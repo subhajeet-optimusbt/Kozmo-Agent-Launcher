@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+html, #root { height: 100%; }
+
+/* jobs-controls.css */
+.jobs-view-switch .ant-segmented-item-selected {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  font-weight: 500;
+}
+
+.jobs-view-switch .ant-segmented-item {
+  transition: all 0.2s ease;
+}
+
+
