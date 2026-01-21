@@ -1,7 +1,54 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, ChevronLeft, ChevronRight } from "lucide-react";
 import GradientBackground from "../../components/layout/GradientBackground";
 export default function LoginPage() {
+  //     const HARDCODED_USER = {
+  //   email: "admin@kozmo.com",
+  //   password: "admin123",
+  // };
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+  const [keepSignedIn, setKeepSignedIn] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const loggedIn =
+      localStorage.getItem("auth") || sessionStorage.getItem("auth");
+
+    if (loggedIn) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
+
+  const handleLogin = () => {
+    setError("");
+
+    if (!email || !password) {
+      setError("Please enter email and password");
+      return;
+    }
+
+    if (email === "admin@kozmo.com" && password === "admin@123") {
+      const authData = {
+        email,
+        loggedInAt: new Date().toISOString(),
+      };
+
+      if (keepSignedIn) {
+        localStorage.setItem("auth", JSON.stringify(authData));
+      } else {
+        sessionStorage.setItem("auth", JSON.stringify(authData));
+      }
+
+      navigate("/dashboard");
+    } else {
+      setError("Invalid email or password");
+    }
+  };
+
   const [showPassword, setShowPassword] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -85,6 +132,8 @@ export default function LoginPage() {
                       </label>
                       <input
                         type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         placeholder="you@company.com"
                         className="w-full h-11 px-3 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all text-sm"
                       />
@@ -99,6 +148,8 @@ export default function LoginPage() {
                       <div className="relative">
                         <input
                           type={showPassword ? "text" : "password"}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
                           placeholder="••••••••"
                           className="w-full h-11 px-3 pr-12 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all text-sm"
                         />
@@ -130,6 +181,8 @@ export default function LoginPage() {
                  focus:ring-emerald-400
                  transition-all duration-300
                  group-hover:border-emerald-500"
+                          checked={keepSignedIn}
+                          onChange={() => setKeepSignedIn(!keepSignedIn)}
                         />
                         <span className="text-sm group-hover:translate-x-0.5 transition-transform duration-300">
                           Keep me signed in
@@ -151,6 +204,11 @@ export default function LoginPage() {
                         Forgot password?
                       </a>
                     </div>
+                    {error && (
+                      <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                        {error}
+                      </p>
+                    )}
 
                     {/* Primary CTA */}
                     <button
@@ -165,6 +223,7 @@ export default function LoginPage() {
     hover:-translate-y-[1px]
     active:translate-y-0 active:shadow-md
   "
+                      onClick={handleLogin}
                     >
                       Sign in
                     </button>
