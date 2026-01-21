@@ -115,10 +115,9 @@ const ContractHeader: React.FC<ContractHeaderProps> = ({
         </button>
 
         {/* Kozmo Logo */}
-        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow">
-          <span className="text-white font-black text-lg">K</span>
+        <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-blue-500 flex items-center justify-center text-white font-bold text-base shadow-lg">
+          K
         </div>
-
         {/* Brand */}
         <div>
           <h1 className="text-md font-black tracking-tight">KOZMO</h1>
@@ -172,11 +171,7 @@ const ContractHeader: React.FC<ContractHeaderProps> = ({
                 className={`
             relative z-10 h-4 w-4
             transition-all duration-300
-            ${
-              isActive
-                ? ""
-                : "opacity-70 group-hover:opacity-100"
-            }
+            ${isActive ? "" : "opacity-70 group-hover:opacity-100"}
           `}
               />
 
@@ -242,7 +237,11 @@ const ContractHeader: React.FC<ContractHeaderProps> = ({
     transition
   "
           >
-            {userName ? userName[0].toUpperCase() : <UserOutlined className="w-10 h-10"/>}
+            {userName ? (
+              userName[0].toUpperCase()
+            ) : (
+              <UserOutlined className="w-10 h-10" />
+            )}
           </button>
 
           {open && (

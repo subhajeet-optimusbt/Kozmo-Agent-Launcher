@@ -112,7 +112,7 @@ const GradientBackground: React.FC = () => {
         style={{
           position: "absolute",
           bottom: "-25%",
-          right: "-15%",
+          right: "0%",
           width: "110%",
           height: "55%",
           background:

@@ -44,9 +44,9 @@ const Header: React.FC<{ onOpenLauncher: () => void }> = ({
       {/* LEFT */}
       <div className="flex items-center gap-3">
         {/* Launcher */}
-<button
-  onClick={onOpenLauncher}
-  className="
+        <button
+          onClick={onOpenLauncher}
+          className="
     relative
     w-8 h-8
     rounded-xl
@@ -69,9 +69,9 @@ const Header: React.FC<{ onOpenLauncher: () => void }> = ({
 
     group
   "
->
-  <Menu
-    className="
+        >
+          <Menu
+            className="
       w-4.5 h-4.5
       text-emerald-600
       transition-all duration-200
@@ -79,11 +79,11 @@ const Header: React.FC<{ onOpenLauncher: () => void }> = ({
       group-hover:text-emerald-600
       group-hover:scale-110
     "
-  />
+          />
 
-  {/* ambient glow (visible even normally, stronger on hover) */}
-  <span
-    className="
+          {/* ambient glow (visible even normally, stronger on hover) */}
+          <span
+            className="
       pointer-events-none
       absolute inset-0
       rounded-xl
@@ -97,12 +97,12 @@ const Header: React.FC<{ onOpenLauncher: () => void }> = ({
       group-hover:opacity-100
       transition-opacity duration-200
     "
-  />
-</button>
+          />
+        </button>
 
         {/* Kozmo Logo */}
-        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow">
-          <span className="text-white font-black text-lg">K</span>
+        <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-blue-500 flex items-center justify-center text-white font-bold text-base shadow-lg">
+          K
         </div>
 
         {/* Brand */}
@@ -174,7 +174,7 @@ const Header: React.FC<{ onOpenLauncher: () => void }> = ({
     transition
   "
           >
-            {userName ? userName[0].toUpperCase() : <UserOutlined size={22}/>}
+            {userName ? userName[0].toUpperCase() : <UserOutlined size={22} />}
           </button>
 
           {open && (
