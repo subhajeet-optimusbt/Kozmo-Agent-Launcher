@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useRef, useEffect } from "react";
 import {
   SearchOutlined,
@@ -9,19 +10,28 @@ import {
 import { LifeBuoy, Sparkles } from "lucide-react";
 import { Tooltip } from "antd";
 import { Menu } from "lucide-react";
-
+import { useNavigate } from "react-router-dom";
+import { baseUrl } from "../../utils/baseUrl";
+import toast from "react-hot-toast";
 const Header: React.FC<{ onOpenLauncher: () => void }> = ({
   onOpenLauncher,
 }) => {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const storedUser =
+    localStorage.getItem("user") || sessionStorage.getItem("user");
 
-  const userName = "Optimus";
-  const userEmail = "opt@gmail.com";
+  const user = storedUser ? JSON.parse(storedUser) : null;
 
-  const workspaces = [
-    { name: "OptimusBT", active: true },
-    { name: "OptimusTrial", active: false },
-  ];
+  const userName = user?.userName;
+  const userEmail = user?.email;
+
+  const workspaces = user?.accounts.map((acc: any) => ({
+    id: acc.accountId,
+    name: acc.accountName,
+    role: acc.role,
+    active: acc.accountId === user.activeAccountId,
+  }));
 
   const profileRef = useRef<HTMLDivElement>(null);
 
@@ -39,6 +49,41 @@ const Header: React.FC<{ onOpenLauncher: () => void }> = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+  const switchWorkspace = (accountId: string) => {
+    const storage = localStorage.getItem("user")
+      ? localStorage
+      : sessionStorage;
+
+    const updatedUser = {
+      ...user,
+      activeAccountId: accountId,
+    };
+
+    storage.setItem("user", JSON.stringify(updatedUser));
+
+    // optional: reload data
+    window.location.reload();
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch(baseUrl() + "/Home/Logout", {
+        method: "POST",
+        credentials: "include", // IMPORTANT if cookies/session based
+      });
+    } catch {
+      toast.error("Logout API failed, proceeding with client logout");
+    } finally {
+      // 🔥 clear auth FIRST
+      localStorage.removeItem("user");
+
+      sessionStorage.removeItem("user");
+
+      // 🔀 redirect to login
+      navigate("/login", { replace: true });
+    }
+  };
+
   return (
     <header className="flex items-center justify-between mb-4 mt-2 relative">
       {/* LEFT */}
@@ -190,9 +235,10 @@ const Header: React.FC<{ onOpenLauncher: () => void }> = ({
                 <div className="text-[10px] font-black text-gray-400 uppercase mb-2">
                   Workspace
                 </div>
-                {workspaces.map((w) => (
+                {workspaces.map((w: any) => (
                   <div
-                    key={w.name}
+                    key={w.id}
+                    onClick={() => switchWorkspace(w.id)}
                     className={`flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer ${
                       w.active
                         ? "bg-emerald-50 text-emerald-600"
@@ -201,7 +247,7 @@ const Header: React.FC<{ onOpenLauncher: () => void }> = ({
                   >
                     <div>
                       <div className="text-sm font-bold">{w.name}</div>
-                      <div className="text-[10px] text-gray-400">Owner</div>
+                      <div className="text-[10px] text-gray-400">{w.role}</div>
                     </div>
                     {w.active && <CheckOutlined />}
                   </div>
@@ -217,7 +263,10 @@ const Header: React.FC<{ onOpenLauncher: () => void }> = ({
                 </button>
 
                 {/* Sign out */}
-                <button className="flex items-center gap-2 px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 transition">
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 transition"
+                >
                   <LogoutOutlined />
                   <span className="text-sm font-medium">Sign out</span>
                 </button>

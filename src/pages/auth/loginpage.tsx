@@ -1,29 +1,27 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, ChevronLeft, ChevronRight } from "lucide-react";
 import GradientBackground from "../../components/layout/GradientBackground";
+import RightSection from "../../components/login/RightSection";
+import { loginApi } from "../../services/authService";
+import toast from "react-hot-toast";
+import FullscreenLoader from "../../components/ui/FullScreenLoader";
 export default function LoginPage() {
-  //     const HARDCODED_USER = {
-  //   email: "admin@kozmo.com",
-  //   password: "admin123",
-  // };
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const [keepSignedIn, setKeepSignedIn] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const loggedIn =
-      localStorage.getItem("auth") || sessionStorage.getItem("auth");
+    const loggedIn = localStorage.getItem("user");
+    if (loggedIn) navigate("/dashboard", { replace: true });
+  }, []);
 
-    if (loggedIn) {
-      navigate("/dashboard", { replace: true });
-    }
-  }, [navigate]);
-
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setError("");
 
     if (!email || !password) {
@@ -31,21 +29,39 @@ export default function LoginPage() {
       return;
     }
 
-    if (email === "admin@kozmo.com" && password === "admin@123") {
-      const authData = {
-        email,
-        loggedInAt: new Date().toISOString(),
-      };
+    setLoading(true);
 
-      if (keepSignedIn) {
-        localStorage.setItem("auth", JSON.stringify(authData));
-      } else {
-        sessionStorage.setItem("auth", JSON.stringify(authData));
+    try {
+      const response = await loginApi({
+        Email: email,
+        Password: password,
+        RememberMe: keepSignedIn,
+      });
+
+      if (!response.isAuthenticated) {
+        toast.error("Invalid email or password");
+        return;
       }
 
-      navigate("/dashboard");
-    } else {
-      setError("Invalid email or password");
+      // What frontend actually needs
+      const userContext = {
+        userId: response.userId,
+        userName: response.userName,
+        email: response.email,
+        accounts: response.accounts,
+        activeAccountId:
+          response.accounts.find((a) => a.isDefault === "Yes")?.accountId ??
+          response.accounts[0]?.accountId,
+      };
+
+      const storage = keepSignedIn ? localStorage : sessionStorage;
+      storage.setItem("user", JSON.stringify(userContext));
+
+      navigate("/dashboard", { replace: true });
+    } catch (err: any) {
+      toast.error(err.message || "Something went wrong");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -56,6 +72,7 @@ export default function LoginPage() {
     <>
       <GradientBackground />
 
+      {loading && <FullscreenLoader />}
       <div className="min-h-screen flex items-center justify-center px-6 py-8 relative">
         {/* Collapse/Expand Button */}
         <button
@@ -204,11 +221,6 @@ export default function LoginPage() {
                         Forgot password?
                       </a>
                     </div>
-                    {error && (
-                      <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                        {error}
-                      </p>
-                    )}
 
                     {/* Primary CTA */}
                     <button
@@ -283,101 +295,7 @@ export default function LoginPage() {
             </div>
 
             {/* ================= RIGHT: PRODUCT STORY ================= */}
-            {isExpanded && (
-              <div className="hidden lg:flex justify-center items-center animate-fadeIn">
-                <div className="relative w-full max-w-lg min-h-[520px] rounded-3xl bg-gradient-to-br from-indigo-50 via-blue-50 to-emerald-50 p-6 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.25)] border border-white/70 flex flex-col justify-between">
-                  {/* subtle glow */}
-                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/40 via-transparent to-white/30 pointer-events-none" />
-
-                  {/* Top */}
-                  <div className="relative space-y-4">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-white text-[11px] font-bold tracking-wide text-emerald-600 shadow-sm w-fit">
-                      Commercial Intelligence OS
-                    </span>
-
-                    <h2 className="text-xl font-bold text-gray-800 leading-snug">
-                      Agents that manage your commercial world
-                    </h2>
-
-                    <p className="text-sm text-gray-700 leading-relaxed">
-                      Kozmo turns messy renewals, proposals, negotiations, and
-                      vendor work into structured, agent-managed quests powered
-                      by DMA, watchlists, signals, and briefs.
-                    </p>
-                  </div>
-
-                  {/* Agents */}
-                  <div className="relative flex flex-wrap gap-2 mt-6">
-                    {[
-                      "Document Agent (DMA)",
-                      "Contract Agent",
-                      "Renewal & Commercial Agents",
-                    ].map((item, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center gap-2 bg-white/80 rounded-full px-4 py-2 border border-white shadow-sm hover:shadow-md transition"
-                      >
-                        <span className="h-2 w-2 rounded-full bg-gradient-to-br from-emerald-400 to-blue-600" />
-                        <p className="text-xs font-semibold text-gray-800 whitespace-nowrap">
-                          {item}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Bottom */}
-                  <div className="relative bg-white/70 backdrop-blur-md rounded-2xl px-5 py-5 border border-white shadow-inner space-y-4 mt-6">
-                    <ul className="space-y-3 text-xs text-gray-700">
-                      <li className="flex items-start gap-3">
-                        <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
-                        <p>
-                          From open-world chaos to a defined domain using
-                          metadata, watchlists, signals, and rubrics.
-                        </p>
-                      </li>
-
-                      <li className="flex items-start gap-3">
-                        <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-blue-500 shrink-0" />
-                        <p>
-                          Every document becomes a quest with a{" "}
-                          <span className="font-medium">
-                            living Intelligence Brief
-                          </span>
-                          , not just a file in storage.
-                        </p>
-                      </li>
-
-                      <li className="flex items-start gap-3">
-                        <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-indigo-500 shrink-0" />
-                        <p>
-                          Happy Path execution and Bhashya-style reflection to
-                          continuously improve outcomes.
-                        </p>
-                      </li>
-                    </ul>
-
-                    <div className="flex flex-wrap gap-2 pt-2">
-                      <span className="px-3 py-1 rounded-full text-[11px] font-medium bg-emerald-100 text-emerald-700">
-                        Renewals & Proposals
-                      </span>
-                      <span className="px-3 py-1 rounded-full text-[11px] font-medium bg-blue-100 text-blue-700">
-                        Negotiation & Vendor
-                      </span>
-                      <span className="px-3 py-1 rounded-full text-[11px] font-medium bg-indigo-100 text-indigo-700">
-                        Team & Enterprise
-                      </span>
-                    </div>
-
-                    <p className="text-xs text-gray-700 leading-relaxed pt-1">
-                      Sign in once and bring all your commercial work under a
-                      single operating system — from small teams using DMA as a
-                      commercial desk to enterprises running full multi-agent
-                      commercial intelligence.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
+            {isExpanded && <RightSection />}
           </div>
         </div>
       </div>

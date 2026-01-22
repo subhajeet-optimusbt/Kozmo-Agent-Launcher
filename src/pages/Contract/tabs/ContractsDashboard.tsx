@@ -6,56 +6,78 @@ import {
   CheckCircle,
   DollarSign,
 } from "lucide-react";
+import type { ContractDashboardResponse } from "../../../types/contracts";
 
-export default function ContractsDashboard() {
+type Props = {
+  data: ContractDashboardResponse | null;
+  loading: boolean;
+};
+
+export default function ContractsDashboard({ data, loading }: Props) {
+  if (loading) {
+    return (
+      <div className="py-10 text-sm text-gray-500">Loading dashboard…</div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="py-10 text-sm text-gray-400">
+        No contract data available
+      </div>
+    );
+  }
+
+  const m = data.currentMetrics;
+
   const kpiCards = [
     {
       label: "Active contracts",
-      value: "0",
+      value: m.activeContracts,
       status: "Healthy",
       icon: CheckCircle,
       iconColor: "text-emerald-500",
-      trend: "+12%",
+      trend: "+",
     },
     {
       label: "High-risk contracts",
-      value: "0",
+      value: m.highRiskContracts,
       status: "Attention",
       icon: AlertCircle,
       iconColor: "text-red-500",
-      trend: "-5%",
+      trend: "-",
     },
     {
       label: "Needs review",
-      value: "0",
+      value: m.inReview,
       status: "Pending",
       icon: FileWarning,
       iconColor: "text-orange-500",
-      trend: "+3%",
+      trend: "+",
     },
     {
       label: "Expiring (90 days)",
-      value: "0",
+      value: m.expireWithin90Days,
       status: "Upcoming",
       icon: Clock,
       iconColor: "text-amber-500",
-      trend: "+8%",
+      trend: "+",
     },
     {
       label: "Pending signature",
-      value: "0",
+      value: m.pendingSignature,
       status: "In progress",
       icon: TrendingUp,
       iconColor: "text-blue-500",
-      trend: "+2%",
+      trend: "+",
     },
     {
       label: "At-risk revenue",
-      value: "$0.00M",
+      value: `$${m.atRiskRevenue.toFixed(2)}M`,
       status: "Exposure",
       icon: DollarSign,
       iconColor: "text-purple-500",
-      trend: "-1%",
+      trend: "-",
     },
   ];
 
@@ -86,42 +108,41 @@ export default function ContractsDashboard() {
       severity: "border-l-pink-400",
     },
   ];
-
   const worklists = [
     {
       title: "Contracts needing Legal review",
-      count: 15,
+      count: m.highRiskContracts,
       action: "Open Legal queue",
       color: "from-red-500 to-red-600",
     },
     {
       title: "Contracts needing Finance approval",
-      count: 7,
+      count: m.mediumRiskContracts,
       action: "Finance queue",
       color: "from-blue-500 to-blue-600",
     },
     {
       title: "Contracts in negotiation",
-      count: 11,
+      count: m.lowRiskContracts,
       action: "Negotiation queue",
       color: "from-purple-500 to-purple-600",
     },
     {
       title: "Renewals approaching",
-      count: 18,
+      count: m.expireWithin30Days,
       action: "Renewal pipeline",
       color: "from-orange-500 to-orange-600",
     },
     {
       title: "Obligations requiring action",
-      count: 42,
+      count: m.expired,
       action: "Obligation hub",
       color: "from-emerald-500 to-emerald-600",
     },
     {
-      title: "Contracts with risk score > 80",
-      count: 12,
-      action: "High risk lens",
+      title: "Total contracts",
+      count: m.totalContracts,
+      action: "Contract inventory",
       color: "from-pink-500 to-pink-600",
     },
   ];
