@@ -13,21 +13,48 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const [keepSignedIn, setKeepSignedIn] = useState(false);
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<{
+    email?: string;
+    password?: string;
+  }>({});
+
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const loggedIn = localStorage.getItem("user");
-    if (loggedIn) navigate("/dashboard", { replace: true });
+    if (loggedIn) navigate("/Home", { replace: true });
   }, []);
 
-  const handleLogin = async () => {
-    setError("");
+  const validateForm = () => {
+    const newErrors: any = {};
 
-    if (!email || !password) {
-      setError("Please enter email and password");
-      return;
+    if (!email.trim()) {
+      newErrors.email = "User ID is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = "Enter a valid email address";
     }
+
+    if (!password) {
+      newErrors.password = "Password is required";
+    } else if (password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters";
+    }
+
+    setErrors(newErrors);
+
+    // 🔔 toast only first error
+    if (Object.keys(newErrors).length > 0) {
+      toast.error(Object.values(newErrors)[0] as string);
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleLogin = async () => {
+    setErrors({});
+
+    if (!validateForm()) return;
 
     setLoading(true);
 
@@ -57,7 +84,7 @@ export default function LoginPage() {
       const storage = keepSignedIn ? localStorage : sessionStorage;
       storage.setItem("user", JSON.stringify(userContext));
 
-      navigate("/dashboard", { replace: true });
+      navigate("/Home", { replace: true });
     } catch (err: any) {
       toast.error(err.message || "Something went wrong");
     } finally {
@@ -67,6 +94,11 @@ export default function LoginPage() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
+
+  const handleMicrosoftLogin = () => {
+    const returnUrl = window.location.origin;
+    window.location.href = `https://kozmo-saas.azurewebsites.net/MicrosoftIdentity/Account/SignIn?returnUrl=${encodeURIComponent(returnUrl)}`;
+  };
 
   return (
     <>
@@ -150,10 +182,20 @@ export default function LoginPage() {
                       <input
                         type="email"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          setErrors((prev) => ({ ...prev, email: "" }));
+                        }}
                         placeholder="you@company.com"
-                        className="w-full h-11 px-3 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all text-sm"
+                        className={`w-full h-11 px-3 rounded-lg border 
+    ${errors.email ? "border-red-400 focus:ring-red-400" : "border-gray-200 focus:ring-emerald-400"}
+    bg-white focus:outline-none focus:ring-2 transition-all text-sm`}
                       />
+                      {errors.email && (
+                        <p className="mt-1 text-xs text-red-500">
+                          {errors.email}
+                        </p>
+                      )}
                     </div>
 
                     {/* Password */}
@@ -166,10 +208,21 @@ export default function LoginPage() {
                         <input
                           type={showPassword ? "text" : "password"}
                           value={password}
-                          onChange={(e) => setPassword(e.target.value)}
+                          onChange={(e) => {
+                            setPassword(e.target.value);
+                            setErrors((prev) => ({ ...prev, password: "" }));
+                          }}
                           placeholder="••••••••"
-                          className="w-full h-11 px-3 pr-12 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all text-sm"
+                          className={`w-full h-11 px-3 pr-12 rounded-lg border 
+    ${errors.password ? "border-red-400 focus:ring-red-400" : "border-gray-200 focus:ring-emerald-400"}
+    bg-white focus:outline-none focus:ring-2 transition-all text-sm`}
                         />
+
+                        {errors.password && (
+                          <p className="mt-1 text-xs text-red-500">
+                            {errors.password}
+                          </p>
+                        )}
 
                         <button
                           type="button"
@@ -249,7 +302,10 @@ export default function LoginPage() {
 
                     {/* SSO */}
                     <div className="grid grid-cols-2 gap-3">
-                      <button className="h-10 rounded-lg border border-gray-200 flex items-center justify-center gap-3 hover:bg-gray-50 transition text-sm">
+                      <button
+                        onClick={handleMicrosoftLogin}
+                        className="h-10 rounded-lg border border-gray-200 flex items-center justify-center gap-3 hover:bg-gray-50 transition text-sm"
+                      >
                         <img
                           src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg"
                           alt="Microsoft"

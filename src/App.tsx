@@ -27,7 +27,7 @@ export default function App() {
           
           {/* Home */}
           <Route element={<HomeLayout />}>
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/Home" element={<Dashboard />} />
           </Route>
 
           {/* Contracts */}
