@@ -9,19 +9,20 @@ import {
 } from "@ant-design/icons";
 import { LifeBuoy, Sparkles } from "lucide-react";
 import { Tooltip } from "antd";
-import { Menu } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { baseUrl } from "../../utils/baseUrl";
 import toast from "react-hot-toast";
+import { setActiveAccountId } from "../../utils/auth";
 const Header: React.FC<{ onOpenLauncher: () => void }> = ({
   onOpenLauncher,
 }) => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  const storedUser =
+const [user, setUser] = useState(() => {
+  const raw =
     localStorage.getItem("user") || sessionStorage.getItem("user");
-
-  const user = storedUser ? JSON.parse(storedUser) : null;
+  return raw ? JSON.parse(raw) : null;
+});
 
   const userName = user?.userName;
   const userEmail = user?.email;
@@ -49,20 +50,19 @@ const Header: React.FC<{ onOpenLauncher: () => void }> = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-  const switchWorkspace = (accountId: string) => {
-    const storage = localStorage.getItem("user")
-      ? localStorage
-      : sessionStorage;
+  const switchWorkspace = async (accountId: string) => {
+    try {
+      await fetch(baseUrl() + "/Home/SwitchAccount", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ accountId }),
+      });
 
-    const updatedUser = {
-      ...user,
-      activeAccountId: accountId,
-    };
-
-    storage.setItem("user", JSON.stringify(updatedUser));
-
-    // optional: reload data
-    window.location.reload();
+      setActiveAccountId(accountId); // 🔥 global update
+    } catch {
+      toast.error("Failed to switch account");
+    }
   };
 
   const handleLogout = async () => {
@@ -84,65 +84,28 @@ const Header: React.FC<{ onOpenLauncher: () => void }> = ({
     }
   };
 
+  useEffect(() => {
+  const handler = () => {
+    const raw =
+      localStorage.getItem("user") || sessionStorage.getItem("user");
+    setUser(raw ? JSON.parse(raw) : null);
+  };
+
+  window.addEventListener("account-changed", handler);
+  return () => window.removeEventListener("account-changed", handler);
+}, []);
+
   return (
     <header className="flex items-center justify-between mb-4 mt-2 relative">
       {/* LEFT */}
       <div className="flex items-center gap-3">
         {/* Launcher */}
-        <button
-          onClick={onOpenLauncher}
-          className="
-    relative
-    w-8 h-8
-    rounded-xl
-
-    bg-gradient-to-br from-white via-slate-50 to-slate-100
-    border border-slate-300/80
-
-    flex items-center justify-center
-
-    shadow-[0_2px_6px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.7)]
-    backdrop-blur-sm
-
-    transition-all duration-200
-
-    hover:bg-white
-    hover:shadow-[0_6px_18px_rgba(16,185,129,0.25)]
-    hover:border-emerald-300
-
-    active:scale-[0.96]
-
-    group
-  "
-        >
-          <Menu
-            className="
-      w-4.5 h-4.5
-      text-emerald-600
-      transition-all duration-200
-
-      group-hover:text-emerald-600
-      group-hover:scale-110
-    "
-          />
-
-          {/* ambient glow (visible even normally, stronger on hover) */}
-          <span
-            className="
-      pointer-events-none
-      absolute inset-0
-      rounded-xl
-
-      bg-gradient-to-br
-      from-emerald-100/20
-      via-transparent
-      to-transparent
-
-      opacity-60
-      group-hover:opacity-100
-      transition-opacity duration-200
-    "
-          />
+        <button onClick={onOpenLauncher} className="launcher-btn">
+          <div className="launcher-dots">
+            {Array.from({ length: 9 }).map((_, i) => (
+              <span key={i} className="dot" />
+            ))}
+          </div>
         </button>
 
         {/* Kozmo Logo */}
@@ -219,7 +182,11 @@ const Header: React.FC<{ onOpenLauncher: () => void }> = ({
     transition
   "
           >
-            {userName ? userName[0].toUpperCase() : <UserOutlined size={22} />}
+            {userName ? (
+              userName.slice(0, 2).toUpperCase()
+            ) : (
+              <UserOutlined size={22} />
+            )}
           </button>
 
           {open && (

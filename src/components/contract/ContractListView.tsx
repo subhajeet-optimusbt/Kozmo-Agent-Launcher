@@ -64,7 +64,10 @@ export default function ContractListView({
 
           {/* Meta */}
           <div className="flex flex-col items-end gap-2 text-xs">
-            <Badge color="green" text={c.status} />
+            <Badge
+              color={c.status === "Active" ? "green" : "default"}
+              text={c.status}
+            />
             <span className="text-gray-400">
               Updated {c.updated}
             </span>

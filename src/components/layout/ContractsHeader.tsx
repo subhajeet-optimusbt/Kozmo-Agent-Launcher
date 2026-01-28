@@ -14,10 +14,10 @@ import {
   Briefcase,
 } from "lucide-react";
 import { Tooltip } from "antd";
-import { Menu } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { baseUrl } from "../../utils/baseUrl";
 import toast from "react-hot-toast";
+import { setActiveAccountId } from "../../utils/auth";
 type ContractHeaderProps = {
   activeTab: string;
   onTabChange: (key: string) => void;
@@ -30,12 +30,14 @@ const ContractHeader: React.FC<ContractHeaderProps> = ({
   onOpenLauncher,
 }) => {
   const [open, setOpen] = useState(false);
-const navigate = useNavigate();
- const storedUser =
+  const navigate = useNavigate();
+ const [user, setUser] = useState(() => {
+  const raw =
     localStorage.getItem("user") || sessionStorage.getItem("user");
+  return raw ? JSON.parse(raw) : null;
+});
 
-  const user = storedUser ? JSON.parse(storedUser) : null;
-   const userName = user?.userName;
+  const userName = user?.userName;
   const userEmail = user?.email;
 
   const workspaces = user?.accounts.map((acc: any) => ({
@@ -61,21 +63,19 @@ const navigate = useNavigate();
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+  const switchWorkspace = async (accountId: string) => {
+    try {
+      await fetch(baseUrl() + "/Home/SwitchAccount", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ accountId }),
+      });
 
-    const switchWorkspace = (accountId: string) => {
-    const storage = localStorage.getItem("user")
-      ? localStorage
-      : sessionStorage;
-
-    const updatedUser = {
-      ...user,
-      activeAccountId: accountId,
-    };
-
-    storage.setItem("user", JSON.stringify(updatedUser));
-
-    // optional: reload data
-    window.location.reload();
+      setActiveAccountId(accountId); // 🔥 global update
+    } catch {
+      toast.error("Failed to switch account");
+    }
   };
 
   const handleLogout = async () => {
@@ -96,65 +96,28 @@ const navigate = useNavigate();
       navigate("/login", { replace: true });
     }
   };
+  useEffect(() => {
+  const handler = () => {
+    const raw =
+      localStorage.getItem("user") || sessionStorage.getItem("user");
+    setUser(raw ? JSON.parse(raw) : null);
+  };
+
+  window.addEventListener("account-changed", handler);
+  return () => window.removeEventListener("account-changed", handler);
+}, []);
+
   return (
     <header className="flex items-center justify-between mb-2 relative">
       {/* LEFT */}
       <div className="flex items-center gap-3">
         {/* Launcher */}
-        <button
-          onClick={onOpenLauncher}
-          className="
-    relative
-    w-8 h-8
-    rounded-xl
-
-    bg-gradient-to-br from-white via-slate-50 to-slate-100
-    border border-slate-300/80
-
-    flex items-center justify-center
-
-    shadow-[0_2px_6px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.7)]
-    backdrop-blur-sm
-
-    transition-all duration-200
-
-    hover:bg-white
-    hover:shadow-[0_6px_18px_rgba(16,185,129,0.25)]
-    hover:border-emerald-300
-
-    active:scale-[0.96]
-
-    group
-  "
-        >
-          <Menu
-            className="
-      w-4.5 h-4.5
-      text-emerald-600
-      transition-all duration-200
-
-      group-hover:text-emerald-600
-      group-hover:scale-110
-    "
-          />
-
-          {/* ambient glow (visible even normally, stronger on hover) */}
-          <span
-            className="
-      pointer-events-none
-      absolute inset-0
-      rounded-xl
-
-      bg-gradient-to-br
-      from-emerald-100/20
-      via-transparent
-      to-transparent
-
-      opacity-60
-      group-hover:opacity-100
-      transition-opacity duration-200
-    "
-          />
+        <button onClick={onOpenLauncher} className="launcher-btn">
+          <div className="launcher-dots">
+            {Array.from({ length: 9 }).map((_, i) => (
+              <span key={i} className="dot" />
+            ))}
+          </div>
         </button>
 
         {/* Kozmo Logo */}
@@ -281,7 +244,7 @@ const navigate = useNavigate();
   "
           >
             {userName ? (
-              userName[0].toUpperCase()
+              userName.slice(0, 2).toUpperCase()
             ) : (
               <UserOutlined className="w-10 h-10" />
             )}
@@ -300,23 +263,23 @@ const navigate = useNavigate();
                 <div className="text-[10px] font-black text-gray-400 uppercase mb-2">
                   Workspace
                 </div>
-                 {workspaces.map((w: any) => (
-                                <div
-                                  key={w.id}
-                                  onClick={() => switchWorkspace(w.id)}
-                                  className={`flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer ${
-                                    w.active
-                                      ? "bg-emerald-50 text-emerald-600"
-                                      : "hover:bg-gray-50"
-                                  }`}
-                                >
-                                  <div>
-                                    <div className="text-sm font-bold">{w.name}</div>
-                                    <div className="text-[10px] text-gray-400">{w.role}</div>
-                                  </div>
-                                  {w.active && <CheckOutlined />}
-                                </div>
-                              ))}
+                {workspaces.map((w: any) => (
+                  <div
+                    key={w.id}
+                    onClick={() => switchWorkspace(w.id)}
+                    className={`flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer ${
+                      w.active
+                        ? "bg-emerald-50 text-emerald-600"
+                        : "hover:bg-gray-50"
+                    }`}
+                  >
+                    <div>
+                      <div className="text-sm font-bold">{w.name}</div>
+                      <div className="text-[10px] text-gray-400">{w.role}</div>
+                    </div>
+                    {w.active && <CheckOutlined />}
+                  </div>
+                ))}
               </div>
 
               {/* Settings + Signout */}
@@ -328,7 +291,10 @@ const navigate = useNavigate();
                 </button>
 
                 {/* Sign out */}
-                <button onClick={handleLogout} className="flex items-center gap-2 px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 transition">
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 transition"
+                >
                   <LogoutOutlined />
                   <span className="text-sm font-medium">Sign out</span>
                 </button>

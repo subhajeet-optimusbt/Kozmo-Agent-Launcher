@@ -21,9 +21,23 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const loggedIn = localStorage.getItem("user");
-    if (loggedIn) navigate("/Home", { replace: true });
-  }, []);
+    fetch("https://kozmo-saas.azurewebsites.net/auth/session", {
+      credentials: "include", //
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Not logged in");
+        return res.json();
+      })
+      .then((session) => {
+        if (session?.isAuthenticated) {
+          localStorage.setItem("user", JSON.stringify(session));
+          navigate("/Home", { replace: true });
+        }
+      })
+      .catch(() => {
+        // user not logged in → stay on login page
+      });
+  }, [navigate]);
 
   const validateForm = () => {
     const newErrors: any = {};
@@ -95,11 +109,17 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
 
-  const handleMicrosoftLogin = () => {
-    const returnUrl = window.location.origin;
-    window.location.href = `https://kozmo-saas.azurewebsites.net/MicrosoftIdentity/Account/SignIn?returnUrl=${encodeURIComponent(returnUrl)}`;
-  };
+  // const handleMicrosoftLogin = () => {
+  //   const returnUrl = window.location.origin;
+  //   window.location.href = `https://kozmo-saas.azurewebsites.net/MicrosoftIdentity/Account/SignIn?returnUrl=${encodeURIComponent(returnUrl)}`;
+  // };
 
+  const handleMicrosoftLogin = () => {
+    window.location.href =
+      "https://kozmo-saas.azurewebsites.net/auth/microsoft" +
+      "?returnUrl=" +
+      encodeURIComponent(window.location.origin);
+  };
   return (
     <>
       <GradientBackground />

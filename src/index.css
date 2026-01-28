@@ -2,8 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-
-html, #root { height: 100%; }
+html,
+#root {
+  height: 100%;
+}
 
 /* jobs-controls.css */
 .jobs-view-switch .ant-segmented-item-selected {
@@ -16,4 +18,52 @@ html, #root { height: 100%; }
   transition: all 0.2s ease;
 }
 
+.launcher-btn {
+  background: transparent;
+  border: none;
+  padding: 6px;
 
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* grid exactly like app launcher */
+.launcher-dots {
+  display: grid;
+  grid-template-columns: repeat(3, 4px);
+  gap: 4px;
+}
+
+/* dots */
+.dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: #177153;
+  transition: background-color 0.2s ease;
+}
+
+/* hover – gentle emerald shift */
+.launcher-btn:hover .dot {
+  background-color: #10b981;
+}
+
+/* center dot slightly stronger */
+.launcher-btn:hover .dot:nth-child(5) {
+  transform: scale(1.25);
+}
+
+/* outer dots tiny response */
+.launcher-btn:hover .dot:not(:nth-child(5)) {
+  transform: scale(1.1);
+}
+
+/* smoothness */
+.dot {
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}

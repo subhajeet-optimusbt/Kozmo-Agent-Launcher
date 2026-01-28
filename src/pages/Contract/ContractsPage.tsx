@@ -5,7 +5,7 @@ import { Plus } from "lucide-react";
 import ContractsDashboard from "./tabs/ContractsDashboard";
 import ContractsTable from "./tabs/ContractsTable";
 import JobsPanel from "./tabs/JobsPanel";
-import { getActiveAccountId } from "../../utils/auth";
+import { getActiveAccountId, ACCOUNT_CHANGED_EVENT } from "../../utils/auth";
 import { fetchContractsDashboard } from "../../services/contractsService";
 import type { ContractDashboardResponse } from "../../types/contracts";
 import FullscreenLoader from "../../components/ui/FullScreenLoader";
@@ -23,8 +23,16 @@ export default function ContractsPage() {
     navigate("/contracts/CreateNewContract");
   };
 
+  const [accountId, setAccountId] = useState(getActiveAccountId());
   useEffect(() => {
-    const accountId = getActiveAccountId();
+    const handler = () => {
+      setAccountId(getActiveAccountId());
+    };
+
+    window.addEventListener(ACCOUNT_CHANGED_EVENT, handler);
+    return () => window.removeEventListener(ACCOUNT_CHANGED_EVENT, handler);
+  }, []);
+  useEffect(() => {
     if (!accountId) return;
 
     const loadDashboard = async () => {
@@ -34,13 +42,14 @@ export default function ContractsPage() {
         setDashboardData(data);
       } catch (err) {
         console.error(err);
+        setDashboardData(null);
       } finally {
         setLoading(false);
       }
     };
 
     loadDashboard();
-  }, []);
+  }, [accountId]);
   return (
     <>
       {loading && <FullscreenLoader />}

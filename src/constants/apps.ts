@@ -23,6 +23,30 @@ export interface Contract {
   status: string;
   updated: string;
 }
+// utils/mapContracts.ts
+export const mapContractsFromApi = (apiData: Array<{
+  rowKey: string;
+  title: string;
+  businessArea: string;
+  type: string;
+  companyName: string;
+  counterparty: string;
+  status: string;
+  modified: string;
+}>) => {
+  return apiData.map((c) => ({
+    key: c.rowKey,
+    title: c.title,
+    area: c.businessArea,
+    type: c.type,
+    company: c.companyName,
+    counterparty: c.counterparty,
+
+    status: c.status,
+    updated: new Date(c.modified).toLocaleDateString(),
+  }));
+};
+
 
 export const APPS: App[] = [
 

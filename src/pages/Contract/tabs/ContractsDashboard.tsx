@@ -73,7 +73,7 @@ export default function ContractsDashboard({ data, loading }: Props) {
     },
     {
       label: "At-risk revenue",
-      value: `$${m.atRiskRevenue.toFixed(2)}M`,
+      value: m.atRiskRevenue,
       status: "Exposure",
       icon: DollarSign,
       iconColor: "text-purple-500",
