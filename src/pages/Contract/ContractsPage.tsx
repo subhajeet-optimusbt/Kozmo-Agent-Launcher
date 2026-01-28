@@ -103,7 +103,7 @@ export default function ContractsPage() {
 
         {activeTab === "jobs" && (
           <div className="px-8">
-            <JobsPanel />
+            <JobsPanel accountId={accountId} />
           </div>
         )}
       </div>

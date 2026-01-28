@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Table, Tag, Progress } from "antd";
 import {
   Activity,
@@ -5,29 +6,82 @@ import {
   AlertCircle,
   CheckCircle2,
 } from "lucide-react";
-import {
-  JOB_HEALTH_DATA,
-  JOB_RUNS_DATA,
-  type JobHealthRow,
-  type JobRunRow,
-} from "../../constants/apps";
 
-export default function JobsTable({ view }: { view: "health" | "runs" }) {
+/* ===================== TYPES ===================== */
+
+type Props = {
+  view: "health" | "runs";
+  jobs: any[];
+  loading: boolean;
+};
+
+/* ===================== COMPONENT ===================== */
+
+export default function JobsTable({ view, jobs, loading }: Props) {
+  const runsData = jobs.map((j) => ({
+    key: j.rowKey,
+    type: j.jobName,
+    run: j.requestId,
+    status: j.status,
+    started: new Date(j.startedAt).toLocaleString(),
+    duration: `${j.timeTaken}s`,
+    attempts: j.attemptNumber,
+  }));
+
+  const healthData = buildHealthData(jobs);
+
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      <Table<JobHealthRow | JobRunRow>
-        rowKey="key"
+      <Table<any>
+        loading={loading}
         pagination={false}
         size="middle"
         className="jobs-table"
+        rowKey="key"
         columns={view === "health" ? healthColumns : runsColumns}
-        dataSource={view === "health" ? JOB_HEALTH_DATA : JOB_RUNS_DATA}
+        dataSource={view === "health" ? healthData : runsData}
       />
     </div>
   );
 }
 
-/* -------------------- HEALTH VIEW -------------------- */
+/* ===================== HEALTH DATA ===================== */
+
+function buildHealthData(jobs: any[]) {
+  const grouped: Record<
+    string,
+    { running: number; queued: number; failed: number }
+  > = {};
+
+  jobs.forEach((j) => {
+    if (!grouped[j.jobName]) {
+      grouped[j.jobName] = { running: 0, queued: 0, failed: 0 };
+    }
+
+    if (j.status === "Running") grouped[j.jobName].running++;
+    if (j.status === "Queued") grouped[j.jobName].queued++;
+    if (j.status === "Failed") grouped[j.jobName].failed++;
+  });
+
+  return Object.entries(grouped).map(([jobName, v]) => {
+    const score =
+      v.failed === 0
+        ? 100
+        : Math.max(0, 100 - v.failed * 10);
+
+    return {
+      key: jobName,
+      type: jobName,
+      running: v.running,
+      queued: v.queued,
+      failed: v.failed,
+      p95: "-",
+      score,
+    };
+  });
+}
+
+/* ===================== HEALTH COLUMNS ===================== */
 
 const healthColumns = [
   {
@@ -41,28 +95,42 @@ const healthColumns = [
     title: "Running",
     dataIndex: "running",
     render: (v: number) => (
-      <Metric icon={<Activity size={14} />} value={v} color="green" />
+      <Metric
+        icon={<Activity size={14} />}
+        value={v}
+        color="green"
+      />
     ),
   },
   {
     title: "Queued",
     dataIndex: "queued",
     render: (v: number) => (
-      <Metric icon={<Clock size={14} />} value={v} color="orange" />
+      <Metric
+        icon={<Clock size={14} />}
+        value={v}
+        color="orange"
+      />
     ),
   },
   {
     title: "Failed",
     dataIndex: "failed",
     render: (v: number) => (
-      <Metric icon={<AlertCircle size={14} />} value={v} color="red" />
+      <Metric
+        icon={<AlertCircle size={14} />}
+        value={v}
+        color="red"
+      />
     ),
   },
   {
     title: "p95",
     dataIndex: "p95",
     render: (v: string) => (
-      <span className="text-sm font-medium text-gray-600">{v}</span>
+      <span className="text-sm font-medium text-gray-600">
+        {v}
+      </span>
     ),
   },
   {
@@ -91,7 +159,7 @@ const healthColumns = [
   },
 ];
 
-/* -------------------- RUNS VIEW -------------------- */
+/* ===================== RUNS COLUMNS ===================== */
 
 const runsColumns = [
   {
@@ -140,7 +208,7 @@ const runsColumns = [
   },
 ];
 
-/* -------------------- SMALL UI PIECES -------------------- */
+/* ===================== SMALL UI PIECES ===================== */
 
 function Metric({
   icon,
@@ -159,9 +227,7 @@ function Metric({
 
   return (
     <div className="flex items-center gap-2">
-      <div
-        className={`p-1.5 rounded-lg ${colorMap[color]}`}
-      >
+      <div className={`p-1.5 rounded-lg ${colorMap[color]}`}>
         {icon}
       </div>
       <span className="text-sm font-medium">{value}</span>
@@ -170,14 +236,14 @@ function Metric({
 }
 
 function StatusPill({ status }: { status: string }) {
-  if (status === "Done") {
+  if (status === "Completed") {
     return (
       <Tag
         icon={<CheckCircle2 size={12} />}
         color="success"
         className="px-3 py-1 rounded-full"
       >
-        Done
+        Completed
       </Tag>
     );
   }

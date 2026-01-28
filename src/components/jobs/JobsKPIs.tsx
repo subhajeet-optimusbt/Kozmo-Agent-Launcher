@@ -1,88 +1,66 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card, Tag } from "antd";
 import { Activity, Clock, AlertTriangle, Gauge } from "lucide-react";
-import { JOB_KPIS } from "../../constants/apps";
+
+type Props = {
+  jobs: any[];
+};
 
 const KPI_CARD_BASE =
   "rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition";
 
-export default function JobsKPIs() {
+export default function JobsKPIs({ jobs }: Props) {
+  const running = jobs.filter((j) => j.status === "Running").length;
+  const queued = jobs.filter((j) => j.status === "Queued").length;
+  const failed = jobs.filter((j) => j.status === "Failed").length;
+
+  const p95 =
+    jobs.length > 0 ? Math.max(...jobs.map((j) => j.timeTaken || 0)) : 0;
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-      {/* In Progress */}
-      <Card className={KPI_CARD_BASE} bodyStyle={{ padding: 14 }}>
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-xs text-gray-500">In Progress</span>
-          <div className="p-1.5 rounded-lg bg-green-50 text-green-600">
-            <Activity size={14} />
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <span className="text-2xl font-semibold">
-            {JOB_KPIS.inProgress}
-          </span>
-          <Tag color="green" className="m-0 text-xs">
-            Running
-          </Tag>
-        </div>
-      </Card>
-
-      {/* Queued */}
-      <Card className={KPI_CARD_BASE} bodyStyle={{ padding: 14 }}>
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-xs text-gray-500">Queued</span>
-          <div className="p-1.5 rounded-lg bg-orange-50 text-orange-600">
-            <Clock size={14} />
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <span className="text-2xl font-semibold">
-            {JOB_KPIS.queued}
-          </span>
-          <Tag color="orange" className="m-0 text-xs">
-            Pending
-          </Tag>
-        </div>
-      </Card>
-
-      {/* Failed */}
-      <Card className={KPI_CARD_BASE} bodyStyle={{ padding: 14 }}>
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-xs text-gray-500">Failed</span>
-          <div className="p-1.5 rounded-lg bg-red-50 text-red-600">
-            <AlertTriangle size={14} />
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <span className="text-2xl font-semibold">
-            {JOB_KPIS.failed}
-          </span>
-          <Tag color="red" className="m-0 text-xs">
-            Alert
-          </Tag>
-        </div>
-      </Card>
-
-      {/* p95 Duration */}
-      <Card className={KPI_CARD_BASE} bodyStyle={{ padding: 14 }}>
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-xs text-gray-500">p95 Duration</span>
-          <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
-            <Gauge size={14} />
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <span className="text-2xl font-semibold">
-            {JOB_KPIS.p95}
-          </span>
-          <Tag color="blue" className="m-0 text-xs">
-            Latency
-          </Tag>
-        </div>
-      </Card>
+      <Kpi
+        label="In Progress"
+        value={running}
+        icon={<Activity size={14} />}
+        color="green"
+      />
+      <Kpi
+        label="Queued"
+        value={queued}
+        icon={<Clock size={14} />}
+        color="orange"
+      />
+      <Kpi
+        label="Failed"
+        value={failed}
+        icon={<AlertTriangle size={14} />}
+        color="red"
+      />
+      <Kpi
+        label="p95 Duration"
+        value={`${p95}s`}
+        icon={<Gauge size={14} />}
+        color="blue"
+      />
     </div>
+  );
+}
+
+function Kpi({ label, value, icon, color }: any) {
+  return (
+    <Card className={KPI_CARD_BASE} bodyStyle={{ padding: 14 }}>
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-xs text-gray-500">{label}</span>
+        <div className={`p-1.5 rounded-lg bg-${color}-50 text-${color}-600`}>
+          {icon}
+        </div>
+      </div>
+      <div className="flex items-center justify-between">
+        <span className="text-2xl font-semibold">{value}</span>
+        <Tag color={color} className="m-0 text-xs">
+          {label}
+        </Tag>
+      </div>
+    </Card>
   );
 }
