@@ -4,117 +4,122 @@ import {
   Clock,
   CheckCircle,
   DollarSign,
+  AlertTriangle
 } from "lucide-react";
 
 
-
-export default function RenewalsDashboard() {
- 
+export default function IntakeDashboard() {
   /* ============================
-      STATIC KPI DATA
+      KPI DATA (Screenshot exact)
   ============================ */
   const kpiCards = [
     {
-      label: "Document Created",
-      value: 0,
-      status: "+ today",
-      icon: CheckCircle,
-      iconColor: "text-emerald-500",
-      trend: "+",
-    },
-    {
-      label: "Documents Updated",
-      value: 0,
-      status: "vs yesterday",
+      label: "New Requests",
+      value: 13,
+      trend: "+4 today",
+      trendType: "up",
       icon: Clock,
-      iconColor: "text-gray-500",
-      trend: "-",
+      iconColor: "text-emerald-600",
     },
     {
-      label: "Document Classification",
+      label: "With Documents",
       value: 0,
-      status: "Pending",
+      trend: "+5 vs yesterday",
+      trendType: "up",
       icon: FileWarning,
-      iconColor: "text-orange-500",
-      trend: "+",
+      iconColor: "text-amber-500",
     },
     {
-      label: "Documents Completed",
-      value: 8,
-      status: "Processed",
+      label: "Running",
+      value: 0,
+      trend: "-3 after nudges",
+      trendType: "down",
+      icon: DollarSign,
+      iconColor: "text-red-500",
+    },
+    {
+      label: "Completed",
+      value: 0,
+      trend: "+4 today",
+      trendType: "up",
       icon: CheckCircle,
       iconColor: "text-emerald-600",
-      trend: "+",
     },
     {
-      label: "Document Escalated",
-      value: 25,
-      status: "Attention",
-      icon: AlertCircle,
-      iconColor: "text-red-500",
-      trend: "+",
-    },
-    {
-      label: "Document Extracted",
+      label: "Failed",
       value: 0,
-      status: "Automation",
-      icon: DollarSign,
-      iconColor: "text-purple-500",
-      trend: "-",
+      trend: "+1 deal",
+      trendType: "neutral",
+      icon: AlertCircle,
+      iconColor: "text-gray-500",
+    },
+    {
+      label: "Escalated",
+      value: 0,
+      trend: "+3% automation",
+      trendType: "up",
+      icon: AlertTriangle,
+      iconColor: "text-indigo-500",
     },
   ];
 
   /* ============================
-      RECENT ACTIVITY / SIGNALS
+      SOURCE FEED
   ============================ */
   const alerts = [
     {
-      type: "Renewal_Addendum.pdf",
-      message: "Pricing deviation — +22% vs policy band",
-      severity: "border-red-500",
-      time: "2 min ago",
+      type: "Email",
+      message: `"Review this amendment" — 3 docs`,
+      time: "From legal@acme.com",
+      severity: "border-blue-400",
     },
     {
-      type: "MSA_Acme_v2.docx",
-      message: "Liability cap changed — 1x → 3x ARR",
-      severity: "border-orange-400",
-      time: "12 min ago",
+      type: "Upload",
+      message: "NDA-Beta1.pdf uploaded",
+      time: "Priya",
+      severity: "border-amber-400",
     },
     {
-      type: "Proposal_Acme_Q4.docx",
-      message: "Draft ready — Generated via archetype engine",
-      severity: "border-emerald-400",
-      time: "40 min ago",
+      type: "Salesforce",
+      message: `"Q4 SaaS Expansion"`,
+      time: "Rahul",
+      severity: "border-indigo-400",
+    },
+    {
+      type: "Teams",
+      message: `"Validate these SOWs"`,
+      time: "Commercial Ops",
+      severity: "border-purple-400",
     },
   ];
 
   /* ============================
-      WORKLISTS / ATTENTION
+      TRIAGE BUCKETS
   ============================ */
   const worklists = [
     {
-      title: "High-Risk Redlines",
-      count: 12,
-      action: "Liability, SLA & pricing edits",
-      color: "from-red-500 to-red-600",
+      title: "Missing Info",
+      count: 11,
+      action: "Term/scope incomplete",
+      color: "from-red-400 to-red-600",
     },
     {
-      title: "Missing Fields",
+      title: "Clarification Needed",
       count: 7,
-      action: "CDoc conversion blocked",
-      color: "from-blue-500 to-blue-600",
+      action: "Intent unclear",
+      color: "from-amber-400 to-amber-600",
     },
     {
-      title: "Processing Errors",
+      title: "Ambiguous Routing",
       count: 3,
-      action: "OCR or parsing failed",
-      color: "from-orange-500 to-orange-600",
+      action: "Multiple possible agents",
+      color: "from-indigo-400 to-indigo-600",
     },
     {
-      title: "Critical Signals",
+      title: "High Priority",
       count: 5,
-      action: "Renewal deadlines & SLA risks",
-      color: "from-purple-500 to-purple-600",
+      action: "Critical flags",
+      color: "from-rose-400 to-rose-600",
     },
   ];
 
@@ -128,37 +133,40 @@ export default function RenewalsDashboard() {
           return (
             <div
               key={idx}
-              className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white px-5 py-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
+              className="group relative rounded-2xl border border-gray-200 bg-white p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_-12px_rgba(0,0,0,0.15)]"
             >
-              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent opacity-0 group-hover:opacity-100 transition" />
+              {/* top glow */}
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent opacity-0 group-hover:opacity-100 transition" />
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-gray-50 border border-gray-100">
-                    <Icon size={18} className={kpi.iconColor} />
-                  </div>
-                  <span className="text-xs font-semibold text-gray-500">
-                    {kpi.label}
-                  </span>
+              {/* Header */}
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-100 bg-gray-50">
+                  <Icon size={18} className={kpi.iconColor} />
                 </div>
 
+                <p className="text-sm font-semibold text-gray-500">
+                  {kpi.label}
+                </p>
+              </div>
+
+              {/* Value */}
+              <div className="mt-4 flex items-end justify-between">
+                <span className="text-3xl font-bold tracking-tight text-gray-900">
+                  {kpi.value}
+                </span>
+
+                {/* Trend Badge */}
                 <span
-                  className={`text-xs font-semibold ${
-                    kpi.trend === "+" ? "text-emerald-600" : "text-red-500"
-                  }`}
+                  className={`rounded-full px-2.5 py-1 text-xs font-semibold
+              ${
+                kpi.trendType === "up"
+                  ? "bg-emerald-50 text-emerald-600"
+                  : kpi.trendType === "down"
+                    ? "bg-red-50 text-red-500"
+                    : "bg-gray-100 text-gray-500"
+              }`}
                 >
                   {kpi.trend}
-                </span>
-              </div>
-
-              <div className="mt-4 text-2xl font-bold text-gray-900">
-                {kpi.value}
-              </div>
-
-              <div className="mt-3 flex items-center justify-between">
-                <span className="text-xs text-gray-400">{kpi.status}</span>
-                <span className="text-[10px] uppercase tracking-widest text-gray-300">
-                  KPI
                 </span>
               </div>
             </div>
@@ -171,11 +179,9 @@ export default function RenewalsDashboard() {
         {/* ===== RECENT ACTIVITY ===== */}
         <div className="bg-white rounded-2xl border border-gray-200">
           <div className="px-6 py-4 border-b border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Recent Activity & Signals
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900">Source Feed</h3>
             <p className="text-sm text-gray-500 mt-1">
-              Live updates from ingestion, profiling, analysis.
+              Where Requests Originate
             </p>
           </div>
 
@@ -194,6 +200,9 @@ export default function RenewalsDashboard() {
                     {alert.message}
                   </p>
                   <span className="text-xs text-gray-400">{alert.time}</span>
+                  <span className="text-xs text-gray-400">
+                    {alert.severity}
+                  </span>
                 </div>
               </div>
             ))}
@@ -204,11 +213,9 @@ export default function RenewalsDashboard() {
         <div className="bg-white rounded-2xl border border-gray-200">
           <div className="px-6 py-4 border-b border-gray-100">
             <h3 className="text-lg font-bold text-gray-900">
-              Documents Requiring Attention
+              Requests Requiring Attention
             </h3>
-            <p className="text-sm text-gray-500 mt-1">
-              Auto-detected blockers & risks.
-            </p>
+            <p className="text-sm text-gray-500 mt-1">Triage Buckets.</p>
           </div>
 
           <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">

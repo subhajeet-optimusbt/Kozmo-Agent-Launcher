@@ -1,28 +1,40 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useRef, useEffect } from "react";
 import {
-  SearchOutlined,
   UserOutlined,
   EditOutlined,
   LogoutOutlined,
   CheckOutlined,
 } from "@ant-design/icons";
-import { LifeBuoy, Sparkles } from "lucide-react";
+import {
+  LifeBuoy,
+  Sparkles,
+  LayoutDashboard,
+  RefreshCw,
+  Briefcase,
+} from "lucide-react";
 import { Tooltip } from "antd";
 import { useNavigate } from "react-router-dom";
-import { baseUrl } from "../../utils/baseUrl";
+import { baseUrl } from "../../../utils/baseUrl";
 import toast from "react-hot-toast";
-import { setActiveAccountId } from "../../utils/auth";
-const Header: React.FC<{ onOpenLauncher: () => void }> = ({
+import { setActiveAccountId } from "../../../utils/auth";
+type RenewalHeaderProps = {
+  activeTab: string;
+  onTabChange: (key: string) => void;
+  onOpenLauncher: () => void;
+};
+
+const RenewalHeader: React.FC<RenewalHeaderProps> = ({
+  activeTab,
+  onTabChange,
   onOpenLauncher,
 }) => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-const [user, setUser] = useState(() => {
-  const raw =
-    localStorage.getItem("user") || sessionStorage.getItem("user");
-  return raw ? JSON.parse(raw) : null;
-});
+  const [user, setUser] = useState(() => {
+    const raw = localStorage.getItem("user") || sessionStorage.getItem("user");
+    return raw ? JSON.parse(raw) : null;
+  });
 
   const userName = user?.userName;
   const userEmail = user?.email;
@@ -83,20 +95,19 @@ const [user, setUser] = useState(() => {
       navigate("/login", { replace: true });
     }
   };
-
   useEffect(() => {
-  const handler = () => {
-    const raw =
-      localStorage.getItem("user") || sessionStorage.getItem("user");
-    setUser(raw ? JSON.parse(raw) : null);
-  };
+    const handler = () => {
+      const raw =
+        localStorage.getItem("user") || sessionStorage.getItem("user");
+      setUser(raw ? JSON.parse(raw) : null);
+    };
 
-  window.addEventListener("account-changed", handler);
-  return () => window.removeEventListener("account-changed", handler);
-}, []);
+    window.addEventListener("account-changed", handler);
+    return () => window.removeEventListener("account-changed", handler);
+  }, []);
 
   return (
-    <header className="flex items-center justify-between mb-4 mt-2 relative">
+    <header className="flex items-center justify-between mb-2 relative">
       {/* LEFT */}
       <div className="flex items-center gap-3">
         {/* Launcher */}
@@ -112,7 +123,6 @@ const [user, setUser] = useState(() => {
         <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-blue-500 flex items-center justify-center text-white font-bold text-base shadow-lg">
           K
         </div>
-
         {/* Brand */}
         <div>
           <h1 className="text-md font-black tracking-tight">KOZMO</h1>
@@ -122,17 +132,67 @@ const [user, setUser] = useState(() => {
         </div>
       </div>
 
-      {/* CENTER SEARCH */}
-      <div className="flex-1 flex justify-center">
-        <div className="w-[420px] flex items-center gap-3 px-4 py-2 bg-white border border-gray-200 rounded-2xl shadow-sm cursor-pointer hover:border-emerald-400 transition group">
-          <SearchOutlined className="text-gray-400 group-hover:text-emerald-500" />
-          <span className="flex-1 text-sm text-gray-400">
-            Search or type a command…
-          </span>
-          <kbd className="px-2 py-0.5 bg-gray-100 border border-gray-200 rounded-lg text-[10px] font-bold text-gray-500">
-            ⌘ K
-          </kbd>
-        </div>
+      {/* Pill Tabs */}
+      <div
+        className="flex items-center gap-1.5
+  bg-white/60 backdrop-blur-md
+  p-2 rounded-full
+  border border-gray-200
+  shadow-sm"
+      >
+        {[
+          { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+          { key: "renewals", label: "Renewals", icon: RefreshCw },
+          { key: "jobs", label: "Jobs", icon: Briefcase },
+        ].map(({ key, label, icon: Icon }) => {
+          const isActive = activeTab === key;
+
+          return (
+            <button
+              key={key}
+              onClick={() => onTabChange(key)}
+              className={`
+          relative flex items-center gap-2
+          px-5 py-2.5 rounded-full
+          text-sm font-semibold
+          transition-all duration-300 ease-out
+          ${
+            isActive
+              ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-md"
+              : "text-gray-600 hover:text-gray-900 hover:bg-white/70"
+          }
+        `}
+            >
+              {/* Glow */}
+              {isActive && (
+                <span
+                  className="absolute inset-0 rounded-full
+            bg-emerald-500/25 blur-lg"
+                />
+              )}
+
+              {/* Icon */}
+              <Icon
+                className={`
+            relative z-10 h-4 w-4
+            transition-all duration-300
+            ${isActive ? "" : "opacity-70 group-hover:opacity-100"}
+          `}
+              />
+
+              {/* Text */}
+              <span
+                className={`
+            relative z-10
+            transition-all duration-300
+            ${isActive ? "translate-y-0" : "translate-y-[1px]"}
+          `}
+              >
+                {label}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* RIGHT */}
@@ -185,7 +245,7 @@ const [user, setUser] = useState(() => {
             {userName ? (
               userName.slice(0, 2).toUpperCase()
             ) : (
-              <UserOutlined size={22} />
+              <UserOutlined className="w-10 h-10" />
             )}
           </button>
 
@@ -246,4 +306,4 @@ const [user, setUser] = useState(() => {
   );
 };
 
-export default Header;
+export default RenewalHeader;

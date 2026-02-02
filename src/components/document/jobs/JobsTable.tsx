@@ -30,9 +30,7 @@ function calculateP95(values: number[]): number {
 
   if (lo === hi) return sorted[lo];
 
-  return (
-    sorted[lo] + (pos - lo) * (sorted[hi] - sorted[lo])
-  );
+  return sorted[lo] + (pos - lo) * (sorted[hi] - sorted[lo]);
 }
 
 /* ===================== TYPES ===================== */
@@ -48,11 +46,16 @@ export default function JobsTable({ view, jobs }: Props) {
   const runsData = jobs.map((j) => ({
     key: j.rowKey,
     type: j.jobName,
-    run: j.requestId,
+    run: j.requestIntId || "-",
     status: j.status,
-    started: new Date(j.startedAt).toLocaleString(),
-    duration: `${j.timeTaken}s`,
-    attempts: j.attemptNumber,
+    started: j.startedAt
+      ? new Date(j.startedAt).toLocaleString()
+      : "-",
+    duration:
+      typeof j.timeTaken === "number" && j.timeTaken > 0
+        ? `${j.timeTaken}s`
+        : "-",
+    attempts: j.attemptNumber ?? 0,
   }));
 
   const healthData = buildHealthData(jobs);
@@ -95,12 +98,24 @@ function buildHealthData(jobs: any[]) {
       };
     }
 
-    if (j.status === "Completed") grouped[j.jobName].completed++;
-    if (j.status === "Failed") grouped[j.jobName].failed++;
-    if (j.status === "Running") grouped[j.jobName].running++;
-    if (j.status === "NotStarted") grouped[j.jobName].queued++;
+    if (j.status === JOB_STATUS.COMPLETED)
+      grouped[j.jobName].completed++;
 
-    if (typeof j.timeTaken === "number") {
+    if (j.status === JOB_STATUS.FAILED)
+      grouped[j.jobName].failed++;
+
+    if (j.status === JOB_STATUS.RUNNING)
+      grouped[j.jobName].running++;
+
+    if (j.status === JOB_STATUS.QUEUED)
+      grouped[j.jobName].queued++;
+
+    // ✅ P95 only from completed jobs
+    if (
+      j.status === JOB_STATUS.COMPLETED &&
+      typeof j.timeTaken === "number" &&
+      j.timeTaken > 0
+    ) {
       grouped[j.jobName].durations.push(j.timeTaken);
     }
   });
@@ -109,13 +124,12 @@ function buildHealthData(jobs: any[]) {
     const C = v.completed;
     const F = v.failed;
     const R = v.running;
-    const T = C + F + R;
 
     const successRate =
       C + F === 0 ? 100 : (C / (C + F)) * 100;
 
     const inFlightPressure =
-      T === 0 ? 0 : (R / T) * 100;
+      C + F + R === 0 ? 0 : (R / (C + F + R)) * 100;
 
     const healthScore =
       0.8 * successRate +
@@ -134,7 +148,6 @@ function buildHealthData(jobs: any[]) {
     };
   });
 }
-
 
 /* ===================== HEALTH COLUMNS ===================== */
 
@@ -179,7 +192,9 @@ const healthColumns = [
     dataIndex: "score",
     render: (v: number) => (
       <div className="flex items-center gap-3 min-w-[160px]">
-        <span className="text-sm font-semibold text-gray-700">{v}%</span>
+        <span className="text-sm font-semibold text-gray-700">
+          {v}%
+        </span>
         <Progress
           percent={v}
           showInfo={false}

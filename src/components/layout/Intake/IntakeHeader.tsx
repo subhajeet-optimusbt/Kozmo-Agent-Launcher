@@ -10,32 +10,31 @@ import {
   LifeBuoy,
   Sparkles,
   LayoutDashboard,
-  FileText,
+  Mail,
   Briefcase,
 } from "lucide-react";
 import { Tooltip } from "antd";
 import { useNavigate } from "react-router-dom";
-import { baseUrl } from "../../utils/baseUrl";
+import { baseUrl } from "../../../utils/baseUrl";
 import toast from "react-hot-toast";
-import { setActiveAccountId } from "../../utils/auth";
-type ContractHeaderProps = {
+import { setActiveAccountId } from "../../../utils/auth";
+type RenewalHeaderProps = {
   activeTab: string;
   onTabChange: (key: string) => void;
   onOpenLauncher: () => void;
 };
 
-const ContractHeader: React.FC<ContractHeaderProps> = ({
+const RenewalHeader: React.FC<RenewalHeaderProps> = ({
   activeTab,
   onTabChange,
   onOpenLauncher,
 }) => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
- const [user, setUser] = useState(() => {
-  const raw =
-    localStorage.getItem("user") || sessionStorage.getItem("user");
-  return raw ? JSON.parse(raw) : null;
-});
+  const [user, setUser] = useState(() => {
+    const raw = localStorage.getItem("user") || sessionStorage.getItem("user");
+    return raw ? JSON.parse(raw) : null;
+  });
 
   const userName = user?.userName;
   const userEmail = user?.email;
@@ -97,15 +96,15 @@ const ContractHeader: React.FC<ContractHeaderProps> = ({
     }
   };
   useEffect(() => {
-  const handler = () => {
-    const raw =
-      localStorage.getItem("user") || sessionStorage.getItem("user");
-    setUser(raw ? JSON.parse(raw) : null);
-  };
+    const handler = () => {
+      const raw =
+        localStorage.getItem("user") || sessionStorage.getItem("user");
+      setUser(raw ? JSON.parse(raw) : null);
+    };
 
-  window.addEventListener("account-changed", handler);
-  return () => window.removeEventListener("account-changed", handler);
-}, []);
+    window.addEventListener("account-changed", handler);
+    return () => window.removeEventListener("account-changed", handler);
+  }, []);
 
   return (
     <header className="flex items-center justify-between mb-2 relative">
@@ -143,7 +142,8 @@ const ContractHeader: React.FC<ContractHeaderProps> = ({
       >
         {[
           { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-          { key: "contracts", label: "Contracts", icon: FileText },
+          { key: "inbox", label: "Inbox", icon: Mail },
+
           { key: "jobs", label: "Jobs", icon: Briefcase },
         ].map(({ key, label, icon: Icon }) => {
           const isActive = activeTab === key;
@@ -307,4 +307,4 @@ const ContractHeader: React.FC<ContractHeaderProps> = ({
   );
 };
 
-export default ContractHeader;
+export default RenewalHeader;

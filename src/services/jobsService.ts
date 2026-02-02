@@ -29,3 +29,28 @@ export async function fetchJobs(accountId: string): Promise<JobRunApi[]> {
 
   return response.json();
 }
+
+
+
+
+export async function fetchIntakeJobs(
+  accountId: string,
+  range: "today" | "7" | "30"
+) {
+  const res = await fetch(
+    `${baseUrl()}/api/Intake/${accountId}/JobList?range=${range}`,
+    {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch jobs");
+  }
+
+  return res.json();
+}

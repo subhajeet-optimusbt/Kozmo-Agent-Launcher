@@ -9,7 +9,7 @@ import {
 } from "@ant-design/icons";
 import AppTile from "../common/AppTile";
 import { APPS } from "../../constants/apps";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import useLocalStorage from "../../hooks/storage";
 
 interface LauncherModalProps {
@@ -26,29 +26,37 @@ const LauncherModal: React.FC<LauncherModalProps> = ({
   const [searchText, setSearchText] = useState("");
   const [pinnedKeys, setPinnedKeys] = useLocalStorage<string[]>(
     "launcher_pinned",
-    []
+    [],
   );
   const [recentKeys, setRecentKeys] = useLocalStorage<string[]>(
     "launcher_recent",
-    []
+    [],
   );
   const [focusedIndex, setFocusedIndex] = useState(0);
 
   const navigate = useNavigate();
+  const location = useLocation();
   const containerRef = useRef<HTMLDivElement | null>(null);
 
+  const activeAppKey = useMemo(() => {
+    return APPS.find(
+      (app) =>
+        location.pathname === app.route ||
+        location.pathname.startsWith(app.route + "/"),
+    )?.key;
+  }, [location.pathname]);
   useEffect(() => {
     if (launcherOpen) {
       setSearchText("");
       setFocusedIndex(0);
     }
-  }, [launcherOpen]); // eslint-disable-line
+  }, [launcherOpen]);
 
   const allApps = APPS;
 
   const pinnedApps = useMemo(
     () => allApps.filter((a) => pinnedKeys.includes(a.key)),
-    [allApps, pinnedKeys]
+    [allApps, pinnedKeys],
   );
 
   const recentApps = useMemo(
@@ -56,7 +64,7 @@ const LauncherModal: React.FC<LauncherModalProps> = ({
       recentKeys
         .map((key) => allApps.find((a) => a.key === key))
         .filter(Boolean) as typeof APPS,
-    [recentKeys, allApps]
+    [recentKeys, allApps],
   );
 
   // LEFT: All apps (no avatar)
@@ -66,7 +74,7 @@ const LauncherModal: React.FC<LauncherModalProps> = ({
     return allApps.filter(
       (app) =>
         app.name.toLowerCase().includes(q) ||
-        (app.description || "").toLowerCase().includes(q)
+        (app.description || "").toLowerCase().includes(q),
     );
   }, [allApps, searchText]);
 
@@ -90,7 +98,7 @@ const LauncherModal: React.FC<LauncherModalProps> = ({
     setRecentKeys((prev) => {
       const newList = [appKey, ...prev.filter((k) => k !== appKey)].slice(
         0,
-        RECENT_LIMIT
+        RECENT_LIMIT,
       );
       return newList;
     });
@@ -99,6 +107,18 @@ const LauncherModal: React.FC<LauncherModalProps> = ({
     setLauncherOpen(false);
   };
 
+  useEffect(() => {
+  if (!launcherOpen) return;
+
+  setSearchText("");
+
+  if (activeAppKey) {
+    const index = leftApps.findIndex(app => app.key === activeAppKey);
+    setFocusedIndex(index >= 0 ? index : 0);
+  } else {
+    setFocusedIndex(0);
+  }
+}, [launcherOpen, activeAppKey, leftApps]);
   // Keyboard handling: Esc to close, Up/Down to navigate left list, Enter to open
   useEffect(() => {
     if (!launcherOpen) return;
@@ -122,7 +142,7 @@ const LauncherModal: React.FC<LauncherModalProps> = ({
       } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         const el = containerRef.current?.querySelector(
-          "input[data-launcher-search]"
+          "input[data-launcher-search]",
         ) as HTMLInputElement | null;
         el?.focus();
       }

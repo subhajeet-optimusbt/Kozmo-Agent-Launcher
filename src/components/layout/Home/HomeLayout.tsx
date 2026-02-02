@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import GradientBackground from "./GradientBackground";
+import GradientBackground from "../GradientBackground";
 import Header from "./Header";
-import LauncherModal from "../launcher/LauncherModal";
+import LauncherModal from "../../launcher/LauncherModal";
 
 export default function AppLayout() {
   const [launcherOpen, setLauncherOpen] = useState(false);

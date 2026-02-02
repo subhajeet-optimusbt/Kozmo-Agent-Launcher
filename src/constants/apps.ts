@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ReactNode } from "react";
 
 export interface App {
@@ -24,16 +25,18 @@ export interface Contract {
   updated: string;
 }
 // utils/mapContracts.ts
-export const mapContractsFromApi = (apiData: Array<{
-  rowKey: string;
-  title: string;
-  businessArea: string;
-  type: string;
-  companyName: string;
-  counterparty: string;
-  status: string;
-  modified: string;
-}>) => {
+export const mapContractsFromApi = (
+  apiData: Array<{
+    rowKey: string;
+    title: string;
+    businessArea: string;
+    type: string;
+    companyName: string;
+    counterparty: string;
+    status: string;
+    modified: string;
+  }>,
+) => {
   return apiData.map((c) => ({
     key: c.rowKey,
     title: c.title,
@@ -47,9 +50,45 @@ export const mapContractsFromApi = (apiData: Array<{
   }));
 };
 
+export interface Renewal {
+  key: string;
+  title: string;
+  businessArea: string;
+  area: string;
+  counterparty: string;
+  owner: string;
+  renewalStatus: string;
+  nextRenewaldate: string;
+  company?: any;
+  type?: any;
+}
+
+// constants/apps.ts
+export interface Intake {
+  key: string;
+
+  subject: string;
+  currentJobName: string;
+  source: string;
+
+  noOfDocuments: number;
+  status: string;
+
+  created: string;
+  updated: string;
+}
+
+export interface Document {
+  key: string;
+  subject: string;
+  currentJobName: string;
+  source: string;
+  status: string;
+  created: string;
+  updated: string;
+}
 
 export const APPS: App[] = [
-
   {
     key: "contracts",
     name: "Contracts",
@@ -87,23 +126,11 @@ export const APPS: App[] = [
     actionHint: undefined,
   },
   {
-    key: "campaigns",
-    name: "Campaigns",
-    description: "Initiatives, cohorts, outcome delivery",
-    badge: 1,
-    route: "/campaigns",
-    icon: "spark",
-    color: "purple",
-    subtitle: undefined,
-    category: "",
-    actionHint: undefined,
-  },
-  {
     key: "dashboards",
     name: "Dashboard",
     description: "Indexes, quadrants, portfolio health",
     badge: 0,
-    route: "/dashboard",
+    route: "/Home",
     icon: "chart",
     color: "rose",
     subtitle: undefined,
@@ -122,20 +149,7 @@ export const APPS: App[] = [
     category: "",
     actionHint: undefined,
   },
-  {
-    key: "settings",
-    name: "Settings",
-    description: "Policy, budgets, integrations and roles",
-    badge: 0,
-    route: "/settings",
-    icon: "gear",
-    color: "slate",
-    subtitle: undefined,
-    category: "",
-    actionHint: undefined,
-  },
 ];
-
 
 export const CONTRACTS: Contract[] = Array.from({ length: 42 }).map((_, i) => ({
   key: String(i),
@@ -241,7 +255,6 @@ export interface JobRunRow {
   duration: string;
   attempts: number;
 }
-
 
 export const JOB_RUNS_DATA: JobRunRow[] = [
   {

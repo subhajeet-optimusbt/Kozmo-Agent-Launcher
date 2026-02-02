@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import GradientBackground from "./GradientBackground";
-import ContractHeader from "./ContractsHeader";
-import LauncherModal from "../launcher/LauncherModal";
+import GradientBackground from "../GradientBackground";
+import RenewalsHeader from "./RenewalsHeader";
+import LauncherModal from "../../launcher/LauncherModal";
 
-export default function ContractsLayout() {
+export default function RenewalsLayout() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [launcherOpen, setLauncherOpen] = useState(false);
 
@@ -13,7 +13,7 @@ export default function ContractsLayout() {
       <GradientBackground />
 
       <div style={{ position: "relative", zIndex: 10 }}>
-        <ContractHeader
+        <RenewalsHeader
           activeTab={activeTab}
           onTabChange={setActiveTab}
           onOpenLauncher={() => setLauncherOpen(true)}

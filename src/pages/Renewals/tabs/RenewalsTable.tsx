@@ -1,119 +1,227 @@
-// import { useState } from "react";
-// import { Button, Input, Tooltip, Select, Divider } from "antd";
-// import { LayoutGrid, List, CreditCard } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Button, Input, Tooltip, Select, Divider, Drawer, Badge } from "antd";
+import { LayoutGrid, List, CreditCard, Filter } from "lucide-react";
 
-// import { CONTRACTS } from "../../../constants/apps";
-// import type { Contract } from "../../../constants/apps";
-// import { useContractsPagination } from "../../../hooks/pagination";
+import type { Renewal } from "../../../constants/apps";
+import { useRenewalsPagination } from "../../../hooks/pagination";
 
-// import ContractTableView from "../../../components/contract/ContractTableView";
-// import ContractListView from "../../../components/contract/ContractListView";
-// import ContractCardView from "../../../components/contract/ContractCardView";
-// import ContractPreviewDrawer from "../../../components/contract/ContractPreviewDrawer";
-// import PaginationControl from "../../../components/PaginationControl";
+import RenewalsTableView from "../../../components/renewals/RenewalsTableView";
+import RenewalsListView from "../../../components/renewals/RenewalsListView";
+import RenewalsCardView from "../../../components/renewals/RenewalsCardView";
+import RenewalsPreviewDrawer from "../../../components/renewals/RenewalsPreviewDrawer";
+import PaginationControl from "../../../components/PaginationControl";
 
-// type View = "table" | "list" | "card";
+type View = "table" | "list" | "card";
 
-// export default function ContractsPage() {
-//   const [view, setView] = useState<View>("table");
-//   const [activeContract, setActiveContract] = useState<Contract | null>(null);
+type Sorter = {
+  field?: keyof Renewal;
+  order?: "ascend" | "descend";
+};
 
-//   const { paginatedData, page, pageSize, total, setPage, setPageSize } =
-//     useContractsPagination(CONTRACTS);
+type Filters = {
+  status: string[];
+  type: string[];
+  area: string[];
+};
 
-//   return (
-//     <div className="space-y-4">
-//       {/* TOP TOOLBAR */}
-//       <div className="flex items-center justify-between gap-6">
-//         {/* Left: Search */}
-//         <Input.Search
-//           placeholder="Search contracts, counterparties, clauses…"
-//           className="w-[340px]"
-//           allowClear
-//         />
+export default function RenewalsTable({
+  renewals,
+}: {
+  renewals: Renewal[];
+}) {
+  const [view, setView] = useState<View>("table");
+  const [activeRenewal, setActiveRenewal] = useState<Renewal | null>(null);
 
-//         {/* Middle: Page size selector */}
-//         <div className="flex items-center gap-2 text-sm text-gray-500">
-//           <span>Rows</span>
-//           <Select
-//             value={pageSize}
-//             className="w-[90px]"
-//             onChange={(s) => {
-//               setPageSize(s);
-//               setPage(1);
-//             }}
-//             options={[
-//               { value: 10, label: "10" },
-//               { value: 12, label: "12" },
-//               { value: 20, label: "20" },
-//             ]}
-//           />
-//         </div>
+  const [search, setSearch] = useState("");
+  const [sorter, setSorter] = useState<Sorter>({});
+  const [filters] = useState<Filters>({
+    status: [],
+    type: [],
+    area: [],
+  });
 
-//         {/* Right: View switch */}
-//         <Button.Group className="shadow-sm rounded-xl overflow-hidden">
-//           <Tooltip title="Table view">
-//             <Button
-//               type={view === "table" ? "primary" : "default"}
-//               onClick={() => setView("table")}
-//               className="flex items-center gap-2 px-4"
-//             >
-//               <LayoutGrid size={16} />
-//               <span className="text-sm font-medium">Table</span>
-//             </Button>
-//           </Tooltip>
+  const [filterOpen, setFilterOpen] = useState(false);
 
-//           <Tooltip title="List view">
-//             <Button
-//               type={view === "list" ? "primary" : "default"}
-//               onClick={() => setView("list")}
-//               className="flex items-center gap-2 px-4"
-//             >
-//               <List size={16} />
-//               <span className="text-sm font-medium">List</span>
-//             </Button>
-//           </Tooltip>
+  /* ---------------- reset pagination when data changes ---------------- */
+  // useEffect(() => {
+  //   setPage(1);
+  // }, [renewals]);
 
-//           <Tooltip title="Card view">
-//             <Button
-//               type={view === "card" ? "primary" : "default"}
-//               onClick={() => setView("card")}
-//               className="flex items-center gap-2 px-4"
-//             >
-//               <CreditCard size={16} />
-//               <span className="text-sm font-medium">Card</span>
-//             </Button>
-//           </Tooltip>
-//         </Button.Group>
-//       </div>
+  /* ---------------- sorting ---------------- */
+  const sortedRenewals = useMemo(() => {
+    if (!sorter.field || !sorter.order) return renewals;
 
-//       <Divider className="my-2" />
+    return [...renewals].sort((a, b) => {
+      const aVal = a[sorter.field!];
+      const bVal = b[sorter.field!];
 
-//       {/* CONTENT */}
-//       {view === "table" && (
-//         <ContractTableView data={paginatedData} onSelect={setActiveContract} />
-//       )}
+      if (aVal < bVal) return sorter.order === "ascend" ? -1 : 1;
+      if (aVal > bVal) return sorter.order === "ascend" ? 1 : -1;
+      return 0;
+    });
+  }, [renewals, sorter]);
 
-//       {view === "list" && (
-//         <ContractListView data={paginatedData} onSelect={setActiveContract} />
-//       )}
+  /* ---------------- search ---------------- */
+  const searchedRenewals = useMemo(() => {
+    if (!search) return sortedRenewals;
 
-//       {view === "card" && (
-//         <ContractCardView data={paginatedData} onSelect={setActiveContract} />
-//       )}
+    const q = search.toLowerCase();
+    return sortedRenewals.filter((c) =>
+      `${c.title} ${c.businessArea} ${c.counterparty} ${c.owner}`
+        .toLowerCase()
+        .includes(q),
+    );
+  }, [search, sortedRenewals]);
 
-//       {/* BOTTOM PAGINATION */}
-//       <PaginationControl
-//         page={page}
-//         pageSize={pageSize}
-//         total={total}
-//         onPageChange={setPage}
-//       />
+  /* ---------------- filters ---------------- */
+  const filteredRenewals = useMemo(() => {
+    return searchedRenewals.filter((c) => {
+      if (filters.status.length && !filters.status.includes(c.renewalStatus))
+        return false;
+      if (filters.type.length && !filters.type.includes(c.type))
+        return false;
+      if (filters.area.length && !filters.area.includes(c.area))
+        return false;
+      return true;
+    });
+  }, [searchedRenewals, filters]);
 
-//       <ContractPreviewDrawer
-//         contract={activeContract}
-//         onClose={() => setActiveContract(null)}
-//       />
-//     </div>
-//   );
-// }
+  /* ---------------- pagination ---------------- */
+  const { paginatedData, page, pageSize, total, setPage, setPageSize } =
+    useRenewalsPagination(filteredRenewals);
+
+  const activeFilterCount =
+    filters.status.length + filters.type.length + filters.area.length;
+
+  return (
+    <div className="space-y-4">
+      {/* ---------------- TOP TOOLBAR ---------------- */}
+      <div className="flex items-center justify-between gap-6">
+        <div className="flex items-center gap-3">
+          <Input.Search
+            placeholder="Search renewals, counterparties, clauses…"
+            className="w-[340px]"
+            allowClear
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+          />
+
+          <Button
+            icon={<Filter size={16} />}
+            className="rounded-xl font-medium"
+            onClick={() => setFilterOpen(true)}
+          >
+            Filters & Facets
+            {activeFilterCount > 0 && (
+              <Badge
+                count={activeFilterCount}
+                size="small"
+                className="ml-2"
+                style={{ backgroundColor: "#6366f1" }}
+              />
+            )}
+          </Button>
+        </div>
+
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <span>Rows</span>
+          <Select
+            value={pageSize}
+            className="w-[90px]"
+            onChange={(s) => {
+              setPageSize(s);
+              setPage(1);
+            }}
+            options={[
+              { value: 10, label: "10" },
+              { value: 12, label: "12" },
+              { value: 20, label: "20" },
+            ]}
+          />
+        </div>
+
+        <Button.Group className="shadow-sm rounded-xl overflow-hidden">
+          <Tooltip title="Table view">
+            <Button
+              type={view === "table" ? "primary" : "default"}
+              onClick={() => setView("table")}
+            >
+              <LayoutGrid size={16} /> Table
+            </Button>
+          </Tooltip>
+          <Tooltip title="Compact view">
+            <Button
+              type={view === "list" ? "primary" : "default"}
+              onClick={() => setView("list")}
+            >
+              <List size={16} /> Compact
+            </Button>
+          </Tooltip>
+          <Tooltip title="Card view">
+            <Button
+              type={view === "card" ? "primary" : "default"}
+              onClick={() => setView("card")}
+            >
+              <CreditCard size={16} /> Card
+            </Button>
+          </Tooltip>
+        </Button.Group>
+      </div>
+
+      <Divider className="my-2" />
+
+      {view === "table" && (
+        <RenewalsTableView
+          data={paginatedData}
+          sorter={sorter}
+          onSortChange={setSorter}
+          onSelect={setActiveRenewal}
+        />
+      )}
+
+      {view === "list" && (
+        <RenewalsListView
+          data={paginatedData}
+          onSelect={setActiveRenewal}
+        />
+      )}
+
+      {view === "card" && (
+        <RenewalsCardView
+          data={paginatedData}
+          onSelect={setActiveRenewal}
+        />
+      )}
+
+      {total > 0 && (
+        <div className="pb-4 flex justify-center">
+          <PaginationControl
+            page={page}
+            pageSize={pageSize}
+            total={total}
+            onPageChange={setPage}
+          />
+        </div>
+      )}
+
+      <RenewalsPreviewDrawer
+        renewal={activeRenewal}
+        onClose={() => setActiveRenewal(null)}
+      />
+
+      {/* FILTER DRAWER (unchanged UI logic) */}
+      <Drawer
+        placement="right"
+        width={380}
+        open={filterOpen}
+        onClose={() => setFilterOpen(false)}
+        closable={false}
+        styles={{ body: { padding: 0 } }}
+      >
+        {/* keep your existing filter UI here */}
+      </Drawer>
+    </div>
+  );
+}

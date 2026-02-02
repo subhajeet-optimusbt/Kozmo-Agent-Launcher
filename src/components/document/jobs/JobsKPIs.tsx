@@ -8,6 +8,7 @@ const JOB_STATUS = {
   RUNNING: "Running",
   QUEUED: "NotStarted",
   FAILED: "Failed",
+  COMPLETED: "Completed",
 } as const;
 
 /* ===================== P95 UTILITY ===================== */
@@ -24,9 +25,7 @@ function calculateP95(values: number[]): number {
 
   if (lo === hi) return sorted[lo];
 
-  return (
-    sorted[lo] + (pos - lo) * (sorted[hi] - sorted[lo])
-  );
+  return sorted[lo] + (pos - lo) * (sorted[hi] - sorted[lo]);
 }
 
 /* ===================== COMPONENT ===================== */
@@ -51,9 +50,10 @@ export default function JobsKPIs({ jobs }: Props) {
     (j) => j.status === JOB_STATUS.FAILED
   ).length;
 
+  // ✅ include completed jobs for P95
   const durations = jobs
     .map((j) => j.timeTaken)
-    .filter((t) => typeof t === "number");
+    .filter((t) => typeof t === "number" && t > 0);
 
   const p95 = calculateP95(durations);
 
@@ -92,6 +92,29 @@ export default function JobsKPIs({ jobs }: Props) {
 
 /* ===================== KPI CARD ===================== */
 
+const COLOR_MAP = {
+  green: {
+    bg: "bg-green-50",
+    text: "text-green-600",
+    tag: "green",
+  },
+  orange: {
+    bg: "bg-orange-50",
+    text: "text-orange-600",
+    tag: "orange",
+  },
+  red: {
+    bg: "bg-red-50",
+    text: "text-red-600",
+    tag: "red",
+  },
+  blue: {
+    bg: "bg-blue-50",
+    text: "text-blue-600",
+    tag: "blue",
+  },
+};
+
 function Kpi({
   label,
   value,
@@ -101,20 +124,22 @@ function Kpi({
   label: string;
   value: number | string;
   icon: React.ReactNode;
-  color: string;
+  color: keyof typeof COLOR_MAP;
 }) {
+  const c = COLOR_MAP[color];
+
   return (
     <Card className={KPI_CARD_BASE} bodyStyle={{ padding: 14 }}>
       <div className="flex items-center justify-between mb-1">
         <span className="text-xs text-gray-500">{label}</span>
-        <div className={`p-1.5 rounded-lg bg-${color}-50 text-${color}-600`}>
+        <div className={`p-1.5 rounded-lg ${c.bg} ${c.text}`}>
           {icon}
         </div>
       </div>
 
       <div className="flex items-center justify-between">
         <span className="text-2xl font-semibold">{value}</span>
-        <Tag color={color} className="m-0 text-xs">
+        <Tag color={c.tag} className="m-0 text-xs">
           {label}
         </Tag>
       </div>
