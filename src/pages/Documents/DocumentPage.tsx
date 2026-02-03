@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
 import { Button } from "antd";
@@ -7,7 +8,10 @@ import DocumentDashboard from "./tabs/DocumentDashboard";
 import DocumentTable from "./tabs/DocumentTable";
 import DocumentJobs from "./tabs/DocumentJobs";
 
-import { fetchDocument } from "../../services/documentService";
+import {
+  fetchDocument,
+  fetchDocumentDashboard,
+} from "../../services/documentService";
 import { mapDocumentFromApi } from "../../types/document";
 import FullscreenLoader from "../../components/ui/FullScreenLoader";
 import RangeTabs from "../../components/ui/RangeTabs";
@@ -18,7 +22,7 @@ type IntakeContextType = {
   activeTab: string;
 };
 
-export type RangeType = "today" | "7" | "30";
+export type RangeType = "today" | "last7days" | "last30days";
 
 export default function DocumentPage() {
   const { activeTab } = useOutletContext<IntakeContextType>();
@@ -27,13 +31,33 @@ export default function DocumentPage() {
   const [document, setDocument] = useState<Document[]>([]);
   const [loading, setLoading] = useState(false);
   const [accountId, setAccountId] = useState(getActiveAccountId());
-  const [range, setRange] = useState<RangeType>("30");
+  const [range, setRange] = useState<RangeType>("today");
+  const [dashboardData, setDashboardData] = useState<any | null>(null);
+
+  useEffect(() => {
+    if (!accountId || activeTab !== "dashboard") return;
+
+    const loadDashboard = async () => {
+      setLoading(true);
+      try {
+        const data = await fetchDocumentDashboard(accountId, range);
+        setDashboardData(data);
+      } catch (err) {
+        console.error(err);
+        setDashboardData(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboard();
+  }, [accountId, range, activeTab]);
 
   /* ---------------- FETCH INBOX ---------------- */
   useEffect(() => {
     if (!accountId || activeTab !== "documents") return;
 
-    const loadIntake = async () => {
+    const loadDocument = async () => {
       setLoading(true);
       try {
         const apiData = await fetchDocument(accountId);
@@ -44,7 +68,7 @@ export default function DocumentPage() {
       }
     };
 
-    loadIntake();
+    loadDocument();
   }, [accountId, activeTab]);
 
   /* ---------------- ACCOUNT CHANGE ---------------- */
@@ -100,7 +124,11 @@ export default function DocumentPage() {
       {/* Tabs */}
       {activeTab === "dashboard" && (
         <div className="px-8 pb-8">
-          <DocumentDashboard />
+          <DocumentDashboard
+            loading={loading}
+            data={dashboardData}
+            range={range}
+          />
         </div>
       )}
 

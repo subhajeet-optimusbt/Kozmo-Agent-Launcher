@@ -20,7 +20,7 @@ export async function fetchJobs(accountId: string): Promise<JobRunApi[]> {
         "Content-Type": "application/json",
       },
       credentials: "include", // keep if your app uses cookies / auth
-    }
+    },
   );
 
   if (!response.ok) {
@@ -30,12 +30,9 @@ export async function fetchJobs(accountId: string): Promise<JobRunApi[]> {
   return response.json();
 }
 
-
-
-
 export async function fetchIntakeJobs(
   accountId: string,
-  range: "today" | "7" | "30"
+  range: "today" | "last7days" | "last30days",
 ) {
   const res = await fetch(
     `${baseUrl()}/api/Intake/${accountId}/JobList?range=${range}`,
@@ -45,7 +42,7 @@ export async function fetchIntakeJobs(
       headers: {
         "Content-Type": "application/json",
       },
-    }
+    },
   );
 
   if (!res.ok) {

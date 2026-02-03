@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import JobsHeader from "../../../components/intake/jobs/JobsHeader";
+// import JobsHeader from "../../../components/intake/jobs/JobsHeader";
 import JobsKPIs from "../../../components/intake/jobs/JobsKPIs";
 import JobsControls from "../../../components/intake/jobs/JobsControls";
 import JobsTable from "../../../components/intake/jobs/JobsTable";
@@ -12,7 +12,7 @@ import FullscreenLoader from "../../../components/ui/FullScreenLoader";
 
 type Props = {
   accountId: string;
-  range: "today" | "7" | "30";
+  range: "today" | "last7days" | "last30days";
 };
 
 export default function IntakeJobsPanel({ accountId, range }: Props) {
@@ -54,8 +54,8 @@ const {
     <div className="space-y-4">
       {loading && <FullscreenLoader />}
 
-      <JobsHeader
-      />
+      {/* <JobsHeader
+      /> */}
 
       <JobsKPIs jobs={jobs} />
 

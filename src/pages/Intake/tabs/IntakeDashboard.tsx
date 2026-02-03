@@ -4,68 +4,103 @@ import {
   Clock,
   CheckCircle,
   DollarSign,
-  AlertTriangle
+  AlertTriangle,
 } from "lucide-react";
 
+/* ================= TYPES ================= */
 
-export default function IntakeDashboard() {
-  /* ============================
-      KPI DATA (Screenshot exact)
-  ============================ */
+export type IntakeDashboardResponse = {
+  total: number;
+  withDocs: number;
+  running: number;
+  completed: number;
+  failed: number;
+  escalated: number;
+};
+
+type Props = {
+  data: IntakeDashboardResponse | null;
+  loading: boolean;
+  range: "today" | "last7days" | "last30days";
+};
+
+/* ================= COMPONENT ================= */
+
+export default function IntakeDashboard({
+  data,
+  loading,
+}: Props) {
+  if (loading) {
+    return (
+      <div className="py-10 text-sm text-gray-500">
+        Loading dashboard…
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="py-10 text-sm text-gray-400">
+        No intake dashboard data available
+      </div>
+    );
+  }
+
+  /* ================= KPI MAPPING ================= */
+
   const kpiCards = [
     {
       label: "New Requests",
-      value: 13,
-      trend: "+4 today",
+      value: data.total,
+      trend: "In range",
       trendType: "up",
       icon: Clock,
       iconColor: "text-emerald-600",
     },
     {
       label: "With Documents",
-      value: 0,
-      trend: "+5 vs yesterday",
+      value: data.withDocs,
+      trend: "In range",
       trendType: "up",
       icon: FileWarning,
       iconColor: "text-amber-500",
     },
     {
       label: "Running",
-      value: 0,
-      trend: "-3 after nudges",
-      trendType: "down",
+      value: data.running,
+      trend: "Processing",
+      trendType: "neutral",
       icon: DollarSign,
       iconColor: "text-red-500",
     },
     {
       label: "Completed",
-      value: 0,
-      trend: "+4 today",
+      value: data.completed,
+      trend: "Completed",
       trendType: "up",
       icon: CheckCircle,
       iconColor: "text-emerald-600",
     },
     {
       label: "Failed",
-      value: 0,
-      trend: "+1 deal",
-      trendType: "neutral",
+      value: data.failed,
+      trend: "Attention",
+      trendType: "down",
       icon: AlertCircle,
       iconColor: "text-gray-500",
     },
     {
       label: "Escalated",
-      value: 0,
-      trend: "+3% automation",
-      trendType: "up",
+      value: data.escalated,
+      trend: "Critical",
+      trendType: "down",
       icon: AlertTriangle,
       iconColor: "text-indigo-500",
     },
   ];
 
-  /* ============================
-      SOURCE FEED
-  ============================ */
+  /* ================= STATIC FEED (UNCHANGED) ================= */
+
   const alerts = [
     {
       type: "Email",
@@ -93,35 +128,34 @@ export default function IntakeDashboard() {
     },
   ];
 
-  /* ============================
-      TRIAGE BUCKETS
-  ============================ */
   const worklists = [
     {
       title: "Missing Info",
-      count: 11,
+      count: data.failed,
       action: "Term/scope incomplete",
       color: "from-red-400 to-red-600",
     },
     {
       title: "Clarification Needed",
-      count: 7,
+      count: data.running,
       action: "Intent unclear",
       color: "from-amber-400 to-amber-600",
     },
     {
       title: "Ambiguous Routing",
-      count: 3,
+      count: data.escalated,
       action: "Multiple possible agents",
       color: "from-indigo-400 to-indigo-600",
     },
     {
       title: "High Priority",
-      count: 5,
+      count: data.escalated,
       action: "Critical flags",
       color: "from-rose-400 to-rose-600",
     },
   ];
+
+  /* ================= RENDER ================= */
 
   return (
     <div className="space-y-6">
@@ -155,16 +189,15 @@ export default function IntakeDashboard() {
                   {kpi.value}
                 </span>
 
-                {/* Trend Badge */}
                 <span
                   className={`rounded-full px-2.5 py-1 text-xs font-semibold
-              ${
-                kpi.trendType === "up"
-                  ? "bg-emerald-50 text-emerald-600"
-                  : kpi.trendType === "down"
-                    ? "bg-red-50 text-red-500"
-                    : "bg-gray-100 text-gray-500"
-              }`}
+                    ${
+                      kpi.trendType === "up"
+                        ? "bg-emerald-50 text-emerald-600"
+                        : kpi.trendType === "down"
+                        ? "bg-red-50 text-red-500"
+                        : "bg-gray-100 text-gray-500"
+                    }`}
                 >
                   {kpi.trend}
                 </span>
@@ -176,10 +209,12 @@ export default function IntakeDashboard() {
 
       {/* ================= ALERTS + WORKLISTS ================= */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* ===== RECENT ACTIVITY ===== */}
+        {/* SOURCE FEED */}
         <div className="bg-white rounded-2xl border border-gray-200">
           <div className="px-6 py-4 border-b border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900">Source Feed</h3>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Source Feed
+            </h3>
             <p className="text-sm text-gray-500 mt-1">
               Where Requests Originate
             </p>
@@ -199,9 +234,8 @@ export default function IntakeDashboard() {
                   <p className="text-sm text-gray-700 mt-0.5">
                     {alert.message}
                   </p>
-                  <span className="text-xs text-gray-400">{alert.time}</span>
                   <span className="text-xs text-gray-400">
-                    {alert.severity}
+                    {alert.time}
                   </span>
                 </div>
               </div>
@@ -209,13 +243,15 @@ export default function IntakeDashboard() {
           </div>
         </div>
 
-        {/* ===== DOCUMENTS REQUIRING ATTENTION ===== */}
+        {/* TRIAGE BUCKETS */}
         <div className="bg-white rounded-2xl border border-gray-200">
           <div className="px-6 py-4 border-b border-gray-100">
             <h3 className="text-lg font-bold text-gray-900">
               Requests Requiring Attention
             </h3>
-            <p className="text-sm text-gray-500 mt-1">Triage Buckets.</p>
+            <p className="text-sm text-gray-500 mt-1">
+              Triage Buckets.
+            </p>
           </div>
 
           <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">

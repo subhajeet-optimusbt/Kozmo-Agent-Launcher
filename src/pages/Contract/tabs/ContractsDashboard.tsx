@@ -1,19 +1,21 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   AlertCircle,
   TrendingUp,
   FileWarning,
   Clock,
   CheckCircle,
-  DollarSign,
 } from "lucide-react";
 import type { ContractDashboardResponse } from "../../../types/contracts";
 
 type Props = {
   data: ContractDashboardResponse | null;
   loading: boolean;
+  range: "today" | "last7days" | "last30days";
+
 };
 
-export default function ContractsDashboard({ data, loading }: Props) {
+export default function ContractsDashboard({ data, loading, range }: Props) {
   if (loading) {
     return (
       <div className="py-10 text-sm text-gray-500">Loading dashboard…</div>
@@ -28,9 +30,17 @@ export default function ContractsDashboard({ data, loading }: Props) {
     );
   }
 
-  const m = data.currentMetrics;
+  const m = data;
 
   const kpiCards = [
+    {
+      label: "Total Contracts",
+      value: m.totalContracts,
+      status: "Healthy",
+      icon: CheckCircle,
+      iconColor: "text-emerald-500",
+      trend: "+",
+    },
     {
       label: "Active contracts",
       value: m.activeContracts,
@@ -49,7 +59,7 @@ export default function ContractsDashboard({ data, loading }: Props) {
     },
     {
       label: "Needs review",
-      value: m.inReview,
+      value: m.contractsNeedingReview,
       status: "Pending",
       icon: FileWarning,
       iconColor: "text-orange-500",
@@ -70,14 +80,6 @@ export default function ContractsDashboard({ data, loading }: Props) {
       icon: TrendingUp,
       iconColor: "text-blue-500",
       trend: "+",
-    },
-    {
-      label: "At-risk revenue",
-      value: m.atRiskRevenue,
-      status: "Exposure",
-      icon: DollarSign,
-      iconColor: "text-purple-500",
-      trend: "-",
     },
   ];
 
@@ -117,31 +119,31 @@ export default function ContractsDashboard({ data, loading }: Props) {
     },
     {
       title: "Contracts needing Finance approval",
-      count: m.mediumRiskContracts,
+      count: 0,
       action: "Finance queue",
       color: "from-blue-500 to-blue-600",
     },
     {
       title: "Contracts in negotiation",
-      count: m.lowRiskContracts,
+      count: 0,
       action: "Negotiation queue",
       color: "from-purple-500 to-purple-600",
     },
     {
       title: "Renewals approaching",
-      count: m.expireWithin30Days,
+      count: 0,
       action: "Renewal pipeline",
       color: "from-orange-500 to-orange-600",
     },
     {
       title: "Obligations requiring action",
-      count: m.expired,
+      count: 0,
       action: "Obligation hub",
       color: "from-emerald-500 to-emerald-600",
     },
     {
       title: "Total contracts",
-      count: m.totalContracts,
+      count: 0,
       action: "Contract inventory",
       color: "from-pink-500 to-pink-600",
     },

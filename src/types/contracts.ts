@@ -17,6 +17,12 @@ export interface ContractMetrics {
 }
 
 export interface ContractDashboardResponse {
+  totalContracts: any;
+  activeContracts: any;
+  highRiskContracts: any;
+  contractsNeedingReview: any;
+  expireWithin90Days: any;
+  pendingSignature: any;
   agentType: string;
   lastUpdated: string;
   currentMetrics: ContractMetrics;

@@ -7,28 +7,50 @@ import IntakeDashboard from "./tabs/IntakeDashboard";
 import IntakeInboxTable from "./tabs/IntakeInboxTable";
 import IntakeJobsPanel from "./tabs/IntakeJobsPanel";
 
-import { fetchIntake } from "../../services/intakeService";
+import {
+  fetchIntake,
+  fetchIntakeDashboard,
+} from "../../services/intakeService";
 import { mapIntakeFromApi } from "../../types/intake";
 import FullscreenLoader from "../../components/ui/FullScreenLoader";
 import RangeTabs from "../../components/ui/RangeTabs";
 import { getActiveAccountId, ACCOUNT_CHANGED_EVENT } from "../../utils/auth";
 import type { Intake } from "../../constants/apps";
+import type { IntakeDashboardResponse } from "../../services/intakeService";
 
 type IntakeContextType = {
   activeTab: string;
 };
 
-export type RangeType = "today" | "7" | "30";
+export type RangeType = "today" | "last7days" | "last30days";
 
 export default function IntakePage() {
   const { activeTab } = useOutletContext<IntakeContextType>();
   const navigate = useNavigate();
 
   const [intake, setIntake] = useState<Intake[]>([]);
+  const [dashboardData, setDashboardData] =
+    useState<IntakeDashboardResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [accountId, setAccountId] = useState(getActiveAccountId());
-  const [range, setRange] = useState<RangeType>("30");
+  const [range, setRange] = useState<RangeType>("today");
 
+  useEffect(() => {
+    const loadDashboard = async () => {
+      setLoading(true);
+      try {
+        const data = await fetchIntakeDashboard(accountId, range);
+        setDashboardData(data);
+      } catch (err) {
+        console.error(err);
+        setDashboardData(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboard();
+  }, [accountId, range, activeTab]);
   /* ---------------- FETCH INBOX ---------------- */
   useEffect(() => {
     if (!accountId || activeTab !== "inbox") return;
@@ -69,9 +91,14 @@ export default function IntakePage() {
       {/* Header */}
       <div className="mx-8 my-4 flex items-center justify-between">
         {/* Left: Title */}
-        <h3 className="text-2xl font-black tracking-tight text-gray-900">
-          Intake Agent
-        </h3>
+        <div>
+          <h3 className="text-2xl font-black tracking-tight text-gray-900">
+            Intake Agent
+          </h3>
+          <p className="mt-1 text-sm text-gray-500">
+            What is coming in, from where, and what needs attention.
+          </p>
+        </div>
 
         {/* Center: Range Tabs (dashboard & jobs only) */}
         {activeTab !== "inbox" && (
@@ -94,7 +121,11 @@ export default function IntakePage() {
       {/* Tabs */}
       {activeTab === "dashboard" && (
         <div className="px-8 pb-8">
-          <IntakeDashboard />
+          <IntakeDashboard
+            loading={loading}
+            data={dashboardData}
+            range={range}
+          />
         </div>
       )}
 

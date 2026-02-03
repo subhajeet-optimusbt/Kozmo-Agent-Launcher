@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   Mail,
   Briefcase,
+  Plus,
 } from "lucide-react";
 import { Tooltip } from "antd";
 import { useNavigate } from "react-router-dom";
@@ -106,6 +107,10 @@ const RenewalHeader: React.FC<RenewalHeaderProps> = ({
     return () => window.removeEventListener("account-changed", handler);
   }, []);
 
+
+  const onCreateNew = () => {
+    
+  }
   return (
     <header className="flex items-center justify-between mb-2 relative">
       {/* LEFT */}
@@ -198,6 +203,27 @@ const RenewalHeader: React.FC<RenewalHeaderProps> = ({
 
       {/* RIGHT */}
       <div className="flex items-center gap-2">
+
+             <Tooltip title="Create new Intake">
+                  <button
+                    onClick={onCreateNew}
+                    className="
+              w-9 h-9
+              flex items-center justify-center
+              rounded-lg
+        
+              text-emerald-600/70
+              bg-emerald-50/40
+        
+              hover:text-emerald-600
+              hover:bg-emerald-100
+        
+              transition-all duration-150
+            "
+                  >
+                    <Plus size={22} strokeWidth={2} />
+                  </button>
+                </Tooltip>
         {/* Help */}
         <Tooltip title="Help">
           <button

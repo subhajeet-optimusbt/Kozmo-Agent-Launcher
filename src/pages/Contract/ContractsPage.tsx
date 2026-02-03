@@ -9,9 +9,12 @@ import { getActiveAccountId, ACCOUNT_CHANGED_EVENT } from "../../utils/auth";
 import { fetchContractsDashboard } from "../../services/contractsService";
 import type { ContractDashboardResponse } from "../../types/contracts";
 import FullscreenLoader from "../../components/ui/FullScreenLoader";
+import RangeTabs from "../../components/ui/RangeTabs";
 type ContractsContextType = {
   activeTab: string;
 };
+export type RangeType = "today" | "last7days" | "last30days";
+
 export default function ContractsPage() {
   const { activeTab } = useOutletContext<ContractsContextType>();
   const navigate = useNavigate();
@@ -23,6 +26,7 @@ export default function ContractsPage() {
     navigate("/contracts/CreateNewContract");
   };
 
+    const [range, setRange] = useState<RangeType>("today");
   const [accountId, setAccountId] = useState(getActiveAccountId());
   useEffect(() => {
     const handler = () => {
@@ -38,7 +42,7 @@ export default function ContractsPage() {
     const loadDashboard = async () => {
       setLoading(true);
       try {
-        const data = await fetchContractsDashboard(accountId);
+        const data = await fetchContractsDashboard(accountId,range);
         setDashboardData(data);
       } catch (err) {
         console.error(err);
@@ -49,7 +53,7 @@ export default function ContractsPage() {
     };
 
     loadDashboard();
-  }, [accountId]);
+  }, [accountId,range]);
   return (
     <>
       {loading && <FullscreenLoader />}
@@ -69,6 +73,11 @@ export default function ContractsPage() {
             </p>
           </div>
 
+        {activeTab !== "contracts" && (
+          <div className="flex-1 flex justify-center">
+            <RangeTabs value={range} onChange={setRange} />
+          </div>
+        )}
           {/* Right side: action button */}
           <Button
             onClick={onCreateContract}
@@ -91,7 +100,7 @@ export default function ContractsPage() {
         {/* Tabs content */}
         {activeTab === "dashboard" && (
           <div className="px-8">
-            <ContractsDashboard loading={loading} data={dashboardData} />
+            <ContractsDashboard loading={loading} data={dashboardData} range={range} />
           </div>
         )}
 
@@ -103,7 +112,7 @@ export default function ContractsPage() {
 
         {activeTab === "jobs" && (
           <div className="px-8">
-            <JobsPanel accountId={accountId} />
+            <JobsPanel accountId={accountId} range={range} />
           </div>
         )}
       </div>

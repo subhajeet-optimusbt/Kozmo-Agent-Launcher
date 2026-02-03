@@ -96,7 +96,6 @@ export default function IntakeTableView({
       title: <SortableHeader label="Subject" field="subject" />,
       dataIndex: "subject",
       key: "subject",
-      sorter: true,
       width: "28%",
       render: (_, record) => (
         <div className="flex items-center gap-3">
@@ -141,7 +140,7 @@ export default function IntakeTableView({
     },
 
     {
-      title: "Status",
+      title: <SortableHeader label="Status" field="status" />,
       dataIndex: "status",
       width: 140,
       render: (v: string) => {
@@ -157,12 +156,12 @@ export default function IntakeTableView({
       },
     },
     {
-      title: "Created",
+      title: <SortableHeader label= "Created" field="created" />,
       dataIndex: "created",
       width: 160,
     },
     {
-      title: "Updated",
+      title: <SortableHeader label="Updated" field="updated" />,
       dataIndex: "updated",
       width: 160,
     },

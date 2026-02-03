@@ -2,18 +2,18 @@
 import { baseUrl } from "../utils/baseUrl";
 
 export const fetchContractsDashboard = async (
-  accountId: string
+  accountId: string,
+  timeSpan: "today" | "last7days" | "last30days"
 ) => {
-  const res = await fetch(
-    `${baseUrl()}/api/Dashboard/${accountId}/contract`,
-    {
-      method: "GET",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
+  const url = `${baseUrl()}/api/Contract/${accountId}/dashboard/Stats?timeSpan=${timeSpan}`;
+
+  const res = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 
   if (!res.ok) {
     throw new Error("Failed to fetch contract dashboard");

@@ -1,4 +1,4 @@
-type Range = "today" | "7" | "30";
+type Range = "today" | "last7days" | "last30days";
 
 type Props = {
   value: Range;
@@ -8,8 +8,8 @@ type Props = {
 export default function RangeTabs({ value, onChange }: Props) {
   const tabs: { label: string; value: Range }[] = [
     { label: "Today", value: "today" },
-    { label: "Last 7 days", value: "7" },
-    { label: "Last 30 days", value: "30" },
+    { label: "Last 7 days", value: "last7days" },
+    { label: "Last 30 days", value: "last30days" },
   ];
 
   return (
