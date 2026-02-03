@@ -107,10 +107,7 @@ const DocumentHeader: React.FC<DocumentHeaderProps> = ({
     return () => window.removeEventListener("account-changed", handler);
   }, []);
 
-
-  const onCreateNew = () => {
-    
-  }
+  const onCreateNew = () => {};
   return (
     <header className="flex items-center justify-between mb-2 relative">
       {/* LEFT */}
@@ -204,21 +201,27 @@ const DocumentHeader: React.FC<DocumentHeaderProps> = ({
       {/* RIGHT */}
       <div className="flex items-center gap-2">
         {/* Help */}
-        <Tooltip title="Create new">
-  <button
-    onClick={onCreateNew} // 👈 hook this to modal / page
-    className="
-      w-9 h-9 flex items-center justify-center rounded-lg
-      text-white
-      bg-emerald-600
-      hover:bg-emerald-700
+        <Tooltip title="Create new Document">
+          <button
+            onClick={onCreateNew}
+            className="
+      w-9 h-9
+      flex items-center justify-center
+      rounded-lg
+
+      text-emerald-600/70
+      bg-emerald-50/40
+
+      hover:text-emerald-600
+      hover:bg-emerald-100
+
       transition-all duration-150
-      shadow-sm
     "
-  >
-    <Plus size={20} strokeWidth={2.5} />
-  </button>
-</Tooltip>
+          >
+            <Plus size={22} strokeWidth={2} />
+          </button>
+        </Tooltip>
+
         <Tooltip title="Help">
           <button
             className="
@@ -233,7 +236,6 @@ const DocumentHeader: React.FC<DocumentHeaderProps> = ({
             <LifeBuoy size={22} strokeWidth={2} />
           </button>
         </Tooltip>
-
         <Tooltip title="Guide">
           <button
             className="

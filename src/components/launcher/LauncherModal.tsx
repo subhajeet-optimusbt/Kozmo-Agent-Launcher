@@ -108,17 +108,17 @@ const LauncherModal: React.FC<LauncherModalProps> = ({
   };
 
   useEffect(() => {
-  if (!launcherOpen) return;
+    if (!launcherOpen) return;
 
-  setSearchText("");
+    setSearchText("");
 
-  if (activeAppKey) {
-    const index = leftApps.findIndex(app => app.key === activeAppKey);
-    setFocusedIndex(index >= 0 ? index : 0);
-  } else {
-    setFocusedIndex(0);
-  }
-}, [launcherOpen, activeAppKey, leftApps]);
+    if (activeAppKey) {
+      const index = leftApps.findIndex((app) => app.key === activeAppKey);
+      setFocusedIndex(index >= 0 ? index : 0);
+    } else {
+      setFocusedIndex(0);
+    }
+  }, [launcherOpen, activeAppKey, leftApps]);
   // Keyboard handling: Esc to close, Up/Down to navigate left list, Enter to open
   useEffect(() => {
     if (!launcherOpen) return;

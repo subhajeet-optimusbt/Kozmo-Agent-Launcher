@@ -5,7 +5,7 @@ import DocumentHeader from "./DocumentHeader";
 import LauncherModal from "../../launcher/LauncherModal";
 
 export default function ContractsLayout() {
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState("documents");
   const [launcherOpen, setLauncherOpen] = useState(false);
 
   return (

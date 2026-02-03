@@ -69,9 +69,15 @@ export default function DocumentPage() {
       {/* Header */}
       <div className="mx-8 my-4 flex items-center justify-between">
         {/* Left: Title */}
-        <h3 className="text-2xl font-black tracking-tight text-gray-900">
-          Document Dashboard
-        </h3>
+
+        <div>
+          <h3 className="text-2xl font-black tracking-tight text-gray-900">
+            Document Dashboard
+          </h3>
+          <p className="mt-1 text-sm text-gray-500">
+            What is coming in, from where, and what needs attention.
+          </p>
+        </div>
 
         {/* Center: Range Tabs (dashboard & jobs only) */}
         {activeTab !== "documents" && (
