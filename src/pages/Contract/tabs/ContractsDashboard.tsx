@@ -15,7 +15,7 @@ type Props = {
 
 };
 
-export default function ContractsDashboard({ data, loading, range }: Props) {
+export default function ContractsDashboard({ data, loading }: Props) {
   if (loading) {
     return (
       <div className="py-10 text-sm text-gray-500">Loading dashboard…</div>
