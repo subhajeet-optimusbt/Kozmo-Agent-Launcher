@@ -88,6 +88,22 @@ export interface Document {
   updated: string;
 }
 
+export type RelationshipStatus =
+  | "Active"
+  | "Inactive"
+  | "Prospect"
+  | "Blacklisted";
+
+export type Relationships = {
+  key: string;
+  displayName: string;
+  legalName: string;
+  category: string;
+  status: RelationshipStatus;
+  created: string;
+  modified: string;
+};
+
 export const APPS: App[] = [
   {
     key: "contracts",
@@ -145,6 +161,18 @@ export const APPS: App[] = [
     route: "/intake",
     icon: "arrow",
     color: "cyan",
+    subtitle: undefined,
+    category: "",
+    actionHint: undefined,
+  },
+  {
+    key: "relationships",
+    name: "Relationships",
+    description: "Parties, links, dependencies, contract mapping",
+    badge: 0,
+    route: "/relationships",
+    icon: "users",
+    color: "teal",
     subtitle: undefined,
     category: "",
     actionHint: undefined,

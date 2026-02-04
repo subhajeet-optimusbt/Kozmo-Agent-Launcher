@@ -19,18 +19,19 @@ import NewRequestForm from "./pages/Contract/NewContractForm";
 import Renewals from "./pages/Renewals/RenewalsPage";
 import SignupPage from "./pages/auth/signuppage";
 import Login from "./pages/auth/loginpage";
+import RelationshipsLayout from "./components/layout/Relationships/RelationshipsLayout";
+import Relationships from "./pages/Relationships/RelationshipsPage";
+import  RelationshipsForm from "./pages/Relationships/RelationshipsForm";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-
         {/* Root */}
         <Route path="/" element={<Navigate to="/login" replace />} />
 
         {/* ================= PROTECTED APP ================= */}
         <Route element={<ProtectedRoute />}>
-          
           {/* Home */}
           <Route element={<HomeLayout />}>
             <Route path="/Home" element={<Dashboard />} />
@@ -49,25 +50,40 @@ export default function App() {
           {/* Renewals */}
           <Route element={<RenewalsLayout />}>
             <Route path="/renewals" element={<Renewals />} />
-            <Route path="/renewals/CreateNewRequest" element={<NewRequestForm/>} />
+            <Route
+              path="/renewals/CreateNewRequest"
+              element={<NewRequestForm />}
+            />
           </Route>
 
           {/* Intake */}
-            <Route element={<IntakeLayout />}>
+          <Route element={<IntakeLayout />}>
             <Route path="/intake" element={<Intake />} />
-            <Route path="/intake/CreateNewRequestIntake" element={<IntakeRequestForm/>} />
+            <Route
+              path="/intake/CreateNewRequestIntake"
+              element={<IntakeRequestForm />}
+            />
           </Route>
-              <Route element={<DocumentLayout />}>
+          <Route element={<DocumentLayout />}>
             <Route path="/documents" element={<Document />} />
-            <Route path="/document/CreateNewDocument" element={<DocumentForm/>} />
+            <Route
+              path="/document/CreateNewDocument"
+              element={<DocumentForm />}
+            />
           </Route>
+          <Route element={<RelationshipsLayout/>}>
+            <Route path="/relationships" element={<Relationships/>} />
+            <Route
+              path="/relationships/CreateNewRelationships"
+              element={< RelationshipsForm />}
+            />
 
+          </Route>
         </Route>
 
         {/* ================= PUBLIC ================= */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignupPage />} />
-
       </Routes>
     </BrowserRouter>
   );
