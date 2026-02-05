@@ -120,7 +120,7 @@ export default function RelationshipsTable({
       <div className="flex items-center justify-between gap-6">
         <div className="flex items-center gap-3">
           <Input.Search
-            placeholder="Search documents…"
+            placeholder="Search relationships...."
             className="w-[340px]"
             allowClear
             onChange={(e) => {

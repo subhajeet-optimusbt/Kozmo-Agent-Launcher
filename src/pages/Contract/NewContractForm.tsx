@@ -48,20 +48,20 @@ function Section({
 }) {
   return (
     <section
-      className={`bg-gradient-to-br from-white to-gray-50/30 rounded-2xl p-8 border border-gray-100/50 shadow-sm hover:shadow-md transition-all duration-300 ${className}`}
+      className={`bg-gradient-to-br from-white to-gray-50/30 rounded-xl p-4 border border-gray-100/50 shadow-sm hover:shadow-md transition-all duration-300 ${className}`}
     >
-      <h3 className="text-base font-bold text-gray-900 mb-6 tracking-tight flex items-center gap-2">
-        <span className="w-1.5 h-5 bg-gradient-to-b from-emerald-500 to-teal-500 rounded-full"></span>
+      <h3 className="text-sm font-bold text-gray-900 mb-3 tracking-tight flex items-center gap-2">
+        <span className="w-1 h-4 bg-gradient-to-b from-emerald-500 to-teal-500 rounded-full"></span>
         {title}
       </h3>
-      <div className="space-y-5">{children}</div>
+      <div className="space-y-3">{children}</div>
     </section>
   );
 }
 
 function TwoCol({ children }: { children: React.ReactNode }) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">{children}</div>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">{children}</div>
   );
 }
 
@@ -94,12 +94,12 @@ export default function CreateContractPage(): JSX.Element {
     <div className="relative overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-sm">
       {/* Subtle top gradient accent */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500" />
-      <div className="mx-8 my-4">
+      <div className="mx-6 my-3">
         {/* Fixed Header */}
         {/* <div className="flex-none bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm"> */}
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
             <Button
               type="text"
               icon={<LeftOutlined className="text-gray-500" />}
@@ -107,19 +107,19 @@ export default function CreateContractPage(): JSX.Element {
               className="hover:bg-gray-100 rounded-xl transition-all duration-200"
             />
             <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+              <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                 Create New Contract
               </h1>
-              <p className="text-sm text-gray-500 mt-0.5">
-                Configure contract metadata and upload documents
+              <p className="text-xs text-gray-500 mt-0.5">
+                Upload a new contract,or create a draft 
               </p>
             </div>
           </div>
 
-          <div className="hidden lg:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-2">
             <Button
               onClick={handleBack}
-              className="rounded-xl px-5 hover:bg-gray-50 transition-all duration-200 border-gray-200"
+              className="rounded-xl px-4 hover:bg-gray-50 transition-all duration-200 border-gray-200"
             >
               Cancel
             </Button>
@@ -130,14 +130,14 @@ export default function CreateContractPage(): JSX.Element {
                   message.success("Draft saved locally");
                 });
               }}
-              className="rounded-xl px-5 bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200 hover:shadow-sm transition-all duration-200"
+              className="rounded-xl px-4 bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200 hover:shadow-sm transition-all duration-200"
             >
               Save Draft
             </Button>
             <Button
               type="primary"
               onClick={() => form.submit()}
-              className="rounded-xl px-8 bg-gradient-to-r from-emerald-600 to-teal-600 border-0 shadow-lg shadow-emerald-200 hover:shadow-xl hover:shadow-emerald-300 transition-all duration-300"
+              className="rounded-xl px-6 bg-gradient-to-r from-emerald-600 to-teal-600 border-0 shadow-lg shadow-emerald-200 hover:shadow-xl hover:shadow-emerald-300 transition-all duration-300"
               loading={saving}
             >
               Submit
@@ -149,24 +149,41 @@ export default function CreateContractPage(): JSX.Element {
 
         {/* Scrollable Content Area */}
         <div className="flex-1 overflow-hidden">
-          <div className=" px-4 py-4">
+          <div className="px-2 py-2">
             <div>
               <Form<FormValues>
                 form={form}
                 layout="vertical"
                 onFinish={onFinish}
                 initialValues={{ autoRenew: false, termType: "fixed" }}
+                className="compact-form"
               >
-                <div className="h-full overflow-y-auto px-4 py-4"></div>
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <style>{`
+                  .compact-form .ant-form-item {
+                    margin-bottom: 12px;
+                  }
+                  .compact-form .ant-form-item-label {
+                    padding-bottom: 2px;
+                  }
+                  .compact-form .ant-input,
+                  .compact-form .ant-input-number,
+                  .compact-form .ant-picker {
+                    height: 32px;
+                  }
+                  .compact-form .ant-select-selector {
+                    min-height: 32px !important;
+                  }
+                `}</style>
+                <div className="h-full overflow-y-auto px-2 py-2"></div>
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
                   {/* Left Column - Main Contract Info */}
-                  <div className="xl:col-span-2 space-y-6">
+                  <div className="xl:col-span-2 space-y-4">
                     {/* CONTRACT BASICS */}
                     <Section title="Contract Basics">
                       <TwoCol>
                         <Form.Item
                           label={
-                            <span className="text-sm font-semibold text-gray-700">
+                            <span className="text-xs font-semibold text-gray-700">
                               Area
                             </span>
                           }
@@ -183,14 +200,15 @@ export default function CreateContractPage(): JSX.Element {
                             className="rounded-lg"
                             options={[
                               { label: "Sales", value: "sales" },
-                              { label: "Procurement", value: "procurement" },
+                              { label: "General", value: "general" },
+                              { label: "Legal", value: "legal" },
                             ]}
                           />
                         </Form.Item>
 
                         <Form.Item
                           label={
-                            <span className="text-sm font-semibold text-gray-700">
+                            <span className="text-xs font-semibold text-gray-700">
                               Type
                             </span>
                           }
@@ -206,7 +224,7 @@ export default function CreateContractPage(): JSX.Element {
                             placeholder="NDA / MSA / SOW"
                             className="rounded-lg"
                             options={[
-                              { label: "NDA", value: "nda" },
+                              { label: "Sales Agreement", value: "nda" },
                               { label: "MSA", value: "msa" },
                               { label: "SOW", value: "sow" },
                             ]}
@@ -215,7 +233,7 @@ export default function CreateContractPage(): JSX.Element {
 
                         <Form.Item
                           label={
-                            <span className="text-sm font-semibold text-gray-700">
+                            <span className="text-xs font-semibold text-gray-700">
                               Title
                             </span>
                           }
@@ -235,7 +253,7 @@ export default function CreateContractPage(): JSX.Element {
 
                         <Form.Item
                           label={
-                            <span className="text-sm font-semibold text-gray-700">
+                            <span className="text-xs font-semibold text-gray-700">
                               Contract Number
                             </span>
                           }
@@ -255,7 +273,7 @@ export default function CreateContractPage(): JSX.Element {
 
                         <Form.Item
                           label={
-                            <span className="text-sm font-semibold text-gray-700">
+                            <span className="text-xs font-semibold text-gray-700">
                               Counterparty
                             </span>
                           }
@@ -279,7 +297,7 @@ export default function CreateContractPage(): JSX.Element {
 
                         <Form.Item
                           label={
-                            <span className="text-sm font-semibold text-gray-700">
+                            <span className="text-xs font-semibold text-gray-700">
                               Company
                             </span>
                           }
@@ -303,7 +321,7 @@ export default function CreateContractPage(): JSX.Element {
 
                         <Form.Item
                           label={
-                            <span className="text-sm font-semibold text-gray-700">
+                            <span className="text-xs font-semibold text-gray-700">
                               Owner
                             </span>
                           }
@@ -327,7 +345,7 @@ export default function CreateContractPage(): JSX.Element {
 
                         <Form.Item
                           label={
-                            <span className="text-sm font-semibold text-gray-700">
+                            <span className="text-xs font-semibold text-gray-700">
                               Originating Party
                             </span>
                           }
@@ -343,14 +361,14 @@ export default function CreateContractPage(): JSX.Element {
 
                       <Form.Item
                         label={
-                          <span className="text-sm font-semibold text-gray-700">
+                          <span className="text-xs font-semibold text-gray-700">
                             Term Type
                           </span>
                         }
                         name="termType"
                       >
                         <Radio.Group className="w-full">
-                          <div className="grid grid-cols-3 gap-3">
+                          <div className="grid grid-cols-3 gap-2">
                             <Radio.Button
                               value="fixed"
                               className="text-center rounded-lg"
@@ -379,7 +397,7 @@ export default function CreateContractPage(): JSX.Element {
                       <TwoCol>
                         <Form.Item
                           label={
-                            <span className="text-sm font-semibold text-gray-700">
+                            <span className="text-xs font-semibold text-gray-700">
                               Start Date
                             </span>
                           }
@@ -396,7 +414,7 @@ export default function CreateContractPage(): JSX.Element {
 
                         <Form.Item
                           label={
-                            <span className="text-sm font-semibold text-gray-700">
+                            <span className="text-xs font-semibold text-gray-700">
                               End Date
                             </span>
                           }
@@ -413,7 +431,7 @@ export default function CreateContractPage(): JSX.Element {
 
                         <Form.Item
                           label={
-                            <span className="text-sm font-semibold text-gray-700">
+                            <span className="text-xs font-semibold text-gray-700">
                               Notice Period (days)
                             </span>
                           }
@@ -433,7 +451,7 @@ export default function CreateContractPage(): JSX.Element {
                       <TwoCol>
                         <Form.Item
                           label={
-                            <span className="text-sm font-semibold text-gray-700">
+                            <span className="text-xs font-semibold text-gray-700">
                               Total Contract Value
                             </span>
                           }
@@ -448,7 +466,7 @@ export default function CreateContractPage(): JSX.Element {
 
                         <Form.Item
                           label={
-                            <span className="text-sm font-semibold text-gray-700">
+                            <span className="text-xs font-semibold text-gray-700">
                               Currency
                             </span>
                           }
@@ -467,16 +485,16 @@ export default function CreateContractPage(): JSX.Element {
 
                       <Form.Item
                         label={
-                          <span className="text-sm font-semibold text-gray-700">
+                          <span className="text-xs font-semibold text-gray-700">
                             Auto-Renew
                           </span>
                         }
                         name="autoRenew"
                         valuePropName="checked"
                       >
-                        <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-gray-50 to-transparent rounded-xl border border-gray-100">
+                        <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-gray-50 to-transparent rounded-xl border border-gray-100">
                           <Switch />
-                          <span className="text-sm text-gray-600 font-medium">
+                          <span className="text-xs text-gray-600 font-medium">
                             Enable automatic renewal
                           </span>
                         </div>
@@ -485,7 +503,7 @@ export default function CreateContractPage(): JSX.Element {
                   </div>
 
                   {/* Right Column - Documents & Notes */}
-                  <div className="xl:col-span-1 space-y-6">
+                  <div className="xl:col-span-1 space-y-4">
                     {/* DOCUMENTS */}
                     <Section title="Documents" className="sticky top-6">
                       <Form.Item
@@ -507,14 +525,15 @@ export default function CreateContractPage(): JSX.Element {
                           }}
                           accept=".pdf,.doc,.docx,.txt"
                           className="rounded-xl border-dashed border-2 border-gray-200 hover:border-emerald-400 transition-all duration-300 bg-gradient-to-br from-white to-gray-50/50"
+                          style={{ padding: '12px' }}
                         >
                           <p className="ant-upload-drag-icon">
-                            <UploadOutlined className="text-emerald-500" />
+                            <UploadOutlined className="text-emerald-500" style={{ fontSize: '28px' }} />
                           </p>
-                          <p className="ant-upload-text font-bold text-gray-800">
+                          <p className="ant-upload-text font-bold text-gray-800 text-sm">
                             Drop files here
                           </p>
-                          <p className="ant-upload-hint text-xs text-gray-500 mt-2">
+                          <p className="ant-upload-hint text-xs text-gray-500 mt-1">
                             PDF, DOCX, TXT supported
                           </p>
                         </Dragger>
@@ -522,14 +541,14 @@ export default function CreateContractPage(): JSX.Element {
 
                       <Form.Item
                         label={
-                          <span className="text-sm font-semibold text-gray-700">
+                          <span className="text-xs font-semibold text-gray-700">
                             Notes / Summary
                           </span>
                         }
                         name="notes"
                       >
                         <TextArea
-                          rows={4}
+                          rows={3}
                           placeholder="Add any summary or metadata for this contract"
                           className="rounded-xl"
                         />
@@ -543,18 +562,18 @@ export default function CreateContractPage(): JSX.Element {
         </div>
 
         {/* Fixed Footer */}
-        <div className="flex-none bg-white/80 backdrop-blur-xl border-t border-gray-200/50 shadow-lg">
-          <div className="px-8 py-4">
-            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div className="text-sm text-gray-500 hidden lg:block">
+        <div className="flex-none bg-white/80 backdrop-blur-xl border-t border-gray-200/50 shadow-lg mt-3">
+          <div className="px-6 py-3">
+            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+              <div className="text-xs text-gray-500 hidden lg:block">
                 All fields marked with <span className="text-red-500">*</span>{" "}
                 are required
               </div>
 
-              <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
                 <Button
                   onClick={handleBack}
-                  className="flex-1 sm:flex-none rounded-xl px-5 hover:bg-gray-50 transition-all duration-200"
+                  className="flex-1 sm:flex-none rounded-xl px-4 hover:bg-gray-50 transition-all duration-200"
                 >
                   Cancel
                 </Button>
@@ -565,14 +584,14 @@ export default function CreateContractPage(): JSX.Element {
                       message.success("Draft saved locally");
                     });
                   }}
-                  className="flex-1 sm:flex-none rounded-xl px-5 bg-gradient-to-r from-gray-50 to-gray-100 hover:shadow-sm transition-all duration-200"
+                  className="flex-1 sm:flex-none rounded-xl px-4 bg-gradient-to-r from-gray-50 to-gray-100 hover:shadow-sm transition-all duration-200"
                 >
                   Save Draft
                 </Button>
                 <Button
                   type="primary"
                   onClick={() => form.submit()}
-                  className="flex-1 sm:flex-none rounded-xl px-8 bg-gradient-to-r from-emerald-600 to-teal-600 border-0 shadow-lg shadow-emerald-200 hover:shadow-xl hover:shadow-emerald-300 transition-all duration-300 font-semibold"
+                  className="flex-1 sm:flex-none rounded-xl px-6 bg-gradient-to-r from-emerald-600 to-teal-600 border-0 shadow-lg shadow-emerald-200 hover:shadow-xl hover:shadow-emerald-300 transition-all duration-300 font-semibold"
                   loading={saving}
                 >
                   Submit

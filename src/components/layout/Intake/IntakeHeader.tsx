@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useRef, useEffect } from "react";
 import {
@@ -19,13 +20,13 @@ import { useNavigate } from "react-router-dom";
 import { baseUrl } from "../../../utils/baseUrl";
 import toast from "react-hot-toast";
 import { setActiveAccountId } from "../../../utils/auth";
-type RenewalHeaderProps = {
+type IntakeHeaderProps = {
   activeTab: string;
   onTabChange: (key: string) => void;
   onOpenLauncher: () => void;
 };
 
-const RenewalHeader: React.FC<RenewalHeaderProps> = ({
+const IntakeHeader: React.FC<IntakeHeaderProps> = ({
   activeTab,
   onTabChange,
   onOpenLauncher,
@@ -107,10 +108,10 @@ const RenewalHeader: React.FC<RenewalHeaderProps> = ({
     return () => window.removeEventListener("account-changed", handler);
   }, []);
 
+  const onCreateIntakeRequest = () => {
+    navigate("/intake/CreateNewRequestIntake");
+  };
 
-  const onCreateNew = () => {
-    
-  }
   return (
     <header className="flex items-center justify-between mb-2 relative">
       {/* LEFT */}
@@ -203,11 +204,10 @@ const RenewalHeader: React.FC<RenewalHeaderProps> = ({
 
       {/* RIGHT */}
       <div className="flex items-center gap-2">
-
-             <Tooltip title="Create new Intake">
-                  <button
-                    onClick={onCreateNew}
-                    className="
+        <Tooltip title="Create new Intake">
+          <button
+            onClick={onCreateIntakeRequest}
+            className="
               w-9 h-9
               flex items-center justify-center
               rounded-lg
@@ -220,10 +220,10 @@ const RenewalHeader: React.FC<RenewalHeaderProps> = ({
         
               transition-all duration-150
             "
-                  >
-                    <Plus size={22} strokeWidth={2} />
-                  </button>
-                </Tooltip>
+          >
+            <Plus size={22} strokeWidth={2} />
+          </button>
+        </Tooltip>
         {/* Help */}
         <Tooltip title="Help">
           <button
@@ -333,4 +333,4 @@ const RenewalHeader: React.FC<RenewalHeaderProps> = ({
   );
 };
 
-export default RenewalHeader;
+export default IntakeHeader;

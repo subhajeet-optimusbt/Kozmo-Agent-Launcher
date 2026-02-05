@@ -1,587 +1,456 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState, type JSX } from "react";
-import {
-  Form,
-  Input,
-  Select,
-  DatePicker,
-  InputNumber,
-  Upload,
-  Button,
-  Switch,
-  Radio,
-  message,
-} from "antd";
-import { UploadOutlined, LeftOutlined } from "@ant-design/icons";
-import type { UploadFile } from "antd/es/upload/interface";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-type FormValues = {
-  area?: string;
-  type?: string;
-  title?: string;
-  number?: string;
-  counterparty?: string;
-  company?: string;
-  owner?: string;
-  origin?: string;
-  termType?: "fixed" | "auto" | "evergreen";
-  startDate?: unknown;
-  endDate?: unknown;
-  noticePeriod?: number;
-  totalValue?: number;
-  currency?: string;
-  autoRenew?: boolean;
-  documents?: UploadFile[];
+import {
+  FileText,
+  Edit3,
+  Search,
+  Sparkles,
+  UploadCloud,
+  ArrowLeft,
+} from "lucide-react";
+import toast from "react-hot-toast";
+import { baseUrl } from "../../utils/baseUrl";
+
+/* ===================== INTENTS ===================== */
+
+const intents = [
+  {
+    key: "new",
+    title: "New Contract Request",
+    description: "Create or review a new agreement (NDA, MSA, SOW)",
+    icon: FileText,
+  },
+  {
+    key: "amendment",
+    title: "Amendment / Change",
+    description: "Modify an existing contract (pricing, scope, term, dates)",
+    icon: Edit3,
+  },
+  {
+    key: "analysis",
+    title: "Document Analysis",
+    description: "Summarize, clause extraction, risk & deviation signals",
+    icon: Search,
+  },
+  {
+    key: "general",
+    title: "General Request",
+    description: "Open-ended ask – Intake will classify and route",
+    icon: Sparkles,
+  },
+];
+
+const intentMeta: Record<string, any> = {
+  new: {
+    Intent: "NewContract",
+    IntentLabel: "New Contract Request",
+    Title: "New Contract Request",
+  },
+  amendment: {
+    Intent: "Amendment",
+    IntentLabel: "Amendment / Change",
+    Title: "Amendment / Change",
+  },
+  analysis: {
+    Intent: "DocumentAnalysis",
+    IntentLabel: "Document Analysis",
+    Title: "Document Analysis",
+  },
+  general: {
+    Intent: "General",
+    IntentLabel: "General Request",
+    Title: "General Request",
+  },
 };
 
-const { Dragger } = Upload;
-const { TextArea } = Input;
+/* ===================== PAGE ===================== */
 
-function Section({
-  title,
-  children,
-  className = "",
-}: {
-  title: React.ReactNode;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <section
-      className={`bg-gradient-to-br from-white to-gray-50/30 rounded-2xl p-8 border border-gray-100/50 shadow-sm hover:shadow-md transition-all duration-300 ${className}`}
-    >
-      <h3 className="text-base font-bold text-gray-900 mb-6 tracking-tight flex items-center gap-2">
-        <span className="w-1.5 h-5 bg-gradient-to-b from-emerald-500 to-teal-500 rounded-full"></span>
-        {title}
-      </h3>
-      <div className="space-y-5">{children}</div>
-    </section>
-  );
-}
-
-function TwoCol({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">{children}</div>
-  );
-}
-
-export default function CreateContractPage(): JSX.Element {
-  const [form] = Form.useForm<FormValues>();
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
-  const [saving, setSaving] = useState(false);
+const CreateNewIntakeRequest = () => {
   const navigate = useNavigate();
-  const handleBack = () => {
-    navigate("/contracts");
+
+  /* ---------- GLOBAL STATE ---------- */
+  const [intent, setIntent] = useState("new");
+  const [files, setFiles] = useState<File[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  /* ---------- COMMON FIELDS ---------- */
+  const [title, setTitle] = useState(intentMeta.new.Title);
+  const [description, setDescription] = useState("");
+  const [businessArea, setBusinessArea] = useState("General");
+
+  /* ---------- NEW CONTRACT ---------- */
+  const [counterparty, setCounterparty] = useState("");
+  const [contractType, setContractType] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [value, setValue] = useState("");
+
+  /* ---------- AMENDMENT ---------- */
+  const [existingContract, setExistingContract] = useState("");
+  const [changeType, setChangeType] = useState("");
+  const [effectiveDate, setEffectiveDate] = useState("");
+
+  /* ===================== HANDLERS ===================== */
+
+  const handleIntentChange = (key: string) => {
+    setIntent(key);
+    setTitle(intentMeta[key].Title);
   };
 
-  const onFinish = async (values: FormValues) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+    setFiles(Array.from(e.target.files));
+  };
+
+  const buildPayload = () => {
+    const user = JSON.parse(
+      localStorage.getItem("user") || sessionStorage.getItem("user") || "{}",
+    );
+
+    const basePayload: any = {
+      Title: title,
+      Description: description,
+      Intent: intentMeta[intent].Intent,
+      IntentLabel: intentMeta[intent].IntentLabel,
+      BusinessArea: businessArea,
+      Source: "Upload",
+      partitionKey: "11111",
+      UserName: user?.userName || "",
+      Subject: title,
+      Message: description,
+    };
+
+    if (intent === "new") {
+      basePayload.counterparty = counterparty;
+      basePayload.contractType = contractType || undefined;
+      basePayload.startDate = startDate;
+      basePayload.value = value || undefined;
+    }
+
+    if (intent === "amendment") {
+      basePayload.existingContract = existingContract;
+      basePayload.changeType = changeType;
+      basePayload.effectiveDate = effectiveDate;
+    }
+
+    return basePayload;
+  };
+
+  const handleSubmit = async () => {
     try {
-      setSaving(true);
-      console.log("Create contract payload:", {
-        ...values,
-        documents: fileList,
+      setLoading(true);
+
+      const user = JSON.parse(
+        localStorage.getItem("user") || sessionStorage.getItem("user") || "{}",
+      );
+      const accountId = user?.activeAccountId;
+
+      const formData = new FormData();
+      const payload = buildPayload();
+
+      Object.keys(payload).forEach((key) => {
+        if (payload[key] !== undefined && payload[key] !== "") {
+          formData.append(key, payload[key]);
+        }
       });
-      await new Promise((r) => setTimeout(r, 700));
-      message.success("Contract created successfully!");
-    } catch (err) {
-      message.error("Failed to create contract");
+
+      files.forEach((file) => formData.append("Files", file));
+
+      const res = await fetch(baseUrl() + `/api/Intake/${accountId}/Request`, {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Failed to create intake request");
+
+      toast.success("Intake request created successfully");
+      navigate(-1);
+    } catch (err: any) {
+      toast.error(err.message || "Something went wrong");
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
   };
 
+  /* ===================== UI ===================== */
+
   return (
-    <div className="relative overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-sm">
-      {/* Subtle top gradient accent */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500" />
-      <div className="mx-8 my-4">
-        {/* Fixed Header */}
-        {/* <div className="flex-none bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm"> */}
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button
-              type="text"
-              icon={<LeftOutlined className="text-gray-500" />}
-              onClick={handleBack}
-              className="hover:bg-gray-100 rounded-xl transition-all duration-200"
-            />
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                Create New Contract
-              </h1>
-              <p className="text-sm text-gray-500 mt-0.5">
-                Configure contract metadata and upload documents
-              </p>
-            </div>
-          </div>
-
-          <div className="hidden lg:flex items-center gap-3">
-            <Button
-              onClick={handleBack}
-              className="rounded-xl px-5 hover:bg-gray-50 transition-all duration-200 border-gray-200"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                form.validateFields().then((vals) => {
-                  console.log("Draft:", vals);
-                  message.success("Draft saved locally");
-                });
-              }}
-              className="rounded-xl px-5 bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200 hover:shadow-sm transition-all duration-200"
-            >
-              Save Draft
-            </Button>
-            <Button
-              type="primary"
-              onClick={() => form.submit()}
-              className="rounded-xl px-8 bg-gradient-to-r from-emerald-600 to-teal-600 border-0 shadow-lg shadow-emerald-200 hover:shadow-xl hover:shadow-emerald-300 transition-all duration-300"
-              loading={saving}
-            >
-              Submit
-            </Button>
-          </div>
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      {/* HEADER */}
+      <div className="bg-white border-b px-6 py-3 flex items-center justify-between">
+        <div>
+          <h1 className="text-lg font-extrabold">Create Intake Request</h1>
+          <p className="text-xs text-gray-500">
+            Capture the ask quickly — Intake will enrich and route after
+            creation.
+          </p>
         </div>
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-1 text-sm font-semibold"
+        >
+          <ArrowLeft className="h-4 w-4" /> Back
+        </button>
+      </div>
 
-        {/* </div> */}
+      {/* CONTENT */}
+      <div className="flex-1 px-6 py-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* LEFT */}
+        <div className="space-y-6">
+          <Card title="1. Choose Intent">
+            <div className="grid grid-cols-2 gap-3">
+              {intents.map((i) => {
+                const Icon = i.icon;
+                const active = intent === i.key;
+                return (
+                  <button
+                    key={i.key}
+                    onClick={() => handleIntentChange(i.key)}
+                    className={`p-4 rounded-xl border text-left transition ${
+                      active
+                        ? "border-emerald-500 bg-emerald-50"
+                        : "border-gray-200 hover:bg-gray-50"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4 text-emerald-600 mb-2" />
+                    <div className="text-xs font-bold">{i.title}</div>
+                    <div className="text-[11px] text-gray-500">
+                      {i.description}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </Card>
 
-        {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-hidden">
-          <div className=" px-4 py-4">
-            <div>
-              <Form<FormValues>
-                form={form}
-                layout="vertical"
-                onFinish={onFinish}
-                initialValues={{ autoRenew: false, termType: "fixed" }}
+          <Card title="3. Attach Artifacts">
+            <div className="space-y-4">
+              {/* Upload Box */}
+              <label className="block border border-dashed border-gray-300 rounded-xl p-6 text-center bg-gray-50 hover:border-emerald-400 hover:bg-emerald-50/40 transition cursor-pointer">
+                <UploadCloud className="mx-auto h-6 w-6 text-gray-400 mb-2" />
+
+                <p className="text-xs font-semibold text-gray-700">
+                  Drop files here or click to upload
+                </p>
+
+                <p className="text-[11px] text-gray-400 mt-1">
+                  PDF, DOCX, images, or email exports
+                </p>
+
+                <input
+                  type="file"
+                  multiple
+                  hidden
+                  onChange={handleFileChange}
+                />
+              </label>
+
+              {/* Link Input */}
+              <Input
+                label="Or paste a link (optional)"
+                placeholder="https://… (SharePoint / Drive / DocuSign)"
+              />
+
+              {/* Add Link Button */}
+              <button
+                type="button"
+                className="text-xs font-semibold text-emerald-600 hover:text-emerald-700"
               >
-                <div className="h-full overflow-y-auto px-4 py-4"></div>
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                  {/* Left Column - Main Contract Info */}
-                  <div className="xl:col-span-2 space-y-6">
-                    {/* CONTRACT BASICS */}
-                    <Section title="Contract Basics">
-                      <TwoCol>
-                        <Form.Item
-                          label={
-                            <span className="text-sm font-semibold text-gray-700">
-                              Area
-                            </span>
-                          }
-                          name="area"
-                          rules={[
-                            {
-                              required: true,
-                              message: "Please select an area",
-                            },
-                          ]}
-                        >
-                          <Select
-                            placeholder="Select area"
-                            className="rounded-lg"
-                            options={[
-                              { label: "Sales", value: "sales" },
-                              { label: "Procurement", value: "procurement" },
-                            ]}
-                          />
-                        </Form.Item>
-
-                        <Form.Item
-                          label={
-                            <span className="text-sm font-semibold text-gray-700">
-                              Type
-                            </span>
-                          }
-                          name="type"
-                          rules={[
-                            {
-                              required: true,
-                              message: "Please select a contract type",
-                            },
-                          ]}
-                        >
-                          <Select
-                            placeholder="NDA / MSA / SOW"
-                            className="rounded-lg"
-                            options={[
-                              { label: "NDA", value: "nda" },
-                              { label: "MSA", value: "msa" },
-                              { label: "SOW", value: "sow" },
-                            ]}
-                          />
-                        </Form.Item>
-
-                        <Form.Item
-                          label={
-                            <span className="text-sm font-semibold text-gray-700">
-                              Title
-                            </span>
-                          }
-                          name="title"
-                          rules={[
-                            {
-                              required: true,
-                              message: "Please enter a contract title",
-                            },
-                          ]}
-                        >
-                          <Input
-                            placeholder="Sales Agreement — Company Name"
-                            className="rounded-lg"
-                          />
-                        </Form.Item>
-
-                        <Form.Item
-                          label={
-                            <span className="text-sm font-semibold text-gray-700">
-                              Contract Number
-                            </span>
-                          }
-                          name="number"
-                          rules={[
-                            {
-                              required: true,
-                              message: "Please enter a contract number",
-                            },
-                          ]}
-                        >
-                          <Input
-                            placeholder="KZ-2025-001"
-                            className="rounded-lg"
-                          />
-                        </Form.Item>
-
-                        <Form.Item
-                          label={
-                            <span className="text-sm font-semibold text-gray-700">
-                              Counterparty
-                            </span>
-                          }
-                          name="counterparty"
-                          rules={[
-                            {
-                              required: true,
-                              message: "Please select a counterparty",
-                            },
-                          ]}
-                        >
-                          <Select
-                            placeholder="Select counterparty"
-                            className="rounded-lg"
-                            options={[
-                              { label: "Acme Ltd", value: "acme" },
-                              { label: "Globex Corp", value: "globex" },
-                            ]}
-                          />
-                        </Form.Item>
-
-                        <Form.Item
-                          label={
-                            <span className="text-sm font-semibold text-gray-700">
-                              Company
-                            </span>
-                          }
-                          name="company"
-                          rules={[
-                            {
-                              required: true,
-                              message: "Please select a company",
-                            },
-                          ]}
-                        >
-                          <Select
-                            placeholder="Select company"
-                            className="rounded-lg"
-                            options={[
-                              { label: "MyCo", value: "myco" },
-                              { label: "OtherCo", value: "otherco" },
-                            ]}
-                          />
-                        </Form.Item>
-
-                        <Form.Item
-                          label={
-                            <span className="text-sm font-semibold text-gray-700">
-                              Owner
-                            </span>
-                          }
-                          name="owner"
-                          rules={[
-                            {
-                              required: true,
-                              message: "Please select an owner",
-                            },
-                          ]}
-                        >
-                          <Select
-                            placeholder="Responsible person"
-                            className="rounded-lg"
-                            options={[
-                              { label: "Alice", value: "alice" },
-                              { label: "Bob", value: "bob" },
-                            ]}
-                          />
-                        </Form.Item>
-
-                        <Form.Item
-                          label={
-                            <span className="text-sm font-semibold text-gray-700">
-                              Originating Party
-                            </span>
-                          }
-                          name="origin"
-                        >
-                          <Select
-                            placeholder="Who sent it?"
-                            className="rounded-lg"
-                            options={[{ label: "External", value: "ext" }]}
-                          />
-                        </Form.Item>
-                      </TwoCol>
-
-                      <Form.Item
-                        label={
-                          <span className="text-sm font-semibold text-gray-700">
-                            Term Type
-                          </span>
-                        }
-                        name="termType"
-                      >
-                        <Radio.Group className="w-full">
-                          <div className="grid grid-cols-3 gap-3">
-                            <Radio.Button
-                              value="fixed"
-                              className="text-center rounded-lg"
-                            >
-                              Fixed
-                            </Radio.Button>
-                            <Radio.Button
-                              value="auto"
-                              className="text-center rounded-lg"
-                            >
-                              Auto-renew
-                            </Radio.Button>
-                            <Radio.Button
-                              value="evergreen"
-                              className="text-center rounded-lg"
-                            >
-                              Evergreen
-                            </Radio.Button>
-                          </div>
-                        </Radio.Group>
-                      </Form.Item>
-                    </Section>
-
-                    {/* DATE RANGE */}
-                    <Section title="Date Range">
-                      <TwoCol>
-                        <Form.Item
-                          label={
-                            <span className="text-sm font-semibold text-gray-700">
-                              Start Date
-                            </span>
-                          }
-                          name="startDate"
-                          rules={[
-                            {
-                              required: true,
-                              message: "Please pick a start date",
-                            },
-                          ]}
-                        >
-                          <DatePicker className="w-full rounded-lg" />
-                        </Form.Item>
-
-                        <Form.Item
-                          label={
-                            <span className="text-sm font-semibold text-gray-700">
-                              End Date
-                            </span>
-                          }
-                          name="endDate"
-                          rules={[
-                            {
-                              required: true,
-                              message: "Please pick an end date",
-                            },
-                          ]}
-                        >
-                          <DatePicker className="w-full rounded-lg" />
-                        </Form.Item>
-
-                        <Form.Item
-                          label={
-                            <span className="text-sm font-semibold text-gray-700">
-                              Notice Period (days)
-                            </span>
-                          }
-                          name="noticePeriod"
-                        >
-                          <InputNumber
-                            className="w-full rounded-lg"
-                            min={0}
-                            placeholder="e.g. 30"
-                          />
-                        </Form.Item>
-                      </TwoCol>
-                    </Section>
-
-                    {/* VALUE */}
-                    <Section title="Value & Currency">
-                      <TwoCol>
-                        <Form.Item
-                          label={
-                            <span className="text-sm font-semibold text-gray-700">
-                              Total Contract Value
-                            </span>
-                          }
-                          name="totalValue"
-                        >
-                          <InputNumber
-                            className="w-full rounded-lg"
-                            min={0}
-                            formatter={(v) => (v ? `${v}` : "")}
-                          />
-                        </Form.Item>
-
-                        <Form.Item
-                          label={
-                            <span className="text-sm font-semibold text-gray-700">
-                              Currency
-                            </span>
-                          }
-                          name="currency"
-                        >
-                          <Select
-                            placeholder="USD / INR"
-                            className="rounded-lg"
-                            options={[
-                              { label: "USD", value: "USD" },
-                              { label: "INR", value: "INR" },
-                            ]}
-                          />
-                        </Form.Item>
-                      </TwoCol>
-
-                      <Form.Item
-                        label={
-                          <span className="text-sm font-semibold text-gray-700">
-                            Auto-Renew
-                          </span>
-                        }
-                        name="autoRenew"
-                        valuePropName="checked"
-                      >
-                        <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-gray-50 to-transparent rounded-xl border border-gray-100">
-                          <Switch />
-                          <span className="text-sm text-gray-600 font-medium">
-                            Enable automatic renewal
-                          </span>
-                        </div>
-                      </Form.Item>
-                    </Section>
-                  </div>
-
-                  {/* Right Column - Documents & Notes */}
-                  <div className="xl:col-span-1 space-y-6">
-                    {/* DOCUMENTS */}
-                    <Section title="Documents" className="sticky top-6">
-                      <Form.Item
-                        name="documents"
-                        valuePropName="fileList"
-                        getValueFromEvent={() => fileList}
-                      >
-                        <Dragger
-                          multiple
-                          fileList={fileList}
-                          beforeUpload={(file) => {
-                            setFileList((prev) => [...prev, file]);
-                            return false;
-                          }}
-                          onRemove={(file) => {
-                            setFileList((prev) =>
-                              prev.filter((f) => f.uid !== file.uid)
-                            );
-                          }}
-                          accept=".pdf,.doc,.docx,.txt"
-                          className="rounded-xl border-dashed border-2 border-gray-200 hover:border-emerald-400 transition-all duration-300 bg-gradient-to-br from-white to-gray-50/50"
-                        >
-                          <p className="ant-upload-drag-icon">
-                            <UploadOutlined className="text-emerald-500" />
-                          </p>
-                          <p className="ant-upload-text font-bold text-gray-800">
-                            Drop files here
-                          </p>
-                          <p className="ant-upload-hint text-xs text-gray-500 mt-2">
-                            PDF, DOCX, TXT supported
-                          </p>
-                        </Dragger>
-                      </Form.Item>
-
-                      <Form.Item
-                        label={
-                          <span className="text-sm font-semibold text-gray-700">
-                            Notes / Summary
-                          </span>
-                        }
-                        name="notes"
-                      >
-                        <TextArea
-                          rows={4}
-                          placeholder="Add any summary or metadata for this contract"
-                          className="rounded-xl"
-                        />
-                      </Form.Item>
-                    </Section>
-                  </div>
-                </div>
-              </Form>
+                + Add another link
+              </button>
             </div>
-          </div>
+          </Card>
         </div>
 
-        {/* Fixed Footer */}
-        <div className="flex-none bg-white/80 backdrop-blur-xl border-t border-gray-200/50 shadow-lg">
-          <div className="px-8 py-4">
-            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div className="text-sm text-gray-500 hidden lg:block">
-                All fields marked with <span className="text-red-500">*</span>{" "}
-                are required
-              </div>
+        {/* RIGHT */}
+        <div className="space-y-6">
+          <Card title="2. Request Details">
+            <Input
+              label="Request title *"
+              value={title}
+              onChange={(e: any) => setTitle(e.target.value)}
+            />
+            <Textarea
+              label="What do you want Kozmo to do? *"
+              value={description}
+              onChange={(e: any) => setDescription(e.target.value)}
+            />
+            <Select
+              label="Business area *"
+              value={businessArea}
+              onChange={(e: any) => setBusinessArea(e.target.value)}
+              options={["General", "Sales", "Legal"]}
+            />
+          </Card>
 
-              <div className="flex items-center gap-3 w-full sm:w-auto">
-                <Button
-                  onClick={handleBack}
-                  className="flex-1 sm:flex-none rounded-xl px-5 hover:bg-gray-50 transition-all duration-200"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={() => {
-                    form.validateFields().then((vals) => {
-                      console.log("Draft:", vals);
-                      message.success("Draft saved locally");
-                    });
-                  }}
-                  className="flex-1 sm:flex-none rounded-xl px-5 bg-gradient-to-r from-gray-50 to-gray-100 hover:shadow-sm transition-all duration-200"
-                >
-                  Save Draft
-                </Button>
-                <Button
-                  type="primary"
-                  onClick={() => form.submit()}
-                  className="flex-1 sm:flex-none rounded-xl px-8 bg-gradient-to-r from-emerald-600 to-teal-600 border-0 shadow-lg shadow-emerald-200 hover:shadow-xl hover:shadow-emerald-300 transition-all duration-300 font-semibold"
-                  loading={saving}
-                >
-                  Submit
-                </Button>
+          <Card title="4. Intent Context">
+            {intent === "new" && (
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label="Counterparty"
+                  value={counterparty}
+                  onChange={(e: any) => setCounterparty(e.target.value)}
+                />
+                <Select
+                  label="Contract type"
+                  value={contractType}
+                  onChange={(e: any) => setContractType(e.target.value)}
+                  options={[
+                    "Sales Agreement",
+                    "Dealer Agreement",
+                    "Ownership Transfer Agreement",
+                  ]}
+                />
+                <Input
+                  type="date"
+                  label="Expected start date"
+                  value={startDate}
+                  onChange={(e: any) => setStartDate(e.target.value)}
+                />
+                <Input
+                  label="Estimated value"
+                  value={value}
+                  onChange={(e: any) => setValue(e.target.value)}
+                />
               </div>
-            </div>
-          </div>
+            )}
+
+            {intent === "amendment" && (
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label="Existing contract"
+                  value={existingContract}
+                  onChange={(e: any) => setExistingContract(e.target.value)}
+                />
+                <Select
+                  label="Change type"
+                  value={changeType}
+                  onChange={(e: any) => setChangeType(e.target.value)}
+                  options={[
+                    "Pricing / Fees",
+                    "Dates / Term",
+                    "Scope",
+                    "Legal Terms",
+                    "Other",
+                  ]}
+                />
+                <Input
+                  type="date"
+                  label="Effective date"
+                  value={effectiveDate}
+                  onChange={(e: any) => setEffectiveDate(e.target.value)}
+                />
+              </div>
+            )}
+
+            {intent === "analysis" && (
+              <div className="grid grid-cols-2 gap-4">
+                <Select
+                  label="Analysis type"
+                  options={[
+                    "Executive Summary",
+                    "Risk & Red Flags",
+                    "Clause Extraction",
+                    "Deviation vs Template",
+                    "Pricing / Payment Terms",
+                  ]}
+                />
+                <Select
+                  label="Output format"
+                  options={["Brief", "Table", "Both"]}
+                />
+              </div>
+            )}
+
+            {intent === "general" && (
+              <Select
+                label="Hint (optional)"
+                options={[
+                  "Let Kozmo decide",
+                  "Feels like a contract review",
+                  "Feels like a renewal",
+                  "Feels like an analysis",
+                  "Feels like an issue",
+                ]}
+              />
+            )}
+          </Card>
         </div>
+      </div>
+
+      {/* FOOTER */}
+      <div className="bg-white border-t px-6 py-3 flex justify-end gap-3">
+        <button
+          onClick={() => navigate("/intake")}
+          className="
+    inline-flex items-center gap-2
+    text-sm font-semibold
+    text-gray-600
+    px-4 py-2
+    rounded-lg
+    transition-all duration-200
+    hover:text-emerald-600
+    hover:bg-emerald-50
+    hover:shadow-sm
+    active:scale-95
+  "
+        >
+          ← Back
+        </button>
+
+        <button
+          disabled={loading}
+          onClick={handleSubmit}
+          className="px-6 py-2 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-emerald-500 to-emerald-600"
+        >
+          {loading ? "Creating..." : "Create Request"}
+        </button>
       </div>
     </div>
   );
-}
+};
+
+export default CreateNewIntakeRequest;
+
+/* ===================== REUSABLE ===================== */
+
+const Card = ({ title, children }: any) => (
+  <div className="bg-white rounded-2xl border p-5 shadow-sm space-y-4">
+    <h2 className="text-xs font-black uppercase">{title}</h2>
+    {children}
+  </div>
+);
+
+const Input = ({ label, ...props }: any) => (
+  <div>
+    <label className="text-xs font-semibold text-gray-600">{label}</label>
+    <input {...props} className="mt-1 w-full h-9 px-3 rounded-lg border" />
+  </div>
+);
+
+const Textarea = ({ label, ...props }: any) => (
+  <div>
+    <label className="text-xs font-semibold text-gray-600">{label}</label>
+    <textarea
+      {...props}
+      rows={3}
+      className="mt-1 w-full px-3 py-2 rounded-lg border"
+    />
+  </div>
+);
+
+const Select = ({ label, options, ...props }: any) => (
+  <div>
+    <label className="text-xs font-semibold text-gray-600">{label}</label>
+    <select {...props} className="mt-1 w-full h-9 px-3 rounded-lg border">
+      <option value="">Select...</option>
+      {options.map((o: string) => (
+        <option key={o} value={o}>
+          {o}
+        </option>
+      ))}
+    </select>
+  </div>
+);

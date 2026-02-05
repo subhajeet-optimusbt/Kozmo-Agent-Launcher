@@ -176,9 +176,9 @@ const LauncherModal: React.FC<LauncherModalProps> = ({
         className="flex flex-col h-[680px] bg-gradient-to-br from-gray-50 via-white to-gray-50 rounded-2xl shadow-2xl overflow-hidden"
       >
         {/* Header */}
-        <div className="relative p-7 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm">
+        <div className="relative p-3 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm">
           <div className="relative flex flex-col gap-5">
-            <div className="flex items-center gap-4 px-5 py-4 bg-white rounded-2xl shadow-sm border border-gray-200/60 transition-all duration-300 group">
+            <div className="flex items-center gap-4 px-5 py-2 bg-white rounded-2xl shadow-sm border border-gray-200/60 transition-all duration-300 group">
               <SearchOutlined className="text-2xl text-emerald-500 group-hover:scale-110 transition-transform duration-200" />
               <input
                 data-launcher-search

@@ -21,7 +21,6 @@ import SignupPage from "./pages/auth/signuppage";
 import Login from "./pages/auth/loginpage";
 import RelationshipsLayout from "./components/layout/Relationships/RelationshipsLayout";
 import Relationships from "./pages/Relationships/RelationshipsPage";
-import  RelationshipsForm from "./pages/Relationships/RelationshipsForm";
 
 export default function App() {
   return (
@@ -73,10 +72,6 @@ export default function App() {
           </Route>
           <Route element={<RelationshipsLayout/>}>
             <Route path="/relationships" element={<Relationships/>} />
-            <Route
-              path="/relationships/CreateNewRelationships"
-              element={< RelationshipsForm />}
-            />
 
           </Route>
         </Route>

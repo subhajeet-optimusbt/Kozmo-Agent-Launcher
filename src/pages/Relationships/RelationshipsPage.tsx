@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import { useOutletContext, useNavigate } from "react-router-dom";
-import { Button } from "antd";
-import { Plus } from "lucide-react";
+import { useOutletContext } from "react-router-dom";
 
 import RelationshipsDashboard from "./tab/RelationshipsDashboard";
 import RelationshipsTable from "./tab/RelationshipsTable";
@@ -21,7 +19,6 @@ type RelationshipsContextType = {
 
 export default function RelationshipsPage() {
   const { activeTab } = useOutletContext<RelationshipsContextType>();
-  const navigate = useNavigate();
 
   const [relationships, setRelationships] = useState<Relationships[]>([]);
   const [loading, setLoading] = useState(false);
@@ -79,10 +76,6 @@ export default function RelationshipsPage() {
     return () => window.removeEventListener(ACCOUNT_CHANGED_EVENT, handler);
   }, []);
 
-  const onCreateRelationships = () => {
-    navigate("/relationships/CreateNewRelationships");
-  };
-
   return (
     <div className="relative overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-sm">
       {loading && <FullscreenLoader />}
@@ -99,16 +92,6 @@ export default function RelationshipsPage() {
             What is coming in, from where, and what needs attention.
           </p>
         </div>
-
-        {/* Right: CTA */}
-        <Button
-          onClick={onCreateRelationships}
-          className="!border-0 !text-white rounded-full px-4 py-2 flex items-center gap-2
-               !bg-gradient-to-r !from-emerald-500 !to-teal-500 shadow-lg"
-        >
-          <Plus size={14} />
-          New Relationships
-        </Button>
       </div>
 
       {/* Tabs */}

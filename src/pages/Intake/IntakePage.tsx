@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
-import { useOutletContext, useNavigate } from "react-router-dom";
-import { Button } from "antd";
-import { Plus } from "lucide-react";
-
+import { useOutletContext } from "react-router-dom";
 import IntakeDashboard from "./tabs/IntakeDashboard";
 import IntakeInboxTable from "./tabs/IntakeInboxTable";
 import IntakeJobsPanel from "./tabs/IntakeJobsPanel";
@@ -26,7 +23,6 @@ export type RangeType = "today" | "last7days" | "last30days";
 
 export default function IntakePage() {
   const { activeTab } = useOutletContext<IntakeContextType>();
-  const navigate = useNavigate();
 
   const [intake, setIntake] = useState<Intake[]>([]);
   const [dashboardData, setDashboardData] =
@@ -80,16 +76,14 @@ export default function IntakePage() {
     return () => window.removeEventListener(ACCOUNT_CHANGED_EVENT, handler);
   }, []);
 
-  const onCreateIntakeRequest = () => {
-    navigate("/intake/CreateNewRequest");
-  };
+ 
 
   return (
     <div className="relative overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-sm">
       {loading && <FullscreenLoader />}
 
       {/* Header */}
-      <div className="mx-8 my-4 flex items-center justify-between">
+      <div className="mx-8 my-4 flex items-center">
         {/* Left: Title */}
         <div>
           <h3 className="text-2xl font-black tracking-tight text-gray-900">
@@ -102,20 +96,10 @@ export default function IntakePage() {
 
         {/* Center: Range Tabs (dashboard & jobs only) */}
         {activeTab !== "inbox" && (
-          <div className="flex-1 flex justify-center">
+          <div className="ml-auto">
             <RangeTabs value={range} onChange={setRange} />
           </div>
         )}
-
-        {/* Right: CTA */}
-        <Button
-          onClick={onCreateIntakeRequest}
-          className="!border-0 !text-white rounded-full px-4 py-2 flex items-center gap-2
-               !bg-gradient-to-r !from-emerald-500 !to-teal-500 shadow-lg"
-        >
-          <Plus size={14} />
-          Create New Request
-        </Button>
       </div>
 
       {/* Tabs */}
