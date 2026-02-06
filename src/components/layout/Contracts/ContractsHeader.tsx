@@ -107,7 +107,9 @@ const ContractHeader: React.FC<ContractHeaderProps> = ({
     return () => window.removeEventListener("account-changed", handler);
   }, []);
 
-  const onCreateNew = () => {};
+    const onCreateContract = () => {
+    navigate("/contracts/CreateNewContract");
+  };
   return (
     <header className="flex items-center justify-between mb-2 relative">
       {/* LEFT */}
@@ -201,7 +203,7 @@ const ContractHeader: React.FC<ContractHeaderProps> = ({
       <div className="flex items-center gap-2">
         <Tooltip title="Create new Contract">
           <button
-            onClick={onCreateNew}
+            onClick={onCreateContract}
             className="
       w-9 h-9
       flex items-center justify-center

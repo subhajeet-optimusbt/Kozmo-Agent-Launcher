@@ -8,8 +8,8 @@ import {
   Search,
   Sparkles,
   UploadCloud,
-  ArrowLeft,
 } from "lucide-react";
+import { ArrowLeftOutlined } from "@ant-design/icons";
 import toast from "react-hot-toast";
 import { baseUrl } from "../../utils/baseUrl";
 
@@ -177,26 +177,44 @@ const CreateNewIntakeRequest = () => {
   /* ===================== UI ===================== */
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* HEADER */}
-      <div className="bg-white border-b px-6 py-3 flex items-center justify-between">
+    <div className="relative overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-sm">
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500" />
+
+      {/* Header */}
+      <div className="mx-8 my-4 flex items-center">
+        {/* Left: Title */}
         <div>
-          <h1 className="text-lg font-extrabold">Create Intake Request</h1>
-          <p className="text-xs text-gray-500">
-            Capture the ask quickly — Intake will enrich and route after
-            creation.
-          </p>
-        </div>
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-1 text-sm font-semibold"
-        >
-          <ArrowLeft className="h-4 w-4" /> Back
-        </button>
+    <h3 className="text-2xl font-black tracking-tight text-gray-900">
+      Create Intake Request
+    </h3>
+  </div>
+
+  {/* Right: Back button */}
+  <div className="ml-auto">
+    <button
+      type="button"
+      onClick={() => navigate("/intake")}
+      className="
+        flex items-center gap-2
+        px-4 py-2 rounded-xl
+        text-sm font-semibold
+        text-emerald-700
+        bg-emerald-50
+        border border-emerald-200
+        transition-all duration-200
+        hover:bg-emerald-100 hover:border-emerald-300
+        hover:-translate-y-[1px]
+        active:translate-y-0
+      "
+    >
+      <ArrowLeftOutlined />
+      Back
+    </button>
+  </div>
       </div>
 
       {/* CONTENT */}
-      <div className="flex-1 px-6 py-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="flex-1 px-6 py-2 grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* LEFT */}
         <div className="space-y-6">
           <Card title="1. Choose Intent">

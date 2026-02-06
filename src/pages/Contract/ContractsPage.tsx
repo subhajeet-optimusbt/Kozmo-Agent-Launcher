@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
-import { useOutletContext, useNavigate } from "react-router-dom";
-import { Button } from "antd";
-import { Plus } from "lucide-react";
+import { useOutletContext } from "react-router-dom";
 import ContractsDashboard from "./tabs/ContractsDashboard";
 import ContractsTable from "./tabs/ContractsTable";
 import JobsPanel from "./tabs/JobsPanel";
@@ -17,14 +15,11 @@ export type RangeType = "today" | "last7days" | "last30days";
 
 export default function ContractsPage() {
   const { activeTab } = useOutletContext<ContractsContextType>();
-  const navigate = useNavigate();
 
   const [dashboardData, setDashboardData] =
     useState<ContractDashboardResponse | null>(null);
   const [loading, setLoading] = useState(false);
-  const onCreateContract = () => {
-    navigate("/contracts/CreateNewContract");
-  };
+
 
     const [range, setRange] = useState<RangeType>("today");
   const [accountId, setAccountId] = useState(getActiveAccountId());
@@ -62,9 +57,9 @@ export default function ContractsPage() {
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500" />
 
         {/* Header */}
-        <div className="mx-8 my-4 flex items-center justify-between">
+        <div className="mx-8 my-4 flex items-center">
           {/* Left side: title + subtitle */}
-          <div className="flex flex-col gap-1">
+          <div>
             <h1 className="text-2xl font-black tracking-tight text-gray-900">
               Contract Agent
             </h1>
@@ -74,27 +69,11 @@ export default function ContractsPage() {
           </div>
 
         {activeTab !== "contracts" && (
-          <div className="flex-1 flex justify-center">
+          <div className="ml-auto">
             <RangeTabs value={range} onChange={setRange} />
           </div>
         )}
           {/* Right side: action button */}
-          <Button
-            onClick={onCreateContract}
-            type="default"
-            size="middle"
-            className="
-            !border-0 !text-white
-            flex items-center gap-2
-            rounded-full px-4 py-2
-            !bg-gradient-to-r !from-emerald-500 !to-teal-500
-            shadow-lg hover:shadow-xl
-            transition-all
-          "
-          >
-            <Plus size={14} />
-            <span className="font-semibold">Create New Contract</span>
-          </Button>
         </div>
 
         {/* Tabs content */}

@@ -1,606 +1,618 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState, type JSX } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  Form,
-  Input,
-  Select,
-  DatePicker,
-  InputNumber,
-  Upload,
-  Button,
-  Switch,
-  Radio,
-  message,
-} from "antd";
-import { UploadOutlined, LeftOutlined } from "@ant-design/icons";
-import type { UploadFile } from "antd/es/upload/interface";
+  useEffect,
+  useState,
+} from "react";
+import { Form, Button, message } from "antd";
+import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-type FormValues = {
-  area?: string;
-  type?: string;
-  title?: string;
-  number?: string;
-  counterparty?: string;
-  company?: string;
-  owner?: string;
-  origin?: string;
-  termType?: "fixed" | "auto" | "evergreen";
-  startDate?: unknown;
-  endDate?: unknown;
-  noticePeriod?: number;
-  totalValue?: number;
-  currency?: string;
-  autoRenew?: boolean;
-  documents?: UploadFile[];
-};
-
-const { Dragger } = Upload;
-const { TextArea } = Input;
-
-function Section({
-  title,
-  children,
-  className = "",
-}: {
-  title: React.ReactNode;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <section
-      className={`bg-gradient-to-br from-white to-gray-50/30 rounded-xl p-4 border border-gray-100/50 shadow-sm hover:shadow-md transition-all duration-300 ${className}`}
-    >
-      <h3 className="text-sm font-bold text-gray-900 mb-3 tracking-tight flex items-center gap-2">
-        <span className="w-1 h-4 bg-gradient-to-b from-emerald-500 to-teal-500 rounded-full"></span>
-        {title}
-      </h3>
-      <div className="space-y-3">{children}</div>
-    </section>
-  );
-}
-
-function TwoCol({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">{children}</div>
-  );
-}
-
-export default function CreateContractPage(): JSX.Element {
-  const [form] = Form.useForm<FormValues>();
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
-  const [saving, setSaving] = useState(false);
+// import type { UploadFile } from "antd/es/upload/interface";
+import FullscreenLoader from "../../components/ui/FullScreenLoader";
+import {
+  fetchAreas,
+  fetchTypes,
+  fetchCompanies,
+  fetchCounterparties,
+  fetchOwners,
+  createContract,
+} from "../../services/formcontract";
+export default function CreateContractPage() {
+  const [form] = Form.useForm();
   const navigate = useNavigate();
-  const handleBack = () => {
-    navigate("/contracts");
-  };
-
-  const onFinish = async (values: FormValues) => {
+  const [loading, setLoading] = useState(true);
+  const [areas, setAreas] = useState<any[]>([]);
+  const [types, setTypes] = useState<any[]>([]);
+  const [companies, setCompanies] = useState<any[]>([]);
+  const [counterparties, setCounterparties] = useState<any[]>([]);
+  const [owners, setOwners] = useState<any[]>([]);
+  const [fileList, setFileList] = useState<File[]>([]);
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [areasRes, typesRes, companiesRes, counterpartiesRes, ownersRes] =
+          await Promise.all([
+            fetchAreas(),
+            fetchTypes(),
+            fetchCompanies(),
+            fetchCounterparties(),
+            fetchOwners(),
+          ]);
+        setAreas(areasRes);
+        setTypes(typesRes);
+        setCompanies(companiesRes);
+        setCounterparties(counterpartiesRes);
+        setOwners(ownersRes);
+      } catch {
+        message.error("Failed to load dropdowns");
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+  const onFinish = async (values: any) => {
     try {
-      setSaving(true);
-      console.log("Create contract payload:", {
-        ...values,
-        documents: fileList,
-      });
-      await new Promise((r) => setTimeout(r, 700));
-      message.success("Contract created successfully!");
-    } catch (err) {
+      setLoading(true);
+      const files = fileList;
+      await createContract(values, files);
+      message.success("Contract created successfully");
+      navigate("/contracts");
+    } catch {
       message.error("Failed to create contract");
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
   };
-
+  if (loading) {
+    return <FullscreenLoader />;
+  }
   return (
     <div className="relative overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-sm">
-      {/* Subtle top gradient accent */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500" />
-      <div className="mx-6 my-3">
-        {/* Fixed Header */}
-        {/* <div className="flex-none bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm"> */}
-
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <Button
-              type="text"
-              icon={<LeftOutlined className="text-gray-500" />}
-              onClick={handleBack}
-              className="hover:bg-gray-100 rounded-xl transition-all duration-200"
-            />
-            <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                Create New Contract
-              </h1>
-              <p className="text-xs text-gray-500 mt-0.5">
-                Upload a new contract,or create a draft 
-              </p>
-            </div>
-          </div>
-
-          <div className="hidden lg:flex items-center gap-2">
-            <Button
-              onClick={handleBack}
-              className="rounded-xl px-4 hover:bg-gray-50 transition-all duration-200 border-gray-200"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                form.validateFields().then((vals) => {
-                  console.log("Draft:", vals);
-                  message.success("Draft saved locally");
-                });
-              }}
-              className="rounded-xl px-4 bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200 hover:shadow-sm transition-all duration-200"
-            >
-              Save Draft
-            </Button>
-            <Button
-              type="primary"
-              onClick={() => form.submit()}
-              className="rounded-xl px-6 bg-gradient-to-r from-emerald-600 to-teal-600 border-0 shadow-lg shadow-emerald-200 hover:shadow-xl hover:shadow-emerald-300 transition-all duration-300"
-              loading={saving}
-            >
-              Submit
-            </Button>
-          </div>
-        </div>
-
-        {/* </div> */}
-
-        {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-hidden">
-          <div className="px-2 py-2">
-            <div>
-              <Form<FormValues>
-                form={form}
-                layout="vertical"
-                onFinish={onFinish}
-                initialValues={{ autoRenew: false, termType: "fixed" }}
-                className="compact-form"
-              >
-                <style>{`
-                  .compact-form .ant-form-item {
-                    margin-bottom: 12px;
-                  }
-                  .compact-form .ant-form-item-label {
-                    padding-bottom: 2px;
-                  }
-                  .compact-form .ant-input,
-                  .compact-form .ant-input-number,
-                  .compact-form .ant-picker {
-                    height: 32px;
-                  }
-                  .compact-form .ant-select-selector {
-                    min-height: 32px !important;
-                  }
-                `}</style>
-                <div className="h-full overflow-y-auto px-2 py-2"></div>
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-                  {/* Left Column - Main Contract Info */}
-                  <div className="xl:col-span-2 space-y-4">
-                    {/* CONTRACT BASICS */}
-                    <Section title="Contract Basics">
-                      <TwoCol>
-                        <Form.Item
-                          label={
-                            <span className="text-xs font-semibold text-gray-700">
-                              Area
-                            </span>
-                          }
-                          name="area"
-                          rules={[
-                            {
-                              required: true,
-                              message: "Please select an area",
-                            },
-                          ]}
-                        >
-                          <Select
-                            placeholder="Select area"
-                            className="rounded-lg"
-                            options={[
-                              { label: "Sales", value: "sales" },
-                              { label: "General", value: "general" },
-                              { label: "Legal", value: "legal" },
-                            ]}
-                          />
-                        </Form.Item>
-
-                        <Form.Item
-                          label={
-                            <span className="text-xs font-semibold text-gray-700">
-                              Type
-                            </span>
-                          }
-                          name="type"
-                          rules={[
-                            {
-                              required: true,
-                              message: "Please select a contract type",
-                            },
-                          ]}
-                        >
-                          <Select
-                            placeholder="NDA / MSA / SOW"
-                            className="rounded-lg"
-                            options={[
-                              { label: "Sales Agreement", value: "nda" },
-                              { label: "MSA", value: "msa" },
-                              { label: "SOW", value: "sow" },
-                            ]}
-                          />
-                        </Form.Item>
-
-                        <Form.Item
-                          label={
-                            <span className="text-xs font-semibold text-gray-700">
-                              Title
-                            </span>
-                          }
-                          name="title"
-                          rules={[
-                            {
-                              required: true,
-                              message: "Please enter a contract title",
-                            },
-                          ]}
-                        >
-                          <Input
-                            placeholder="Sales Agreement — Company Name"
-                            className="rounded-lg"
-                          />
-                        </Form.Item>
-
-                        <Form.Item
-                          label={
-                            <span className="text-xs font-semibold text-gray-700">
-                              Contract Number
-                            </span>
-                          }
-                          name="number"
-                          rules={[
-                            {
-                              required: true,
-                              message: "Please enter a contract number",
-                            },
-                          ]}
-                        >
-                          <Input
-                            placeholder="KZ-2025-001"
-                            className="rounded-lg"
-                          />
-                        </Form.Item>
-
-                        <Form.Item
-                          label={
-                            <span className="text-xs font-semibold text-gray-700">
-                              Counterparty
-                            </span>
-                          }
-                          name="counterparty"
-                          rules={[
-                            {
-                              required: true,
-                              message: "Please select a counterparty",
-                            },
-                          ]}
-                        >
-                          <Select
-                            placeholder="Select counterparty"
-                            className="rounded-lg"
-                            options={[
-                              { label: "Acme Ltd", value: "acme" },
-                              { label: "Globex Corp", value: "globex" },
-                            ]}
-                          />
-                        </Form.Item>
-
-                        <Form.Item
-                          label={
-                            <span className="text-xs font-semibold text-gray-700">
-                              Company
-                            </span>
-                          }
-                          name="company"
-                          rules={[
-                            {
-                              required: true,
-                              message: "Please select a company",
-                            },
-                          ]}
-                        >
-                          <Select
-                            placeholder="Select company"
-                            className="rounded-lg"
-                            options={[
-                              { label: "MyCo", value: "myco" },
-                              { label: "OtherCo", value: "otherco" },
-                            ]}
-                          />
-                        </Form.Item>
-
-                        <Form.Item
-                          label={
-                            <span className="text-xs font-semibold text-gray-700">
-                              Owner
-                            </span>
-                          }
-                          name="owner"
-                          rules={[
-                            {
-                              required: true,
-                              message: "Please select an owner",
-                            },
-                          ]}
-                        >
-                          <Select
-                            placeholder="Responsible person"
-                            className="rounded-lg"
-                            options={[
-                              { label: "Alice", value: "alice" },
-                              { label: "Bob", value: "bob" },
-                            ]}
-                          />
-                        </Form.Item>
-
-                        <Form.Item
-                          label={
-                            <span className="text-xs font-semibold text-gray-700">
-                              Originating Party
-                            </span>
-                          }
-                          name="origin"
-                        >
-                          <Select
-                            placeholder="Who sent it?"
-                            className="rounded-lg"
-                            options={[{ label: "External", value: "ext" }]}
-                          />
-                        </Form.Item>
-                      </TwoCol>
-
-                      <Form.Item
-                        label={
-                          <span className="text-xs font-semibold text-gray-700">
-                            Term Type
-                          </span>
-                        }
+      {" "}
+      {/* Top Gradient */}{" "}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500" />{" "}
+      {/* ================= HEADER ================= */}{" "}
+      <div className="mx-8 my-4 flex items-center">
+        {" "}
+        <div>
+          {" "}
+          <h3 className="text-2xl font-black tracking-tight text-gray-900">
+            {" "}
+            Create New Contract{" "}
+          </h3>{" "}
+        </div>{" "}
+        <div className="ml-auto">
+          {" "}
+          <button
+            type="button"
+            onClick={() => navigate("/contracts")}
+            className=" flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 transition-all duration-200 hover:bg-emerald-100 hover:border-emerald-300 hover:-translate-y-[1px] active:translate-y-0 "
+          >
+            {" "}
+            <ArrowLeftOutlined /> Back{" "}
+          </button>{" "}
+        </div>{" "}
+      </div>{" "}
+      {/* ================= FORM ================= */}{" "}
+      <Form
+        layout="vertical"
+        form={form}
+        onFinish={onFinish}
+        initialValues={{ termType: "fixed", autoRenew: false }}
+      >
+        {" "}
+        <div className="px-8 pb-8 space-y-6">
+          {" "}
+          {/* ================= BASIC INFO ================= */}{" "}
+          {/* Section 1: Basic Information */}{" "}
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100/50 border border-gray-200/80 rounded-2xl p-6 shadow-sm">
+            {" "}
+            <div className="flex items-center gap-2 mb-6">
+              {" "}
+              <div className="w-1 h-5 bg-blue-500 rounded-full"></div>{" "}
+              <h3 className="text-base font-semibold text-gray-800">
+                {" "}
+                Basic Information{" "}
+              </h3>{" "}
+            </div>{" "}
+            <div className="space-y-5">
+              {" "}
+              {/* First Row - Selects */}{" "}
+              <div className="grid grid-cols-4 gap-6">
+                {" "}
+                <div className="flex flex-col">
+                  {" "}
+                  <label className="text-sm font-medium text-gray-700 mb-2">
+                    {" "}
+                    Area <span className="text-red-500">*</span>{" "}
+                  </label>{" "}
+                  <select
+                    name="area"
+                    className="h-10 px-3 rounded-lg border border-gray-300 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    required
+                  >
+                    {" "}
+                    <option value="">Select area</option>{" "}
+                    {areas.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {" "}
+                        {a.name}{" "}
+                      </option>
+                    ))}{" "}
+                  </select>{" "}
+                </div>{" "}
+                <div className="flex flex-col">
+                  {" "}
+                  <label className="text-sm font-medium text-gray-700 mb-2">
+                    {" "}
+                    Type <span className="text-red-500">*</span>{" "}
+                  </label>{" "}
+                  <select
+                    name="type"
+                    className="h-10 px-3 rounded-lg border border-gray-300 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    required
+                  >
+                    {" "}
+                    <option value="">Select type</option>{" "}
+                    {types.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {" "}
+                        {t.name}{" "}
+                      </option>
+                    ))}{" "}
+                  </select>{" "}
+                </div>{" "}
+                <div className="flex flex-col">
+                  {" "}
+                  <label className="text-sm font-medium text-gray-700 mb-2">
+                    {" "}
+                    Company <span className="text-red-500">*</span>{" "}
+                  </label>{" "}
+                  <select
+                    name="company"
+                    className="h-10 px-3 rounded-lg border border-gray-300 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    required
+                  >
+                    {" "}
+                    <option value="">Select company</option>{" "}
+                    {companies.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {" "}
+                        {c.name}{" "}
+                      </option>
+                    ))}{" "}
+                  </select>{" "}
+                </div>{" "}
+                <div className="flex flex-col">
+                  {" "}
+                  <label className="text-sm font-medium text-gray-700 mb-2">
+                    {" "}
+                    Owner{" "}
+                  </label>{" "}
+                  <select
+                    name="owner"
+                    className="h-10 px-3 rounded-lg border border-gray-300 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  >
+                    {" "}
+                    <option value="">Select owner</option>{" "}
+                    {owners.map((o) => (
+                      <option key={o.id} value={o.id}>
+                        {" "}
+                        {o.displayName}{" "}
+                      </option>
+                    ))}{" "}
+                  </select>{" "}
+                </div>{" "}
+              </div>{" "}
+              {/* Divider */}{" "}
+              <div className="border-t border-gray-200/60"></div>{" "}
+              {/* Second Row - Text Inputs & Select */}{" "}
+              <div className="grid grid-cols-3 gap-6">
+                {" "}
+                <div className="flex flex-col">
+                  {" "}
+                  <label className="text-sm font-medium text-gray-700 mb-2">
+                    {" "}
+                    Title <span className="text-red-500">*</span>{" "}
+                  </label>{" "}
+                  <input
+                    type="text"
+                    name="title"
+                    placeholder="Enter contract title"
+                    className="h-10 px-3 rounded-lg border border-gray-300 bg-white text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    required
+                  />{" "}
+                </div>{" "}
+                <div className="flex flex-col">
+                  {" "}
+                  <label className="text-sm font-medium text-gray-700 mb-2">
+                    {" "}
+                    Number <span className="text-red-500">*</span>{" "}
+                  </label>{" "}
+                  <input
+                    type="text"
+                    name="number"
+                    placeholder="Enter contract number"
+                    className="h-10 px-3 rounded-lg border border-gray-300 bg-white text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    required
+                  />{" "}
+                </div>{" "}
+                <div className="flex flex-col">
+                  {" "}
+                  <label className="text-sm font-medium text-gray-700 mb-2">
+                    {" "}
+                    Counterparty <span className="text-red-500">*</span>{" "}
+                  </label>{" "}
+                  <select
+                    name="counterparty"
+                    className="h-10 px-3 rounded-lg border border-gray-300 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    required
+                  >
+                    {" "}
+                    <option value="">Select counterparty</option>{" "}
+                    {counterparties.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {" "}
+                        {c.displayName}{" "}
+                      </option>
+                    ))}{" "}
+                  </select>{" "}
+                </div>{" "}
+              </div>{" "}
+              {/* Third Row - Originating Party */}{" "}
+              <div className="grid grid-cols-3 gap-6">
+                {" "}
+                <div className="flex flex-col">
+                  {" "}
+                  <label className="text-sm font-medium text-gray-700 mb-2">
+                    {" "}
+                    Originating Party{" "}
+                    <span className="text-red-500">*</span>{" "}
+                  </label>{" "}
+                  <select
+                    name="originatingParty"
+                    className="h-10 px-3 rounded-lg border border-gray-300 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    required
+                  >
+                    {" "}
+                    <option value="">Select party</option>{" "}
+                    <option value="Company">Company</option>{" "}
+                    <option value="Counterparty">Counterparty</option>{" "}
+                    <option value="Both">Both</option>{" "}
+                  </select>{" "}
+                </div>{" "}
+              </div>{" "}
+            </div>{" "}
+          </div>{" "}
+          {/* Section 2: Term & Value */}{" "}
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100/50 border border-gray-200/80 rounded-2xl p-6 shadow-sm">
+            {" "}
+            <div className="flex items-center gap-2 mb-6">
+              {" "}
+              <div className="w-1 h-5 bg-blue-500 rounded-full"></div>{" "}
+              <h3 className="text-base font-semibold text-gray-800">
+                {" "}
+                Term & Value{" "}
+              </h3>{" "}
+            </div>{" "}
+            <div className="space-y-5">
+              {" "}
+              {/* First Row - Term Type & Auto Renew */}{" "}
+              <div className="grid grid-cols-12 gap-4 items-end">
+                {" "}
+                <div className="col-span-6">
+                  {" "}
+                  <label className="text-sm font-medium text-gray-700 mb-3 block">
+                    {" "}
+                    Term Type{" "}
+                  </label>{" "}
+                  <div className="flex gap-3">
+                    {" "}
+                    <label className="flex-1 text-center border-2 border-gray-200 rounded-lg px-4 py-2.5 cursor-pointer hover:border-blue-400 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+                      {" "}
+                      <input
+                        type="radio"
                         name="termType"
-                      >
-                        <Radio.Group className="w-full">
-                          <div className="grid grid-cols-3 gap-2">
-                            <Radio.Button
-                              value="fixed"
-                              className="text-center rounded-lg"
-                            >
-                              Fixed
-                            </Radio.Button>
-                            <Radio.Button
-                              value="auto"
-                              className="text-center rounded-lg"
-                            >
-                              Auto-renew
-                            </Radio.Button>
-                            <Radio.Button
-                              value="evergreen"
-                              className="text-center rounded-lg"
-                            >
-                              Evergreen
-                            </Radio.Button>
-                          </div>
-                        </Radio.Group>
-                      </Form.Item>
-                    </Section>
-
-                    {/* DATE RANGE */}
-                    <Section title="Date Range">
-                      <TwoCol>
-                        <Form.Item
-                          label={
-                            <span className="text-xs font-semibold text-gray-700">
-                              Start Date
-                            </span>
-                          }
-                          name="startDate"
-                          rules={[
-                            {
-                              required: true,
-                              message: "Please pick a start date",
-                            },
-                          ]}
-                        >
-                          <DatePicker className="w-full rounded-lg" />
-                        </Form.Item>
-
-                        <Form.Item
-                          label={
-                            <span className="text-xs font-semibold text-gray-700">
-                              End Date
-                            </span>
-                          }
-                          name="endDate"
-                          rules={[
-                            {
-                              required: true,
-                              message: "Please pick an end date",
-                            },
-                          ]}
-                        >
-                          <DatePicker className="w-full rounded-lg" />
-                        </Form.Item>
-
-                        <Form.Item
-                          label={
-                            <span className="text-xs font-semibold text-gray-700">
-                              Notice Period (days)
-                            </span>
-                          }
-                          name="noticePeriod"
-                        >
-                          <InputNumber
-                            className="w-full rounded-lg"
-                            min={0}
-                            placeholder="e.g. 30"
-                          />
-                        </Form.Item>
-                      </TwoCol>
-                    </Section>
-
-                    {/* VALUE */}
-                    <Section title="Value & Currency">
-                      <TwoCol>
-                        <Form.Item
-                          label={
-                            <span className="text-xs font-semibold text-gray-700">
-                              Total Contract Value
-                            </span>
-                          }
-                          name="totalValue"
-                        >
-                          <InputNumber
-                            className="w-full rounded-lg"
-                            min={0}
-                            formatter={(v) => (v ? `${v}` : "")}
-                          />
-                        </Form.Item>
-
-                        <Form.Item
-                          label={
-                            <span className="text-xs font-semibold text-gray-700">
-                              Currency
-                            </span>
-                          }
-                          name="currency"
-                        >
-                          <Select
-                            placeholder="USD / INR"
-                            className="rounded-lg"
-                            options={[
-                              { label: "USD", value: "USD" },
-                              { label: "INR", value: "INR" },
-                            ]}
-                          />
-                        </Form.Item>
-                      </TwoCol>
-
-                      <Form.Item
-                        label={
-                          <span className="text-xs font-semibold text-gray-700">
-                            Auto-Renew
-                          </span>
-                        }
-                        name="autoRenew"
-                        valuePropName="checked"
-                      >
-                        <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-gray-50 to-transparent rounded-xl border border-gray-100">
-                          <Switch />
-                          <span className="text-xs text-gray-600 font-medium">
-                            Enable automatic renewal
-                          </span>
-                        </div>
-                      </Form.Item>
-                    </Section>
-                  </div>
-
-                  {/* Right Column - Documents & Notes */}
-                  <div className="xl:col-span-1 space-y-4">
-                    {/* DOCUMENTS */}
-                    <Section title="Documents" className="sticky top-6">
-                      <Form.Item
-                        name="documents"
-                        valuePropName="fileList"
-                        getValueFromEvent={() => fileList}
-                      >
-                        <Dragger
-                          multiple
-                          fileList={fileList}
-                          beforeUpload={(file) => {
-                            setFileList((prev) => [...prev, file]);
-                            return false;
-                          }}
-                          onRemove={(file) => {
-                            setFileList((prev) =>
-                              prev.filter((f) => f.uid !== file.uid)
-                            );
-                          }}
-                          accept=".pdf,.doc,.docx,.txt"
-                          className="rounded-xl border-dashed border-2 border-gray-200 hover:border-emerald-400 transition-all duration-300 bg-gradient-to-br from-white to-gray-50/50"
-                          style={{ padding: '12px' }}
-                        >
-                          <p className="ant-upload-drag-icon">
-                            <UploadOutlined className="text-emerald-500" style={{ fontSize: '28px' }} />
-                          </p>
-                          <p className="ant-upload-text font-bold text-gray-800 text-sm">
-                            Drop files here
-                          </p>
-                          <p className="ant-upload-hint text-xs text-gray-500 mt-1">
-                            PDF, DOCX, TXT supported
-                          </p>
-                        </Dragger>
-                      </Form.Item>
-
-                      <Form.Item
-                        label={
-                          <span className="text-xs font-semibold text-gray-700">
-                            Notes / Summary
-                          </span>
-                        }
-                        name="notes"
-                      >
-                        <TextArea
-                          rows={3}
-                          placeholder="Add any summary or metadata for this contract"
-                          className="rounded-xl"
-                        />
-                      </Form.Item>
-                    </Section>
-                  </div>
-                </div>
-              </Form>
-            </div>
-          </div>
-        </div>
-
-        {/* Fixed Footer */}
-        <div className="flex-none bg-white/80 backdrop-blur-xl border-t border-gray-200/50 shadow-lg mt-3">
-          <div className="px-6 py-3">
-            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-              <div className="text-xs text-gray-500 hidden lg:block">
-                All fields marked with <span className="text-red-500">*</span>{" "}
-                are required
-              </div>
-
-              <div className="flex items-center gap-2 w-full sm:w-auto">
-                <Button
-                  onClick={handleBack}
-                  className="flex-1 sm:flex-none rounded-xl px-4 hover:bg-gray-50 transition-all duration-200"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={() => {
-                    form.validateFields().then((vals) => {
-                      console.log("Draft:", vals);
-                      message.success("Draft saved locally");
-                    });
+                        value="fixed"
+                        className="sr-only"
+                      />{" "}
+                      <span className="text-sm font-medium text-gray-700">
+                        {" "}
+                        Fixed{" "}
+                      </span>{" "}
+                    </label>{" "}
+                    <label className="flex-1 text-center border-2 border-gray-200 rounded-lg px-4 py-2.5 cursor-pointer hover:border-blue-400 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+                      {" "}
+                      <input
+                        type="radio"
+                        name="termType"
+                        value="auto"
+                        className="sr-only"
+                      />{" "}
+                      <span className="text-sm font-medium text-gray-700">
+                        {" "}
+                        Auto{" "}
+                      </span>{" "}
+                    </label>{" "}
+                    <label className="flex-1 text-center border-2 border-gray-200 rounded-lg px-4 py-2.5 cursor-pointer hover:border-blue-400 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+                      {" "}
+                      <input
+                        type="radio"
+                        name="termType"
+                        value="evergreen"
+                        className="sr-only"
+                      />{" "}
+                      <span className="text-sm font-medium text-gray-700">
+                        {" "}
+                        Evergreen{" "}
+                      </span>{" "}
+                    </label>{" "}
+                  </div>{" "}
+                </div>{" "}
+                <div className="col-span-6 flex justify-end">
+                  {" "}
+                  <label className="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-4 py-2.5 cursor-pointer hover:border-blue-400 transition-colors">
+                    {" "}
+                    <input
+                      type="checkbox"
+                      name="autoRenew"
+                      className="w-11 h-6 appearance-none bg-gray-300 rounded-full relative cursor-pointer transition-colors checked:bg-blue-500 before:content-[''] before:absolute before:w-5 before:h-5 before:rounded-full before:bg-white before:top-0.5 before:left-0.5 before:transition-transform checked:before:translate-x-5"
+                    />{" "}
+                    <span className="text-sm font-medium text-gray-700">
+                      {" "}
+                      Auto Renew{" "}
+                    </span>{" "}
+                  </label>{" "}
+                </div>{" "}
+              </div>{" "}
+              {/* Divider */}{" "}
+              <div className="border-t border-gray-200/60"></div>{" "}
+              {/* Second Row - Dates */}{" "}
+              <div className="grid grid-cols-2 gap-6">
+                {" "}
+                <div className="flex flex-col">
+                  {" "}
+                  <label className="text-sm font-medium text-gray-700 mb-2">
+                    {" "}
+                    Start Date <span className="text-red-500">*</span>{" "}
+                  </label>{" "}
+                  <input
+                    type="date"
+                    name="startDate"
+                    className="h-10 px-3 rounded-lg border border-gray-300 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    required
+                  />{" "}
+                </div>{" "}
+                <div className="flex flex-col">
+                  {" "}
+                  <label className="text-sm font-medium text-gray-700 mb-2">
+                    {" "}
+                    End Date <span className="text-red-500">*</span>{" "}
+                  </label>{" "}
+                  <input
+                    type="date"
+                    name="endDate"
+                    className="h-10 px-3 rounded-lg border border-gray-300 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    required
+                  />{" "}
+                </div>{" "}
+              </div>{" "}
+              {/* Third Row - Notice Period & Total Value */}{" "}
+              <div className="grid grid-cols-2 gap-6">
+                {" "}
+                <div className="flex flex-col">
+                  {" "}
+                  <label className="text-sm font-medium text-gray-700 mb-2">
+                    {" "}
+                    Notice Period <span className="text-red-500">*</span>{" "}
+                  </label>{" "}
+                  <div className="flex gap-3">
+                    {" "}
+                    <input
+                      type="number"
+                      name="noticePeriodValue"
+                      min="1"
+                      placeholder="Enter value"
+                      className="flex-1 h-10 px-3 rounded-lg border border-gray-300 bg-white text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      required
+                    />{" "}
+                    <select
+                      name="noticePeriodUnit"
+                      className="w-32 h-10 px-3 rounded-lg border border-gray-300 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      required
+                    >
+                      {" "}
+                      <option value="">Unit</option>{" "}
+                      <option value="days">Days</option>{" "}
+                      <option value="months">Months</option>{" "}
+                      <option value="years">Years</option>{" "}
+                    </select>{" "}
+                  </div>{" "}
+                </div>{" "}
+                <div className="flex flex-col">
+                  {" "}
+                  <label className="text-sm font-medium text-gray-700 mb-2">
+                    {" "}
+                    Total Value <span className="text-red-500">*</span>{" "}
+                  </label>{" "}
+                  <div className="flex gap-3">
+                    {" "}
+                    <input
+                      type="number"
+                      name="totalValueAmount"
+                      min="0"
+                      step="0.01"
+                      placeholder="0.00"
+                      className="flex-1 h-10 px-3 rounded-lg border border-gray-300 bg-white text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      required
+                    />{" "}
+                    <select
+                      name="totalValueCurrency"
+                      className="w-28 h-10 px-3 rounded-lg border border-gray-300 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      required
+                    >
+                      {" "}
+                      <option value="">Currency</option>{" "}
+                      <option value="USD">USD</option>{" "}
+                      <option value="INR">INR</option>{" "}
+                    </select>{" "}
+                  </div>{" "}
+                </div>{" "}
+              </div>{" "}
+            </div>{" "}
+          </div>{" "}
+          {/* Section 3: Attachments */}{" "}
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100/50 border border-gray-200/80 rounded-2xl p-6 shadow-sm">
+            {" "}
+            <div className="flex items-center gap-2 mb-6">
+              {" "}
+              <div className="w-1 h-5 bg-purple-500 rounded-full"></div>{" "}
+              <h3 className="text-base font-semibold text-gray-800">
+                {" "}
+                Attachments{" "}
+              </h3>{" "}
+            </div>{" "}
+            <div className="flex flex-col">
+              {" "}
+              <label className="text-sm font-medium text-gray-700 mb-3">
+                {" "}
+                Documents{" "}
+              </label>{" "}
+              {/* Upload Area */}{" "}
+              <div
+                className="relative border-2 border-dashed border-gray-300 rounded-xl bg-white hover:border-purple-400 transition-colors cursor-pointer"
+                onClick={() => document.getElementById("fileInput")?.click()}
+              >
+                {" "}
+                <input
+                  type="file"
+                  id="fileInput"
+                  multiple
+                  className="sr-only"
+                  onChange={(e) => {
+                    const files = e.target.files;
+                    if (files) {
+                      const fileArray: File[] = [];
+                      for (let i = 0; i < files.length; i++) {
+                        fileArray.push(files[i]);
+                      }
+                      setFileList((prev) => [...prev, ...fileArray]);
+                    }
                   }}
-                  className="flex-1 sm:flex-none rounded-xl px-4 bg-gradient-to-r from-gray-50 to-gray-100 hover:shadow-sm transition-all duration-200"
-                >
-                  Save Draft
-                </Button>
-                <Button
-                  type="primary"
-                  onClick={() => form.submit()}
-                  className="flex-1 sm:flex-none rounded-xl px-6 bg-gradient-to-r from-emerald-600 to-teal-600 border-0 shadow-lg shadow-emerald-200 hover:shadow-xl hover:shadow-emerald-300 transition-all duration-300 font-semibold"
-                  loading={saving}
-                >
-                  Submit
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+                />{" "}
+                <div className="flex flex-col items-center justify-center py-10">
+                  {" "}
+                  <div className="w-12 h-12 bg-purple-50 rounded-full flex items-center justify-center mb-3">
+                    {" "}
+                    <svg
+                      className="w-6 h-6 text-purple-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      {" "}
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                      />{" "}
+                    </svg>{" "}
+                  </div>{" "}
+                  <p className="text-sm font-medium text-gray-700 mb-1">
+                    {" "}
+                    Click or drag files to upload{" "}
+                  </p>{" "}
+                  <p className="text-xs text-gray-500">
+                    {" "}
+                    PDF, DOC, XLS up to 10MB{" "}
+                  </p>{" "}
+                </div>{" "}
+              </div>{" "}
+              {/* File List */}{" "}
+              {fileList.length > 0 && (
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  {" "}
+                  {fileList.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:border-purple-300 transition-colors group"
+                    >
+                      {" "}
+                      <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                        {" "}
+                        <svg
+                          className="w-5 h-5 text-purple-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          {" "}
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />{" "}
+                        </svg>{" "}
+                      </div>{" "}
+                      <div className="flex-1 min-w-0">
+                        {" "}
+                        <p className="text-sm font-medium text-gray-700 truncate">
+                          {" "}
+                          {file.name}{" "}
+                        </p>{" "}
+                      </div>{" "}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setFileList((prev) =>
+                            prev.filter((_, i) => i !== index),
+                          )
+                        }
+                        className="text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        {" "}
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          {" "}
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />{" "}
+                        </svg>{" "}
+                      </button>{" "}
+                    </div>
+                  ))}{" "}
+                </div>
+              )}{" "}
+            </div>{" "}
+          </div>{" "}
+        </div>{" "}
+        {/* ================= FOOTER ================= */}{" "}
+        <div className=" sticky bottom-0 z-10 bg-white/90 backdrop-blur border-t border-gray-200 px-8 py-4 flex justify-end gap-3 ">
+          {" "}
+          <Button className="rounded-lg px-5" onClick={() => navigate(-1)}>
+            {" "}
+            Cancel{" "}
+          </Button>{" "}
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={loading}
+            className="rounded-lg px-6 font-semibold"
+          >
+            {" "}
+            Submit{" "}
+          </Button>{" "}
+        </div>{" "}
+      </Form>{" "}
     </div>
   );
 }

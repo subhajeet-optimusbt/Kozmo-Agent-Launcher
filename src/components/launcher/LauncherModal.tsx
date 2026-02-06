@@ -234,7 +234,7 @@ const LauncherModal: React.FC<LauncherModalProps> = ({
                 </div>
               ) : (
                 <div className="h-[520px] overflow-auto px-2 py-2">
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 gap-5">
                     {leftApps.map((app, idx) => (
                       <div
                         key={app.key}
@@ -246,7 +246,7 @@ const LauncherModal: React.FC<LauncherModalProps> = ({
                           isPinned={pinnedKeys.includes(app.key)}
                           isFocused={focusedIndex === idx}
                           compact
-                          showAvatar={false} // <-- NO avatar in All Applications
+                          showAvatar={true} // <-- NO avatar in All Applications
                           onClick={() => {
                             openApp(app.key);
                           }}
