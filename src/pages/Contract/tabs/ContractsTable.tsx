@@ -1,7 +1,15 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect, useMemo } from "react";
 import { Button, Input, Tooltip, Select, Divider, Drawer, Badge } from "antd";
-import { LayoutGrid, List, CreditCard, Filter, RotateCcw } from "lucide-react";
-
+import {
+  LayoutGrid,
+  List,
+  CreditCard,
+  Filter,
+  RotateCcw,
+  Briefcase,
+} from "lucide-react";
+import { ArrowLeftOutlined } from "@ant-design/icons";
 import { fetchContracts } from "../../../services/contractsService";
 import { mapContractsFromApi } from "../../../constants/apps";
 import FullscreenLoader from "../../../components/ui/FullScreenLoader";
@@ -14,7 +22,7 @@ import ContractListView from "../../../components/contract/ContractListView";
 import ContractCardView from "../../../components/contract/ContractCardView";
 import ContractPreviewDrawer from "../../../components/contract/ContractPreviewDrawer";
 import PaginationControl from "../../../components/PaginationControl";
-
+import Portfolio from "../../../components/contract/Portfolio";
 type View = "table" | "list" | "card";
 
 type Sorter = {
@@ -44,7 +52,7 @@ export default function ContractsPage() {
 
   const [filterOpen, setFilterOpen] = useState(false);
   const [accountId, setAccountId] = useState(getActiveAccountId());
-
+  const [showPortfolio, setShowPortfolio] = useState(false);
   /* ---------------- account change ---------------- */
   useEffect(() => {
     const handler = () => {
@@ -131,118 +139,176 @@ export default function ContractsPage() {
   return (
     <div className="space-y-4">
       {loading && <FullscreenLoader />}
+      {showPortfolio ? (
+        <div className="space-y-1">
+          {/* -------- PAGE HEADER (SAME AS CONTRACTS STYLE) -------- */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600">
+                <Briefcase size={18} />
+              </div>
 
-      {/* ---------------- TOP TOOLBAR ---------------- */}
-      <div className="flex items-center justify-between gap-6">
-        {/* Search + Filters */}
-        <div className="flex items-center gap-3">
-          <Input.Search
-            placeholder="Search contracts, counterparties, clauses…"
-            className="w-[340px]"
-            allowClear
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-          />
+              <div className="leading-tight">
+                <div className="text-lg font-semibold text-gray-900">
+                  Portfolio
+                </div>
+                <div className="text-xs text-gray-500">
+                  Value vs Criticality overview
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowPortfolio(false)}
+              className=" flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 transition-all duration-200 hover:bg-emerald-100 hover:border-emerald-300 hover:-translate-y-[1px] active:translate-y-0 "
+            >
+              {" "}
+              <ArrowLeftOutlined /> Back{" "}
+            </button>{" "}
+          </div>
 
-          <Button
-            icon={<Filter size={16} />}
-            className="rounded-xl font-medium"
-            onClick={() => setFilterOpen(true)}
-          >
-            Filters & Facets
-            {activeFilterCount > 0 && (
-              <Badge
-                count={activeFilterCount}
-                size="small"
-                className="ml-2"
-                style={{ backgroundColor: "#6366f1" }}
+          <Divider className="my-2" />
+
+          {/* -------- PORTFOLIO CONTENT -------- */}
+          <Portfolio />
+        </div>
+      ) : (
+        <>
+          <div className="flex items-center justify-between gap-6">
+            {/* Search + Filters */}
+            <div className="flex items-center gap-3">
+              <Input.Search
+                placeholder="Search contracts, counterparties, clauses…"
+                className="w-[340px]"
+                allowClear
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
               />
-            )}
-          </Button>
-        </div>
 
-        {/* Page size */}
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <span>Rows</span>
-          <Select
-            value={pageSize}
-            className="w-[90px]"
-            onChange={(s) => {
-              setPageSize(s);
-              setPage(1);
-            }}
-            options={[
-              { value: 10, label: "10" },
-              { value: 12, label: "12" },
-              { value: 20, label: "20" },
-            ]}
-          />
-        </div>
+              <Button
+                icon={<Filter size={16} />}
+                className="rounded-xl font-medium"
+                onClick={() => setFilterOpen(true)}
+              >
+                Filters & Facets
+                {activeFilterCount > 0 && (
+                  <Badge
+                    count={activeFilterCount}
+                    size="small"
+                    className="ml-2"
+                    style={{ backgroundColor: "#6366f1" }}
+                  />
+                )}
+              </Button>
+              <Button
+                onClick={() => setShowPortfolio(true)}
+                className="
+    px-5 py-2.5
+    rounded-xl
+    font-medium
+    text-white
+    bg-gradient-to-r from-indigo-500 to-purple-600
+    hover:from-indigo-600 hover:to-purple-700
+    shadow-md hover:shadow-lg
+    transition-all duration-200
+    active:scale-95
+  "
+              >
+                <Briefcase size={18} />
+                Portfolio
+              </Button>
+            </div>
 
-        {/* View switch */}
-        <Button.Group className="shadow-sm rounded-xl overflow-hidden">
-          <Tooltip title="Table view">
-            <Button
-              type={view === "table" ? "primary" : "default"}
-              onClick={() => setView("table")}
-            >
-              <LayoutGrid size={16} />
-              Table
-            </Button>
-          </Tooltip>
-          <Tooltip title="Compact view">
-            <Button
-              type={view === "list" ? "primary" : "default"}
-              onClick={() => setView("list")}
-            >
-              <List size={16} />
-              Compact
-            </Button>
-          </Tooltip>
-          <Tooltip title="Card view">
-            <Button
-              type={view === "card" ? "primary" : "default"}
-              onClick={() => setView("card")}
-            >
-              <CreditCard size={16} />
-              Card
-            </Button>
-          </Tooltip>
-        </Button.Group>
-      </div>
+            {/* Page size */}
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <span>Rows</span>
+              <Select
+                value={pageSize}
+                className="w-[90px]"
+                onChange={(s) => {
+                  setPageSize(s);
+                  setPage(1);
+                }}
+                options={[
+                  { value: 10, label: "10" },
+                  { value: 12, label: "12" },
+                  { value: 20, label: "20" },
+                ]}
+              />
+            </div>
 
-      <Divider className="my-2" />
+            {/* View switch */}
+            <Button.Group className="shadow-sm rounded-xl overflow-hidden">
+              <Tooltip title="Table view">
+                <Button
+                  type={view === "table" ? "primary" : "default"}
+                  onClick={() => setView("table")}
+                >
+                  <LayoutGrid size={16} />
+                  Table
+                </Button>
+              </Tooltip>
+              <Tooltip title="Compact view">
+                <Button
+                  type={view === "list" ? "primary" : "default"}
+                  onClick={() => setView("list")}
+                >
+                  <List size={16} />
+                  Compact
+                </Button>
+              </Tooltip>
+              <Tooltip title="Card view">
+                <Button
+                  type={view === "card" ? "primary" : "default"}
+                  onClick={() => setView("card")}
+                >
+                  <CreditCard size={16} />
+                  Card
+                </Button>
+              </Tooltip>
+            </Button.Group>
+          </div>
 
-      {/* ---------------- CONTENT ---------------- */}
-      {view === "table" && (
-        <ContractTableView
-          data={paginatedData}
-          sorter={sorter}
-          onSortChange={setSorter}
-          onSelect={setActiveContract}
-        />
-      )}
+          <Divider className="my-2" />
 
-      {view === "list" && (
-        <ContractListView data={paginatedData} onSelect={setActiveContract} />
-      )}
+          {/* ---------------- CONTENT ---------------- */}
+          {view === "table" && (
+            <ContractTableView
+              data={paginatedData}
+              sorter={sorter}
+              onSortChange={setSorter}
+              onSelect={setActiveContract}
+            />
+          )}
 
-      {view === "card" && (
-        <ContractCardView data={paginatedData} onSelect={setActiveContract} />
-      )}
+          {view === "list" && (
+            <ContractListView
+              data={paginatedData}
+              onSelect={setActiveContract}
+            />
+          )}
 
-      {/* ---------------- PAGINATION ---------------- */}
-      {total > 0 && (
-        <div className="pb-4 flex justify-center">
-          <PaginationControl
-            page={page}
-            pageSize={pageSize}
-            total={total}
-            onPageChange={setPage}
-          />
-        </div>
+          {view === "card" && (
+            <ContractCardView
+              data={paginatedData}
+              onSelect={setActiveContract}
+            />
+          )}
+
+          {/* ---------------- PAGINATION ---------------- */}
+          {total > 0 && (
+            <div className="pb-4 flex justify-center">
+              <PaginationControl
+                page={page}
+                pageSize={pageSize}
+                total={total}
+                onPageChange={setPage}
+              />
+            </div>
+          )}
+        </>
       )}
 
       {/* ---------------- PREVIEW DRAWER ---------------- */}
@@ -251,7 +317,6 @@ export default function ContractsPage() {
         onClose={() => setActiveContract(null)}
       />
 
-      {/* ---------------- FILTER DRAWER ---------------- */}
       <Drawer
         placement="right"
         width={380}
@@ -352,43 +417,43 @@ export default function ContractsPage() {
       </Drawer>
     </div>
   );
-}
 
-/* ---------------- Filter Pill Section ---------------- */
-function FilterSection({
-  title,
-  options,
-  value,
-  onChange,
-}: {
-  title: string;
-  options: string[];
-  value: string[];
-  onChange: (v: string[]) => void;
-}) {
-  return (
-    <div className="mb-6">
-      <h4 className="mb-3 font-semibold">{title}</h4>
-      <div className="flex flex-wrap gap-2">
-        {options.map((opt) => {
-          const active = value.includes(opt);
-          return (
-            <Button
-              key={opt}
-              size="small"
-              type={active ? "primary" : "default"}
-              className="rounded-full"
-              onClick={() =>
-                onChange(
-                  active ? value.filter((v) => v !== opt) : [...value, opt],
-                )
-              }
-            >
-              {opt}
-            </Button>
-          );
-        })}
+  /* ---------------- Filter Pill Section ---------------- */
+  function FilterSection({
+    title,
+    options,
+    value,
+    onChange,
+  }: {
+    title: string;
+    options: string[];
+    value: string[];
+    onChange: (v: string[]) => void;
+  }) {
+    return (
+      <div className="mb-6">
+        <h4 className="mb-3 font-semibold">{title}</h4>
+        <div className="flex flex-wrap gap-2">
+          {options.map((opt) => {
+            const active = value.includes(opt);
+            return (
+              <Button
+                key={opt}
+                size="small"
+                type={active ? "primary" : "default"}
+                className="rounded-full"
+                onClick={() =>
+                  onChange(
+                    active ? value.filter((v) => v !== opt) : [...value, opt],
+                  )
+                }
+              >
+                {opt}
+              </Button>
+            );
+          })}
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 }

@@ -5,7 +5,7 @@ import type { Renewal } from "../constants/apps";
 
 export function useContractsPagination(data: Contract[]) {
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(50);
 
   const total = data.length;
   const totalPages = Math.ceil(total / pageSize);

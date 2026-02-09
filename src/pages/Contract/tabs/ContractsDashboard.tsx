@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import {
+ import {
   AlertCircle,
   TrendingUp,
   FileWarning,
@@ -7,6 +6,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import type { ContractDashboardResponse } from "../../../types/contracts";
+import FullscreenLoader from "../../../components/ui/FullScreenLoader";
 
 type Props = {
   data: ContractDashboardResponse | null;
@@ -18,7 +18,7 @@ type Props = {
 export default function ContractsDashboard({ data, loading }: Props) {
   if (loading) {
     return (
-      <div className="py-10 text-sm text-gray-500">Loading dashboard…</div>
+      <FullscreenLoader />
     );
   }
 

@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
-import { useOutletContext, useNavigate } from "react-router-dom";
-import { Button } from "antd";
-import { Plus } from "lucide-react";
+import { useOutletContext } from "react-router-dom";
 
 import RenewalsDashboard from "./tabs/RenewalsDashboard";
 import RenewalsTable from "./tabs/RenewalsTable";
@@ -12,6 +10,9 @@ import { mapRenewalsFromApi } from "../../types/renewals";
 import FullscreenLoader from "../../components/ui/FullScreenLoader";
 import { getActiveAccountId, ACCOUNT_CHANGED_EVENT } from "../../utils/auth";
 import type { Renewal } from "../../constants/apps";
+import RangeTabs from "../../components/ui/RangeTabs";
+
+export type RangeType = "today" | "last7days" | "last30days";
 
 type RenewalsContextType = {
   activeTab: string;
@@ -19,12 +20,10 @@ type RenewalsContextType = {
 
 export default function RenewalsPage() {
   const { activeTab } = useOutletContext<RenewalsContextType>();
-  const navigate = useNavigate();
-
   const [renewals, setRenewals] = useState<Renewal[]>([]);
   const [loading, setLoading] = useState(false);
   const [accountId, setAccountId] = useState(getActiveAccountId());
-
+  const [range,setRange] = useState<RangeType>("today");
   /* ---------------- FETCH ON PAGE LOAD ---------------- */
   useEffect(() => {
     if (!accountId) return;
@@ -55,16 +54,12 @@ export default function RenewalsPage() {
       window.removeEventListener(ACCOUNT_CHANGED_EVENT, handler);
   }, []);
 
-  const onCreateRequest = () => {
-    navigate("/renewals/CreateNewRequest");
-  };
-
   return (
     <div className="relative overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-sm">
       {loading && <FullscreenLoader />}
 
       {/* Header */}
-      <div className="mx-8 my-4 flex items-center justify-between">
+      <div className="mx-8 my-4 flex items-center">
         <div>
           <h1 className="text-2xl font-black tracking-tight text-gray-900">
             Renewals Dashboard
@@ -73,21 +68,17 @@ export default function RenewalsPage() {
             What is coming in, from where, and what needs attention.
           </p>
         </div>
-
-        <Button
-          onClick={onCreateRequest}
-          className="!border-0 !text-white rounded-full px-4 py-2 flex items-center gap-2
-                     !bg-gradient-to-r !from-emerald-500 !to-teal-500 shadow-lg"
-        >
-          <Plus size={14} />
-          Create New Request
-        </Button>
+          {activeTab !== "renewals" && (
+                  <div className="ml-auto">
+                    <RangeTabs value={range} onChange={setRange} />
+                  </div>
+                )}
       </div>
 
       {/* Tabs */}
       {activeTab === "dashboard" && (
         <div className="px-8 pb-8">
-          <RenewalsDashboard  />
+          <RenewalsDashboard  loading={loading} range={range} />
         </div>
       )}
 
@@ -99,7 +90,7 @@ export default function RenewalsPage() {
 
       {activeTab === "jobs" && (
         <div className="px-8 pb-8">
-          <RenewalsJobsPanel accountId={""} />
+          <RenewalsJobsPanel accountId={accountId} range={range} />
         </div>
       )}
     </div>

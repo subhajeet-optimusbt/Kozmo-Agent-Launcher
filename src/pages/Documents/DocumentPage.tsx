@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import { useOutletContext, useNavigate } from "react-router-dom";
-import { Button } from "antd";
-import { Plus } from "lucide-react";
+import { useOutletContext } from "react-router-dom";
 
 import DocumentDashboard from "./tabs/DocumentDashboard";
 import DocumentTable from "./tabs/DocumentTable";
@@ -26,7 +24,6 @@ export type RangeType = "today" | "last7days" | "last30days";
 
 export default function DocumentPage() {
   const { activeTab } = useOutletContext<IntakeContextType>();
-  const navigate = useNavigate();
 
   const [document, setDocument] = useState<Document[]>([]);
   const [loading, setLoading] = useState(false);
@@ -82,16 +79,12 @@ export default function DocumentPage() {
     return () => window.removeEventListener(ACCOUNT_CHANGED_EVENT, handler);
   }, []);
 
-  const onCreateDocument = () => {
-    navigate("/document/CreateNewDocument");
-  };
-
   return (
     <div className="relative overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-sm">
       {loading && <FullscreenLoader />}
 
       {/* Header */}
-      <div className="mx-8 my-4 flex items-center justify-between">
+      <div className="mx-8 my-4 flex items-center">
         {/* Left: Title */}
 
         <div>
@@ -105,20 +98,10 @@ export default function DocumentPage() {
 
         {/* Center: Range Tabs (dashboard & jobs only) */}
         {activeTab !== "documents" && (
-          <div className="flex-1 flex justify-center">
+          <div className="ml-auto">
             <RangeTabs value={range} onChange={setRange} />
           </div>
         )}
-
-        {/* Right: CTA */}
-        <Button
-          onClick={onCreateDocument}
-          className="!border-0 !text-white rounded-full px-4 py-2 flex items-center gap-2
-               !bg-gradient-to-r !from-emerald-500 !to-teal-500 shadow-lg"
-        >
-          <Plus size={14} />
-          Create New Document
-        </Button>
       </div>
 
       {/* Tabs */}

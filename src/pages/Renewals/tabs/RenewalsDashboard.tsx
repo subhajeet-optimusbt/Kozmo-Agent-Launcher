@@ -5,11 +5,20 @@ import {
   CheckCircle,
   DollarSign,
 } from "lucide-react";
+import FullscreenLoader from "../../../components/ui/FullScreenLoader";
+type Props = {
+  loading: boolean;
+  range: "today" | "last7days" | "last30days";
 
+}
 
-
-export default function RenewalsDashboard() {
+export default function RenewalsDashboard({loading}: Props) {
  
+    if (loading) {
+      return (
+        <FullscreenLoader />
+      );
+    }
   /* ============================
       STATIC KPI DATA
   ============================ */

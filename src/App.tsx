@@ -15,7 +15,7 @@ import Dashboard from "./pages/Home";
 import Contracts from "./pages/Contract/ContractsPage";
 import ContractsTableDetails from "./pages/Contract/ContractsTableDetails";
 import NewContractForm from "./pages/Contract/NewContractForm";
-import NewRequestForm from "./pages/Contract/NewContractForm";
+import NewRenewals from "./pages/Renewals/NewRenewals";
 import Renewals from "./pages/Renewals/RenewalsPage";
 import SignupPage from "./pages/auth/signuppage";
 import Login from "./pages/auth/loginpage";
@@ -50,8 +50,8 @@ export default function App() {
           <Route element={<RenewalsLayout />}>
             <Route path="/renewals" element={<Renewals />} />
             <Route
-              path="/renewals/CreateNewRequest"
-              element={<NewRequestForm />}
+              path="/renewals/CreateNewRenewals"
+              element={<NewRenewals />}
             />
           </Route>
 

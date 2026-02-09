@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState, useMemo } from "react";
-import JobsHeader from "../../../components/jobs/JobsHeader";
+// import JobsHeader from "../../../components/jobs/JobsHeader";
 import JobsKPIs from "../../../components/jobs/JobsKPIs";
 import JobsControls from "../../../components/jobs/JobsControls";
 import JobsTable from "../../../components/jobs/JobsTable";
@@ -8,16 +8,16 @@ import { fetchJobs } from "../../../services/jobsService";
 import { useContractsPagination } from "../../../hooks/pagination";
 import PaginationControl from "../../../components/PaginationControl";
 import FullscreenLoader from "../../../components/ui/FullScreenLoader";
-
 type Props = {
   accountId: string;
+  range: string;
 };
 
-export default function JobsPanel({ accountId }: Props) {
+export default function JobsPanel({ accountId,range }: Props) {
   const [view, setView] = useState<"health" | "runs">("health");
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [range, setRange] = useState<"today" | "7d" | "30d">("30d");
+
 
   useEffect(() => {
     if (!accountId) return;
@@ -61,7 +61,7 @@ export default function JobsPanel({ accountId }: Props) {
   return (
     <div className="space-y-4">
       {loading && <FullscreenLoader/>}
-      <JobsHeader range={range} onChange={setRange} />
+      {/* <JobsHeader range={range} onChange={setRange} /> */}
       <JobsKPIs jobs={filteredJobs} />
       <JobsControls
         view={view}
