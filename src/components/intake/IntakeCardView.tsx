@@ -64,7 +64,7 @@ export default function IntakeCardView({
                   {c.subject}
                 </h3>
                 <p className="text-xs text-gray-500 truncate">
-                  {c.currentJobName}
+                  {c.RequestId}
                 </p>
               </div>
             </div>

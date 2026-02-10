@@ -75,7 +75,7 @@ export default function DocumentPreviewDrawer({ document, onClose }: Props) {
                 onClose();
               }}
             >
-              View Full Contract
+              View Full Documents
               <ArrowRight size={14} />
             </Button>
           </div>

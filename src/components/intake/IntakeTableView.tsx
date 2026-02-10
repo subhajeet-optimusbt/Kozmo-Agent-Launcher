@@ -65,8 +65,8 @@ export default function IntakeTableView({
     );
   };
 
-  const getIntakeStatusTag = (status: string) => {
-    switch (status) {
+  const getIntakeStatusTag = (Status: string) => {
+    switch (Status) {
       case "Completed":
         return {
           color: "green",
@@ -138,10 +138,15 @@ export default function IntakeTableView({
         </span>
       ),
     },
-
     {
-      title: <SortableHeader label="Status" field="status" />,
-      dataIndex: "status",
+      title: <SortableHeader label="Request Id" field="RequestId" />,
+      dataIndex: "RequestId",
+      key: "RequestId",
+      render:(v) => <span className="text-gray-700">{v}</span>,
+    },
+    {
+      title: <SortableHeader label="Status" field="Status" />,
+      dataIndex: "Status",
       width: 140,
       render: (v: string) => {
         const tag = getIntakeStatusTag(v);

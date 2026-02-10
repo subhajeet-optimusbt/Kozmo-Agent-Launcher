@@ -15,13 +15,15 @@ export const mapIntakeFromApi = (apiData: Array<any>) => {
     currentJobName: c.CurrentJobName ?? "0",
 
     // API doesn’t give source → show fallback
-    source: c.source?.trim() || "N/A" ,
+    source: c.source?.trim() || "N/A",
 
     noOfDocuments: c.NoOfDocuments ?? 0,
 
-    status: c.status,
+    Status: c.Status,
 
     created: dayjs(c.Created).fromNow(),
     updated: dayjs(c.Modified).fromNow(),
+
+    RequestId: c.RequestId,
   }));
 };

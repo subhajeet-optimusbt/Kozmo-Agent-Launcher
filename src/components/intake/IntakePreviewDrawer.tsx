@@ -37,7 +37,7 @@ export default function IntakePreviewDrawer({ intake, onClose }: Props) {
                 color="green"
                 className="rounded-full px-3 py-1 text-xs font-medium"
               >
-                {intake.status}
+                {intake.Status}
               </Tag>
             </div>
           </div>
@@ -71,11 +71,11 @@ export default function IntakePreviewDrawer({ intake, onClose }: Props) {
               icon={<Eye size={16} />}
               className="w-full flex items-center justify-center gap-2"
               onClick={() => {
-                navigate(`/contracts/${intake.key}`);
+                navigate(`/intake/${intake.RequestId}`);
                 onClose();
               }}
             >
-              View Full Contract
+              View Full Intake
               <ArrowRight size={14} />
             </Button>
           </div>

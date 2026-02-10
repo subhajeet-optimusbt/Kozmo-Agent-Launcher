@@ -45,7 +45,7 @@ export default function IntakeListView({
             </h3>
 
             <p className="text-sm text-gray-500 truncate">
-              {c.currentJobName}
+              {c.RequestId}
             </p>
 
             <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">

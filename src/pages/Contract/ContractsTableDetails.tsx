@@ -16,6 +16,8 @@ import {
   Calendar,
   Building2,
   Clock,
+  Receipt,
+  FileDiff,
 } from "lucide-react";
 
 import { getActiveAccountId, ACCOUNT_CHANGED_EVENT } from "../../utils/auth";
@@ -32,38 +34,84 @@ const SECTIONS = [
     label: "Overview",
     icon: FileText,
     apiKey: "contractEntity",
+    visible: (data: any) =>
+      Array.isArray(data?.contractEntity) && data.contractEntity.length > 0,
   },
-  { key: "documents", label: "Documents", icon: Folder, apiKey: "documents" },
+  {
+    key: "documents",
+    label: "Documents",
+    icon: Folder,
+    apiKey: "documents",
+    visible: (data: any) => Array.isArray(data?.documents),
+  },
   {
     key: "milestones",
     label: "Milestones",
     icon: Flag,
     apiKey: "contractMilestones",
+    visible: (data: any) =>
+      Array.isArray(data?.contractMilestones) &&
+      data.contractMilestones.length > 0,
   },
   {
     key: "provisions",
     label: "Provisions",
     icon: FileSignature,
     apiKey: "contractKeyProvisions",
+    visible: (data: any) =>
+      Array.isArray(data?.contractKeyProvisions) &&
+      data.contractKeyProvisions.length > 0,
   },
   {
     key: "obligations",
     label: "Obligations",
     icon: ListChecks,
     apiKey: "contractObligations",
+    visible: (data: any) =>
+      Array.isArray(data?.contractObligations) &&
+      data.contractObligations.length > 0,
   },
-  { key: "clauses", label: "Clauses", icon: Scale, apiKey: "contractClauses" },
+  {
+    key: "clauses",
+    label: "Clauses",
+    icon: Scale,
+    apiKey: "contractClauses",
+    visible: (data: any) =>
+      Array.isArray(data?.contractClauses) && data.contractClauses.length > 0,
+  },
   {
     key: "pricing",
     label: "Pricing Terms",
     icon: DollarSign,
     apiKey: "contractPricingTerms",
+    visible: (data: any) =>
+      Array.isArray(data?.contractPricingTerms) &&
+      data.contractPricingTerms.length > 0,
   },
   {
     key: "provenance",
     label: "Provenance",
     icon: ShieldCheck,
     apiKey: "provenance",
+    visible: (data: any) => !!data?.provenance,
+  },
+  {
+    key: "invoices",
+    label: "Invoices",
+    icon: Receipt,
+    apiKey: "invoices",
+    component: Invoices,
+    visible: (data: any) =>
+      Array.isArray(data?.invoices) && data.invoices.length > 0,
+  },
+  {
+    key: "amendments",
+    label: "Amendments",
+    icon: FileDiff,
+    apiKey: "amendments",
+    component: Amendments,
+    visible: (data: any) =>
+      Array.isArray(data?.amendments) && data.amendments.length > 0,
   },
 ];
 
@@ -142,175 +190,173 @@ export default function ContractDetailsPage() {
   const { contractEntity } = data;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/20 to-purple-50/20 p-6">
-      <div className="max-w-[1600px] mx-auto">
-        <div className="relative bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
-          {/* Gradient accent */}
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500" />
+    <div className="relative bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
+      {/* Gradient accent */}
+      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500" />
 
-          <div className="px-8 py-8 flex gap-8">
-            {/* ---------------------------------- */}
-            {/* Sidebar */}
-            {/* ---------------------------------- */}
+      <div className="px-8 py-8 flex gap-8">
+        {/* ---------------------------------- */}
+        {/* Sidebar */}
+        {/* ---------------------------------- */}
 
-            <aside className="w-80 shrink-0">
-              <div className="sticky top-6">
-                <div className="bg-gradient-to-br from-white to-gray-50/50 rounded-2xl border border-gray-200 p-5 space-y-2 shadow-lg backdrop-blur-sm">
-                  <h3 className="text-xs font-bold uppercase tracking-wider mb-4 text-gray-500 flex items-center gap-2">
-                    <div className="w-1 h-4 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full" />
-                    Navigation
-                  </h3>
+        <aside className="w-80 shrink-0">
+          <div className="sticky top-6">
+            <div className="bg-gradient-to-br from-white to-gray-50/50 rounded-2xl border border-gray-200 p-5 space-y-2 shadow-lg backdrop-blur-sm">
+              <h3 className="text-xs font-bold uppercase tracking-wider mb-4 text-gray-500 flex items-center gap-2">
+                <div className="w-1 h-4 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full" />
+                Navigation
+              </h3>
 
-                  {SECTIONS.map(({ key, label, icon: Icon, apiKey }) => {
-                    const count = Array.isArray(data?.[apiKey])
-                      ? data[apiKey].length
-                      : null;
+              {SECTIONS.filter((section) => section.visible?.(data)).map(
+                ({ key, label, icon: Icon, apiKey }) => {
+                  const count = Array.isArray(data?.[apiKey])
+                    ? data[apiKey].length
+                    : null;
 
-                    return (
-                      <button
-                        key={key}
-                        onClick={() => setActive(key)}
-                        className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl text-sm transition-all duration-200 group
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => setActive(key)}
+                      className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl text-sm transition-all duration-200 group
                           ${
                             active === key
                               ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25 scale-[1.02]"
                               : "hover:bg-gray-50 text-gray-700 hover:shadow-md hover:scale-[1.01]"
                           }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`transition-transform duration-200 ${active === key ? "" : "group-hover:scale-110"}`}
-                          >
-                            <Icon
-                              size={12}
-                              strokeWidth={active === key ? 2.5 : 2}
-                            />
-                          </div>
-                          <span
-                            className={
-                              active === key ? "font-semibold" : "font-medium"
-                            }
-                          >
-                            {label}
-                          </span>
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`transition-transform duration-200 ${active === key ? "" : "group-hover:scale-110"}`}
+                        >
+                          <Icon
+                            size={12}
+                            strokeWidth={active === key ? 2.5 : 2}
+                          />
                         </div>
+                        <span
+                          className={
+                            active === key ? "font-semibold" : "font-medium"
+                          }
+                        >
+                          {label}
+                        </span>
+                      </div>
 
-                        {count !== null && (
-                          <span
-                            className={`text-xs px-2.5 py-1 rounded-full font-medium transition-colors
+                      {count !== null && (
+                        <span
+                          className={`text-xs px-2.5 py-1 rounded-full font-medium transition-colors
                             ${
                               active === key
                                 ? "bg-white/20 text-white"
                                 : "bg-gray-100 text-gray-600 group-hover:bg-blue-50 group-hover:text-blue-600"
                             }`}
-                          >
-                            {count}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </aside>
-
-            {/* ---------------------------------- */}
-            {/* Main Content */}
-            {/* ---------------------------------- */}
-
-            <main className="flex-1 space-y-3 min-w-0">
-              {/* Header */}
-              <div className="bg-gradient-to-br from-white to-gray-50/50 rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
-                <div className="px-8 py-6">
-                  <div className="flex justify-between items-start gap-6">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start gap-4 mb-4">
-                        <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
-                          <FileText
-                            className="text-white"
-                            size={28}
-                            strokeWidth={2}
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h1 className="text-xl font-bold text-gray-800 mb-1 truncate">
-                            {contractEntity.ContractTitle}
-                          </h1>
-                          <div className="flex items-center gap-2 text-gray-600">
-                            <Building2 size={12} />
-                            <p className="text-sm font-medium">
-                              {contractEntity.CompanyName}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap gap-2">
-                        <Tag
-                          color="success"
-                          className="px-3 py-1 rounded-lg border-0 bg-green-50 text-green-700 font-medium flex items-center"
                         >
-                          {contractEntity.Status}
-                        </Tag>
+                          {count}
+                        </span>
+                      )}
+                    </button>
+                  );
+                },
+              )}
+            </div>
+          </div>
+        </aside>
 
-                        <Tag className="px-3 py-1 rounded-lg border border-blue-200 bg-blue-50 text-blue-700 font-medium flex items-center">
-                          {contractEntity.ContractType}
-                        </Tag>
+        {/* ---------------------------------- */}
+        {/* Main Content */}
+        {/* ---------------------------------- */}
 
-                        {contractEntity.FinalizedDate && (
-                          <Tag className="px-3 py-1 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 font-medium flex items-center gap-1">
-                            <Calendar size={14} />
-                            <span>
-                              {formatDate(contractEntity.FinalizedDate)}
-                            </span>
-                          </Tag>
-                        )}
+        <main className="flex-1 space-y-3 min-w-0">
+          {/* Header */}
+          <div className="bg-gradient-to-br from-white to-gray-50/50 rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
+            <div className="px-8 py-6">
+              <div className="flex justify-between items-start gap-6">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                      <FileText
+                        className="text-white"
+                        size={28}
+                        strokeWidth={2}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h1 className="text-xl font-bold text-gray-800 mb-1 truncate">
+                        {contractEntity.ContractTitle}
+                      </h1>
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <Building2 size={12} />
+                        <p className="text-sm font-medium">
+                          {contractEntity.CompanyName}
+                        </p>
                       </div>
                     </div>
+                  </div>
 
-                    <Button
-                      icon={<ArrowLeft size={18} />}
-                      onClick={() => navigate(-1)}
-                      className="h-10 px-5 rounded-xl border-gray-300 hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm hover:shadow-md"
+                  <div className="flex flex-wrap gap-2">
+                    <Tag
+                      color="success"
+                      className="px-3 py-1 rounded-lg border-0 bg-green-50 text-green-700 font-medium flex items-center"
                     >
-                      Back
-                    </Button>
-                  </div>
-                </div>
-              </div>
+                      {contractEntity.Status}
+                    </Tag>
 
-              {/* Section Content */}
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
-                <div className="p-4">
-                  <div className="animate-fadeIn">
-                    {active === "overview" && <Overview data={data} />}
-                    {active === "documents" && (
-                      <Documents items={data.documents} />
-                    )}
-                    {active === "milestones" && (
-                      <Milestones items={data.contractMilestones} />
-                    )}
-                    {active === "provisions" && (
-                      <Provisions items={data.contractKeyProvisions} />
-                    )}
-                    {active === "obligations" && (
-                      <Obligations items={data.contractObligations} />
-                    )}
-                    {active === "clauses" && (
-                      <Clauses items={data.contractClauses} />
-                    )}
-                    {active === "pricing" && (
-                      <Pricing items={data.contractPricingTerms} />
-                    )}
-                    {active === "provenance" && (
-                      <Provenance data={data.provenance} />
+                    <Tag className="px-3 py-1 rounded-lg border border-blue-200 bg-blue-50 text-blue-700 font-medium flex items-center">
+                      {contractEntity.ContractType}
+                    </Tag>
+
+                    {contractEntity.FinalizedDate && (
+                      <Tag className="px-3 py-1 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 font-medium flex items-center gap-1">
+                        <Calendar size={14} />
+                        <span>{formatDate(contractEntity.FinalizedDate)}</span>
+                      </Tag>
                     )}
                   </div>
                 </div>
+
+                <Button
+                  icon={<ArrowLeft size={18} />}
+                  onClick={() => navigate(-1)}
+                  className=" flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 transition-all duration-200 hover:bg-emerald-100 hover:border-emerald-300 hover:-translate-y-[1px] active:translate-y-0 "
+                >
+                  Back
+                </Button>
               </div>
-            </main>
+            </div>
           </div>
-        </div>
+
+          {/* Section Content */}
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
+            <div className="p-4">
+              <div className="animate-fadeIn">
+                {active === "overview" && <Overview data={data} />}
+                {active === "documents" && <Documents items={data.documents} />}
+                {active === "milestones" && (
+                  <Milestones items={data.contractMilestones} />
+                )}
+                {active === "provisions" && (
+                  <Provisions items={data.contractKeyProvisions} />
+                )}
+                {active === "obligations" && (
+                  <Obligations items={data.contractObligations} />
+                )}
+                {active === "clauses" && (
+                  <Clauses items={data.contractClauses} />
+                )}
+                {active === "pricing" && (
+                  <Pricing items={data.contractPricingTerms} />
+                )}
+                {active === "provenance" && (
+                  <Provenance data={data.provenance} />
+                )}
+                {active === "invoices" && <Invoices items={data.invoices} />}
+                {active === "amendments" && (
+                  <Amendments items={data.amendments} />
+                )}
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
     </div>
   );
@@ -629,18 +675,125 @@ function InfoCard({
   );
 }
 
-// function Info({ label, value }: { label: string; value: string }) {
-//   return (
-//     <div>
-//       <div className="text-xs uppercase tracking-wide text-gray-400 mb-1">
-//         {label}
-//       </div>
-//       <div className="font-medium">{value || "-"}</div>
-//     </div>
-//   );
-// }
-
 function formatDate(date?: string) {
   if (!date) return "-";
   return new Date(date).toLocaleDateString();
+}
+
+export function Invoices({ items = [] }: { items: any[] }) {
+  return (
+    <div>
+      <h2 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+        <div className="w-1 h-5 bg-gradient-to-b from-green-500 to-emerald-500 rounded-full" />
+        Invoices ({items.length})
+      </h2>
+
+      <div className="space-y-4">
+        {items.map((inv) => {
+          const invoice = inv.invoice;
+
+          return (
+            <div
+              key={invoice.RowKey}
+              className="border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all duration-200 
+                         bg-gradient-to-r hover:from-green-50/50 hover:border-green-300 group"
+            >
+              <div className="flex justify-between items-start gap-4">
+                <div className="flex items-start gap-3">
+                  <div
+                    className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg 
+                                  flex items-center justify-center group-hover:scale-110 transition-transform"
+                  >
+                    <Receipt className="text-white" size={20} />
+                  </div>
+
+                  <div>
+                    <h3 className="font-semibold text-gray-800">
+                      Invoice #{invoice.RowKey}
+                    </h3>
+
+                    <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                      <Calendar size={14} />
+                      {invoice.InvoiceDate
+                        ? new Date(invoice.InvoiceDate).toLocaleDateString()
+                        : "—"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-right">
+                  <p className="text-lg font-bold text-gray-800 flex items-center gap-1 justify-end">
+                    <DollarSign size={16} />
+                    {invoice.TotalAmount}
+                  </p>
+
+                  <span
+                    className={`inline-block mt-1 px-3 py-1 rounded-lg text-xs font-semibold
+                      ${
+                        invoice.Status === "Paid"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-amber-100 text-amber-700"
+                      }`}
+                  >
+                    {invoice.Status}
+                  </span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+export function Amendments({ items = [] }: { items: any[] }) {
+  return (
+    <div>
+      <h2 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+        <div className="w-1 h-5 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full" />
+        Amendments ({items.length})
+      </h2>
+
+      <div className="space-y-4">
+        {items.map((a, index) => {
+          const am = a.amendment;
+
+          return (
+            <div
+              key={index}
+              className="relative border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all duration-200 
+                         bg-gradient-to-r hover:from-purple-50/50 hover:border-purple-300 group"
+            >
+              {/* index bubble like milestones */}
+              <div
+                className="absolute left-5 top-5 w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 
+                              rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg"
+              >
+                {index + 1}
+              </div>
+
+              <div className="pl-12">
+                <div className="flex items-center gap-2 mb-2">
+                  <FileDiff className="text-purple-600" size={18} />
+                  <h3 className="font-semibold text-gray-800">
+                    {am.AmendmentTitle}
+                  </h3>
+                </div>
+
+                <p className="text-sm text-gray-600 mb-3">
+                  {am.AmendmentSummary || "—"}
+                </p>
+
+                <p className="text-xs text-gray-500 flex items-center gap-1.5">
+                  <Calendar size={14} />
+                  {am.AmendmentDate || "—"}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }

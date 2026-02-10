@@ -14,6 +14,7 @@ import DocumentForm from "./pages/Documents/DocumentRequestForm";
 import Dashboard from "./pages/Home";
 import Contracts from "./pages/Contract/ContractsPage";
 import ContractsTableDetails from "./pages/Contract/ContractsTableDetails";
+import DocumentTableDetails from "./pages/Documents/DocumentTableDetails";
 import NewContractForm from "./pages/Contract/NewContractForm";
 import NewRenewals from "./pages/Renewals/NewRenewals";
 import Renewals from "./pages/Renewals/RenewalsPage";
@@ -21,7 +22,8 @@ import SignupPage from "./pages/auth/signuppage";
 import Login from "./pages/auth/loginpage";
 import RelationshipsLayout from "./components/layout/Relationships/RelationshipsLayout";
 import Relationships from "./pages/Relationships/RelationshipsPage";
-
+import IntakeTableDetails from "./pages/Intake/IntakeTableDetails";
+import RelationshipsTableDetails from "./pages/Relationships/RelationshipsTableDetails";
 export default function App() {
   return (
     <BrowserRouter>
@@ -58,6 +60,7 @@ export default function App() {
           {/* Intake */}
           <Route element={<IntakeLayout />}>
             <Route path="/intake" element={<Intake />} />
+            <Route path="/intake/:requestId" element={<IntakeTableDetails />} />
             <Route
               path="/intake/CreateNewRequestIntake"
               element={<IntakeRequestForm />}
@@ -66,13 +69,20 @@ export default function App() {
           <Route element={<DocumentLayout />}>
             <Route path="/documents" element={<Document />} />
             <Route
+              path="/documents/:documentId"
+              element={<DocumentTableDetails />}
+            />
+            <Route
               path="/document/CreateNewDocument"
               element={<DocumentForm />}
             />
           </Route>
-          <Route element={<RelationshipsLayout/>}>
-            <Route path="/relationships" element={<Relationships/>} />
-
+          <Route element={<RelationshipsLayout />}>
+            <Route path="/relationships" element={<Relationships />} />
+            <Route
+              path="/relationships/:id"
+              element={<RelationshipsTableDetails />}
+            />
           </Route>
         </Route>
 

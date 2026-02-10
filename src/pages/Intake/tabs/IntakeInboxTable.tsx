@@ -19,9 +19,10 @@ type Sorter = {
 };
 
 type Filters = {
-  status: string[];
+  Status: string[];
   subject: string[];
   currentJobName: string[];
+  RequestId: string[];
 };
 
 export default function IntakeTable({ intake }: { intake: Intake[] }) {
@@ -31,9 +32,10 @@ export default function IntakeTable({ intake }: { intake: Intake[] }) {
   const [search, setSearch] = useState("");
   const [sorter, setSorter] = useState<Sorter>({});
   const [filters, setFilters] = useState<Filters>({
-    status: [],
+    Status: [],
     subject: [],
     currentJobName: [],
+    RequestId: [],
   });
 
   const [filterOpen, setFilterOpen] = useState(false);
@@ -63,22 +65,25 @@ export default function IntakeTable({ intake }: { intake: Intake[] }) {
 
     const q = search.toLowerCase();
     return sortedIntake.filter((c) =>
-      `${c.subject} ${c.currentJobName} ${c.noOfDocuments}`
+      `${c.subject} ${c.currentJobName} ${c.noOfDocuments} ${c.RequestId}`
         .toLowerCase()
         .includes(q),
     );
   }, [search, sortedIntake]);
-
   /* ---------------- filters ---------------- */
   const filteredIntake = useMemo(() => {
     return searchedIntake.filter((c) => {
-      if (filters.status.length && !filters.status.includes(c.status))
+      if (filters.Status.length && !filters.Status.includes(c.Status))
         return false;
       if (filters.subject.length && !filters.subject.includes(c.subject))
         return false;
       if (
         filters.currentJobName.length &&
         !filters.currentJobName.includes(c.currentJobName)
+      )
+        if (
+        filters.RequestId.length &&
+        !filters.RequestId.includes(c.RequestId)
       )
         return false;
       return true;
@@ -90,7 +95,7 @@ export default function IntakeTable({ intake }: { intake: Intake[] }) {
     usePagination<Intake>(filteredIntake);
 
   const activeFilterCount =
-    filters.status.length +
+    filters.Status.length +
     filters.subject.length +
     filters.currentJobName.length;
 
@@ -238,8 +243,8 @@ export default function IntakeTable({ intake }: { intake: Intake[] }) {
             <FilterSection
               title="Status"
               options={["Completed", "Failed", "Signed", "NotStarted"]}
-              value={filters.status}
-              onChange={(v) => setFilters((f) => ({ ...f, status: v }))}
+              value={filters.Status}
+              onChange={(v) => setFilters((f) => ({ ...f, Status: v }))}
             />
           </div>
 
@@ -271,7 +276,7 @@ export default function IntakeTable({ intake }: { intake: Intake[] }) {
               icon={<RotateCcw size={16} />}
               className="flex-1"
               onClick={() =>
-                setFilters({ status: [], subject: [], currentJobName: [] })
+                setFilters({ Status: [], subject: [], currentJobName: [], RequestId: [] })
               }
             >
               Clear all

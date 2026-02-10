@@ -65,6 +65,7 @@ export interface Renewal {
 
 // constants/apps.ts
 export interface Intake {
+  [x: string]: any;
   key: string;
 
   subject: string;
@@ -72,10 +73,11 @@ export interface Intake {
   source: string;
 
   noOfDocuments: number;
-  status: string;
+  Status: string;
 
   created: string;
   updated: string;
+  RequestId: any;
 }
 
 export interface Document {
