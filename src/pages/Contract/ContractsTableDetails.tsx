@@ -34,8 +34,9 @@ const SECTIONS = [
     label: "Overview",
     icon: FileText,
     apiKey: "contractEntity",
-    visible: (data: any) =>
-      Array.isArray(data?.contractEntity) && data.contractEntity.length > 0,
+    // visible: (data: any) =>
+    //   Array.isArray(data?.contractEntity) && data.contractEntity.length > 0,
+    always: true,
   },
   {
     key: "documents",
@@ -61,6 +62,13 @@ const SECTIONS = [
     visible: (data: any) =>
       Array.isArray(data?.contractKeyProvisions) &&
       data.contractKeyProvisions.length > 0,
+  },
+  {
+    key: "correspondence",
+    label: "Correspondence",
+    icon: FileText,
+    apiKey: "correspondence",
+    visible: (data: any) => data?.correspondence?.length > 0,
   },
   {
     key: "obligations",
@@ -207,57 +215,57 @@ export default function ContractDetailsPage() {
                 Navigation
               </h3>
 
-              {SECTIONS.filter((section) => section.visible?.(data)).map(
-                ({ key, label, icon: Icon, apiKey }) => {
-                  const count = Array.isArray(data?.[apiKey])
-                    ? data[apiKey].length
-                    : null;
+              {SECTIONS.filter(
+                (section) => section.always || section.visible?.(data),
+              ).map(({ key, label, icon: Icon, apiKey }) => {
+                const count = Array.isArray(data?.[apiKey])
+                  ? data[apiKey].length
+                  : null;
 
-                  return (
-                    <button
-                      key={key}
-                      onClick={() => setActive(key)}
-                      className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl text-sm transition-all duration-200 group
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setActive(key)}
+                    className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl text-sm transition-all duration-200 group
                           ${
                             active === key
                               ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25 scale-[1.02]"
                               : "hover:bg-gray-50 text-gray-700 hover:shadow-md hover:scale-[1.01]"
                           }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`transition-transform duration-200 ${active === key ? "" : "group-hover:scale-110"}`}
-                        >
-                          <Icon
-                            size={12}
-                            strokeWidth={active === key ? 2.5 : 2}
-                          />
-                        </div>
-                        <span
-                          className={
-                            active === key ? "font-semibold" : "font-medium"
-                          }
-                        >
-                          {label}
-                        </span>
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`transition-transform duration-200 ${active === key ? "" : "group-hover:scale-110"}`}
+                      >
+                        <Icon
+                          size={12}
+                          strokeWidth={active === key ? 2.5 : 2}
+                        />
                       </div>
+                      <span
+                        className={
+                          active === key ? "font-semibold" : "font-medium"
+                        }
+                      >
+                        {label}
+                      </span>
+                    </div>
 
-                      {count !== null && (
-                        <span
-                          className={`text-xs px-2.5 py-1 rounded-full font-medium transition-colors
+                    {count !== null && (
+                      <span
+                        className={`text-xs px-2.5 py-1 rounded-full font-medium transition-colors
                             ${
                               active === key
                                 ? "bg-white/20 text-white"
                                 : "bg-gray-100 text-gray-600 group-hover:bg-blue-50 group-hover:text-blue-600"
                             }`}
-                        >
-                          {count}
-                        </span>
-                      )}
-                    </button>
-                  );
-                },
-              )}
+                      >
+                        {count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </aside>
@@ -329,13 +337,16 @@ export default function ContractDetailsPage() {
           <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
             <div className="p-4">
               <div className="animate-fadeIn">
-                {active === "overview" && <Overview data={data} />}
+                {active === "overview" && <Overview data={data.c} />}
                 {active === "documents" && <Documents items={data.documents} />}
                 {active === "milestones" && (
                   <Milestones items={data.contractMilestones} />
                 )}
                 {active === "provisions" && (
                   <Provisions items={data.contractKeyProvisions} />
+                )}
+                {active === "correspondence" && (
+                  <Correspondence items={data.correspondence} />
                 )}
                 {active === "obligations" && (
                   <Obligations items={data.contractObligations} />
@@ -367,7 +378,7 @@ export default function ContractDetailsPage() {
 /* ---------------------------------- */
 
 function Overview({ data }: { data: any }) {
-  const c = data.contractEntity;
+  const c = data?.contractEntity ?? {};
 
   return (
     <div>
@@ -510,6 +521,48 @@ function Provisions({ items }: { items: any[] }) {
                 {p.value}
               </span>
             </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Correspondence({ items }: { items: any[] }) {
+  return (
+    <div>
+      <h2 className="text-lg font-bold mb-6 flex items-center gap-2">
+        <FileText size={18} /> Correspondence ({items.length})
+      </h2>
+
+      <div className="space-y-4">
+        {items.map((c, i) => (
+          <div key={i} className="border rounded-xl p-4 bg-blue-50 shadow-sm">
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="font-semibold text-gray-800">
+                {c.Subject || "No Subject"}
+              </h3>
+
+              <span className="text-xs text-gray-500">
+                {c.Created ? new Date(c.Created).toLocaleString() : "—"}
+              </span>
+            </div>
+
+            <div className="text-sm text-gray-600 mb-3">
+              Created by: <b>{c.CreatedBy || "—"}</b>
+            </div>
+
+            {c.BodyUrl && (
+              <a
+                href={c.BodyUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline"
+              >
+                <FileText size={14} />
+                View Message
+              </a>
+            )}
           </div>
         ))}
       </div>
@@ -691,7 +744,6 @@ export function Invoices({ items = [] }: { items: any[] }) {
       <div className="space-y-4">
         {items.map((inv) => {
           const invoice = inv.invoice;
-
           return (
             <div
               key={invoice.RowKey}
