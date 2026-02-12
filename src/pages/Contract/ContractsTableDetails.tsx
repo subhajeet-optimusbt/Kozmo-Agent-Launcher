@@ -19,7 +19,7 @@ import {
   Receipt,
   FileDiff,
 } from "lucide-react";
-
+import { baseUrl } from "../../utils/baseUrl";
 import { getActiveAccountId, ACCOUNT_CHANGED_EVENT } from "../../utils/auth";
 import FullscreenLoader from "../../components/ui/FullScreenLoader";
 import "./ContractDetails.css";
@@ -415,43 +415,100 @@ function Overview({ data }: { data: any }) {
 }
 
 function Documents({ items }: { items: any[] }) {
+  const tenantId = getActiveAccountId();
+
+  const handleDownload = async (documentUrl: string, fileName: string) => {
+    try {
+      const encodedBlobUrl = encodeURIComponent(documentUrl);
+
+      const downloadUrl = `${baseUrl()}/api/Contract/${tenantId}/DownloadFromSaasUrl?blobUrl=${encodedBlobUrl}`;
+
+      const response = await fetch(downloadUrl, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to download document");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Download error:", error);
+    }
+  };
+
   return (
     <div>
       <h2 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
         <div className="w-1 h-5 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full" />
         Documents ({items.length})
       </h2>
+
       <div className="space-y-3">
         {items.map((d) => (
           <div
             key={d.RowKey}
-            className="group flex justify-between items-center border border-gray-200 rounded-xl p-5 hover:shadow-lg hover:border-blue-300 transition-all duration-200 bg-gradient-to-r hover:from-blue-50/50"
+            className="group flex justify-between items-center border border-gray-200 rounded-xl p-5 
+                       hover:shadow-lg hover:border-blue-300 transition-all duration-200 
+                       bg-gradient-to-r hover:from-blue-50/50"
           >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+            {/* Left */}
+            <div className="flex items-center gap-4 min-w-0">
+              <div
+                className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg 
+                              flex items-center justify-center flex-shrink-0 
+                              group-hover:scale-110 transition-transform"
+              >
                 <FileText className="text-blue-600" size={24} />
               </div>
-              <div>
-                <h3 className="font-semibold text-gray-800 mb-0.5">
-                  {d.FileName}
+
+              <div className="min-w-0">
+                <h3 className="font-semibold text-gray-800 truncate">
+                  {d.Name}
                 </h3>
-                <p className="text-xs text-gray-500 flex items-center gap-2">
+
+                <div className="flex flex-wrap gap-2 mt-1 text-xs">
                   <span className="px-2 py-0.5 bg-gray-100 rounded">
-                    {d.DocumentType}
+                    {d.Type}
                   </span>
+
                   <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded">
                     {d.Status}
                   </span>
-                </p>
+
+                  {d.Language && (
+                    <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded">
+                      {d.Language}
+                    </span>
+                  )}
+
+                  {d.IsPrimary === "Yes" && (
+                    <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded font-semibold">
+                      Primary
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
+            {/* Right */}
             <Button
               type="primary"
               icon={<Download size={16} />}
-              href={d.FileUrl}
-              target="_blank"
-              className="bg-gradient-to-r from-blue-500 to-blue-600 border-0 rounded-lg shadow-md hover:shadow-lg"
+              onClick={() => handleDownload(d.DocumentUrl, d.Name)}
+              className="bg-gradient-to-r from-blue-500 to-blue-600 
+                         border-0 rounded-lg shadow-md hover:shadow-lg"
             >
               View
             </Button>
