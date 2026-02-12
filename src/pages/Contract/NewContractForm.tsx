@@ -1,8 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
 import { Form, Button, message } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -50,11 +47,32 @@ export default function CreateContractPage() {
     };
     load();
   }, []);
-  const onFinish = async (values: any) => {
+  // const onFinish = async (values: any) => {
+  //   try {
+  //     setLoading(true);
+  //     const files = fileList;
+  //     await createContract(values, files);
+  //     message.success("Contract created successfully");
+  //     navigate("/contracts");
+  //   } catch {
+  //     message.error("Failed to create contract");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+
     try {
-      setLoading(true);
-      const files = fileList;
-      await createContract(values, files);
+      const formData = new FormData(e.currentTarget);
+
+      const values: Record<string, any> = {};
+      formData.forEach((value, key) => {
+        values[key] = value;
+      });
+
+      await createContract(values, fileList);
       message.success("Contract created successfully");
       navigate("/contracts");
     } catch {
@@ -63,6 +81,7 @@ export default function CreateContractPage() {
       setLoading(false);
     }
   };
+
   if (loading) {
     return <FullscreenLoader />;
   }
@@ -97,7 +116,9 @@ export default function CreateContractPage() {
       <Form
         layout="vertical"
         form={form}
-        onFinish={onFinish}
+        // onFinish={onFinish}
+        component="form"
+        onSubmitCapture={onSubmit}
         initialValues={{ termType: "fixed", autoRenew: false }}
       >
         {" "}
