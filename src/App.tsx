@@ -80,7 +80,7 @@ export default function App() {
           <Route element={<RelationshipsLayout />}>
             <Route path="/relationships" element={<Relationships />} />
             <Route
-              path="/relationships/:id"
+              path="/relationships/:counterpartyId"
               element={<RelationshipsTableDetails />}
             />
           </Route>

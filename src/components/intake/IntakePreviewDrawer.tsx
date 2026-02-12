@@ -71,7 +71,9 @@ export default function IntakePreviewDrawer({ intake, onClose }: Props) {
               icon={<Eye size={16} />}
               className="w-full flex items-center justify-center gap-2"
               onClick={() => {
-                navigate(`/intake/${intake.RequestId}`);
+                navigate(`/intake/${intake.RequestId}`, {
+                  state: { overview: intake },
+                });
                 onClose();
               }}
             >

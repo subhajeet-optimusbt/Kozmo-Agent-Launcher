@@ -10,7 +10,7 @@ export const mapIntakeFromApi = (apiData: Array<any>) => {
     key: c.RowKey,
 
     // Screenshot shows "Untitled Request"
-    subject: c.subject ?? "Untitled Request",
+    subject: c.Intent ?? "Untitled Request",
 
     currentJobName: c.CurrentJobName ?? "0",
 

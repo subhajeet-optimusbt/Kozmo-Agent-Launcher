@@ -71,11 +71,13 @@ export default function RelationshipsPreviewDrawer({ relationships, onClose }: P
               icon={<Eye size={16} />}
               className="w-full flex items-center justify-center gap-2"
               onClick={() => {
-                navigate(`/relationships/${relationships.key}`);
+                navigate(`/relationships/${relationships.key}`,{
+                  state: {overview: relationships},
+                });
                 onClose();
               }}
             >
-              View Full Contract
+              View Full Details
               <ArrowRight size={14} />
             </Button>
           </div>

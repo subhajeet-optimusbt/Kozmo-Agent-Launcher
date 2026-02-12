@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   FileText,
   Folder,
@@ -38,6 +38,8 @@ const SECTIONSINTAKE = [
 export default function IntakeDetailsPage() {
   const { requestId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const overview = location.state?.overview;
   const tenantId = getActiveAccountId();
 
   const [active, setActive] = useState("files");
@@ -150,9 +152,61 @@ export default function IntakeDetailsPage() {
           {/* Section Content Card */}
           <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
             <div className="p-6">
-              {/* {active === "overview" && (
-            <IntakeOverview requestId={requestId!} />
-          )} */}
+              {active === "overview" && (
+                <>
+                  {!overview && (
+                    <div className="text-sm text-gray-500 text-center py-10">
+                      Overview data not available.
+                    </div>
+                  )}
+
+                  {overview && (
+                    <div className="space-y-6">
+                      {/* Header */}
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h2 className="text-xl font-bold text-gray-900">
+                            {overview.subject}
+                          </h2>
+                          <p className="text-sm text-gray-500 mt-1">
+                            Intake overview
+                          </p>
+                        </div>
+
+                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                          {overview.Status}
+                        </span>
+                      </div>
+
+                      {/* Info Grid */}
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                        <OverviewItem
+                          label="Current Job Name"
+                          value={overview.currentJobName}
+                        />
+                        <OverviewItem
+                          label="No Of Documents"
+                          value={overview.noOfDocuments}
+                        />
+                        <OverviewItem
+                          label="Created"
+                          value={overview.created}
+                        />
+                        <OverviewItem
+                          label="Modified"
+                          value={overview.modified}
+                        />
+                      </div>
+
+                      {/* Hint */}
+                      <div className="rounded-xl border border-gray-200 bg-gray-50 p-5 text-sm text-gray-600">
+                        View obligations, clauses, milestones, documents, and
+                        pricing terms inside the full contract workspace.
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
 
               {active === "files" && <IntakeFiles items={files} />}
 
@@ -165,6 +219,16 @@ export default function IntakeDetailsPage() {
   );
 }
 
+function OverviewItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <div className="text-xs uppercase tracking-wide text-gray-400 mb-1">
+        {label}
+      </div>
+      <div className="text-sm font-semibold text-gray-900">{value || "—"}</div>
+    </div>
+  );
+}
 export function IntakeFiles({ items }: { items: any[] }) {
   return (
     <div className="bg-white rounded-2xl border shadow-sm p-6">

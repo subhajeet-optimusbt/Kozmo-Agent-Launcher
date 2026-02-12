@@ -93,35 +93,78 @@ export const fetchOwners = async (): Promise<DropdownOption[]> => {
 };
 
 // ---------------- POST CONTRACT ----------------
+const buildFieldsPayload = (values: any) => {
+  return [
+    { FieldName: "BusinessArea", FieldValue: values.area, FieldType: "text" },
+    { FieldName: "Type", FieldValue: values.type, FieldType: "text" },
+    { FieldName: "Title", FieldValue: values.title, FieldType: "text" },
+    { FieldName: "ContractNumber", FieldValue: values.number, FieldType: "text" },
+    { FieldName: "Counterparty", FieldValue: values.counterparty, FieldType: "text" },
+    { FieldName: "CompanyName", FieldValue: values.company, FieldType: "text" },
+    { FieldName: "OriginatingParty", FieldValue: values.originatingParty, FieldType: "text" },
+    { FieldName: "TermType", FieldValue: values.termType, FieldType: "text" },
+
+    {
+      FieldName: "StartDate",
+      FieldValue: dayjs(values.startDate).format("YYYY-MM-DDT00:00:00.000Z"),
+      FieldType: "date",
+    },
+    {
+      FieldName: "EndDate",
+      FieldValue: dayjs(values.endDate).format("YYYY-MM-DDT00:00:00.000Z"),
+      FieldType: "date",
+    },
+
+    {
+      FieldName: "RenewalNoticePeriodDays",
+      FieldValue: values.noticePeriodValue,
+      FieldType: "number",
+    },
+    {
+      FieldName: "RenewalNoticePeriodUnit",
+      FieldValue: values.noticePeriodUnit,
+      FieldType: "text",
+    },
+
+    {
+      FieldName: "Value",
+      FieldValue: values.totalValueAmount,
+      FieldType: "number",
+    },
+    {
+      FieldName: "Currency",
+      FieldValue: values.totalValueCurrency,
+      FieldType: "text",
+    },
+  ];
+};
+
 export const createContract = async (values: any, files: File[]) => {
   const accountId = getAccountId();
-
   const formData = new FormData();
 
-  Object.keys(values).forEach((key) => {
-    let value = values[key];
+  formData.append("PartitionKey", accountId);
+  formData.append("UserName", "Optimus"); // or from auth
 
-    if (dayjs.isDayjs(value)) {
-      value = value.format("YYYY-MM-DD");
-    }
+  const fieldsPayload = buildFieldsPayload(values);
 
-    formData.append(key, value ?? "");
-  });
+  // IMPORTANT: stringify Fields
+  formData.append("Fields", JSON.stringify(fieldsPayload));
 
+  // Files must be appended as "Files"
   files.forEach((file) => {
-    formData.append("documents", file);
+    formData.append("Files", file);
   });
 
   const res = await fetch(
     `${baseUrl()}/api/Contract/${accountId}/CreateContract`,
     {
       method: "POST",
-      credentials: "include", // ⭐ IMPORTANT
+      credentials: "include",
       body: formData,
     },
   );
 
   if (!res.ok) throw new Error("Failed to create contract");
-
   return res.json();
 };
