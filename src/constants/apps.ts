@@ -12,6 +12,7 @@ export interface App {
   route: string;
   icon: string;
   color?: string;
+  externalUrl?: string;
 }
 
 export interface Contract {
@@ -184,9 +185,10 @@ export const APPS: App[] = [
     name: "Platform Settings",
     description: "Tenant and org configuration",
     badge: 0,
-    route: "/settings",
+    route: "/",
     icon: "settings",
     color: "slate",
+    externalUrl: "https://kozmo-saas.azurewebsites.net/Tenant",
     subtitle: undefined,
     category: "",
     actionHint: undefined,

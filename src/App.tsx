@@ -24,6 +24,8 @@ import RelationshipsLayout from "./components/layout/Relationships/Relationships
 import Relationships from "./pages/Relationships/RelationshipsPage";
 import IntakeTableDetails from "./pages/Intake/IntakeTableDetails";
 import RelationshipsTableDetails from "./pages/Relationships/RelationshipsTableDetails";
+import Reports from "./pages/Reports/Reports";
+import ReportDetails from "./pages/Reports/ReportsDetails";
 export default function App() {
   return (
     <BrowserRouter>
@@ -89,6 +91,9 @@ export default function App() {
         {/* ================= PUBLIC ================= */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/reports" element={<Reports />} />
+        <Route path="/reports/:categoryId/:reportId" element={<ReportDetails />} />
+
       </Routes>
     </BrowserRouter>
   );

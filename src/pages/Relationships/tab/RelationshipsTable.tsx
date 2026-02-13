@@ -1,10 +1,13 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button, Input, Tooltip, Select, Divider, Drawer, Badge } from "antd";
 import { LayoutGrid, List, CreditCard, Filter, RotateCcw } from "lucide-react";
 
 import type { Relationships } from "../../../constants/apps";
 import { usePagination } from "../../../hooks/pagination";
-
+import { fetchRelationships } from "../../../services/RelationshipsService";
+import { mapRelationshipsFromApi } from "../../../types/relationships";
+import FullscreenLoader from "../../../components/ui/FullScreenLoader";
+import { getActiveAccountId, ACCOUNT_CHANGED_EVENT } from "../../../utils/auth";
 import RelationshipsTableView from "../../../components/relationships/RelationshipsTableView";
 import RelastionshipsListView from "../../../components/relationships/RelationshipsListView";
 import RelationshipsCardView from "../../../components/relationships/RelationshipsCardView";
@@ -23,11 +26,10 @@ type Filters = {
   category: string[];
 };
 
-export default function RelationshipsTable({
-  relationships,
-}: {
-  relationships: Relationships[];
-}) {
+export default function RelationshipsTable() {
+  const [loading, setLoading] = useState(false);
+  const [relationships, setRelationships] = useState<Relationships[]>([]);
+  const [accountId, setAccountId] = useState(getActiveAccountId());
   const [view, setView] = useState<View>("table");
   const [activeRelationships, setActiveRelationships] =
     useState<Relationships | null>(null);
@@ -45,6 +47,35 @@ export default function RelationshipsTable({
   // useEffect(() => {
   //   setPage(1);
   // }, [renewals]);
+
+  useEffect(() => {
+    if (!accountId) return;
+
+    const loadRelationships = async () => {
+      setLoading(true);
+      try {
+        const apiData = await fetchRelationships(accountId);
+        setRelationships(mapRelationshipsFromApi(apiData ?? []));
+      } catch (e) {
+        console.error(e);
+        setRelationships([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadRelationships();
+  }, [accountId]);
+
+  useEffect(() => {
+    const handler = () => {
+      setAccountId(getActiveAccountId());
+      setRelationships([]);
+    };
+
+    window.addEventListener(ACCOUNT_CHANGED_EVENT, handler);
+    return () => window.removeEventListener(ACCOUNT_CHANGED_EVENT, handler);
+  }, []);
 
   /* ---------------- sorting ---------------- */
   const sortedRelationships = useMemo(() => {
@@ -118,6 +149,7 @@ export default function RelationshipsTable({
     <div className="space-y-4">
       {/* ---------------- TOP TOOLBAR ---------------- */}
       <div className="flex items-center justify-between gap-6">
+        {loading && <FullscreenLoader />}
         <div className="flex items-center gap-3">
           <Input.Search
             placeholder="Search relationships...."

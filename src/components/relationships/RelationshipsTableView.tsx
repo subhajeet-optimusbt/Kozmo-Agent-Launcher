@@ -137,11 +137,21 @@ export default function RelationshipsTableView({
       title: <SortableHeader label="Created" field="created" />,
       dataIndex: "created",
       width: 160,
+      render: (value: string) => {
+        if(!value) return "N/A";
+        const date = new Date(value);
+        return date.toLocaleDateString("en-US");
+      },
     },
     {
       title: <SortableHeader label="Modified" field="modified" />,
       dataIndex: "modified",
       width: 160,
+      render: (value: string) => {
+        if(!value) return "N/A";
+        const date = new Date(value);
+        return date.toLocaleDateString("en-US");
+      },
     },
   ];
 

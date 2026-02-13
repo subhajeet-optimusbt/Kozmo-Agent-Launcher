@@ -26,6 +26,16 @@ export default function RelationshipsListView({
   data: Relationships[];
   onSelect: (c: Relationships) => void;
 }) {
+  const formatDate = (value?: string) => {
+    if (!value) return "N/A";
+
+    return new Date(value).toLocaleDateString("en-US", {
+      month: "2-digit",
+      day: "2-digit",
+      year: "2-digit",
+    });
+  };
+
   return (
     <div className="space-y-3">
       {data.map((c) => (
@@ -60,9 +70,7 @@ export default function RelationshipsListView({
               {c.displayName}
             </h3>
 
-            <p className="text-sm text-gray-500 truncate">
-              {c.legalName}
-            </p>
+            <p className="text-sm text-gray-500 truncate">{c.legalName}</p>
 
             <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
               <Tag className="rounded-full px-3" color="blue">
@@ -73,12 +81,9 @@ export default function RelationshipsListView({
 
           {/* Meta */}
           <div className="flex flex-col items-end gap-2 text-xs">
-            <Badge
-              color={getStatusBadgeColor(c.status)}
-              text={c.status}
-            />
+            <Badge color={getStatusBadgeColor(c.status)} text={c.status} />
             <span className="text-gray-400">
-              Updated {c.modified}
+              Updated {formatDate(c.modified)}
             </span>
           </div>
         </div>

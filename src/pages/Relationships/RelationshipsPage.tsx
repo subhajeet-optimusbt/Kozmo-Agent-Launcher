@@ -5,24 +5,19 @@ import { useOutletContext } from "react-router-dom";
 import RelationshipsDashboard from "./tab/RelationshipsDashboard";
 import RelationshipsTable from "./tab/RelationshipsTable";
 
-import {
-  fetchRelationships,
-  fetchRelationshipsDashboard,
-} from "../../services/RelationshipsService";
-import { mapRelationshipsFromApi } from "../../types/relationships";
+import { fetchRelationshipsDashboard } from "../../services/RelationshipsService";
 import FullscreenLoader from "../../components/ui/FullScreenLoader";
 import { getActiveAccountId, ACCOUNT_CHANGED_EVENT } from "../../utils/auth";
-import type { Relationships } from "../../constants/apps";
 type RelationshipsContextType = {
   activeTab: string;
 };
 
 export default function RelationshipsPage() {
   const { activeTab } = useOutletContext<RelationshipsContextType>();
-
-  const [relationships, setRelationships] = useState<Relationships[]>([]);
-  const [loading, setLoading] = useState(false);
   const [accountId, setAccountId] = useState(getActiveAccountId());
+
+  const [loading, setLoading] = useState(false);
+
   //   const [range, setRange] = useState<RangeType>("today");
   const [dashboardData, setDashboardData] = useState<any | null>(null);
 
@@ -46,30 +41,12 @@ export default function RelationshipsPage() {
   }, [accountId, activeTab]);
 
   /* ---------------- FETCH Relationships ---------------- */
-  useEffect(() => {
-    if (!accountId) return;
-
-    const loadRelationships = async () => {
-      setLoading(true);
-      try {
-        const apiData = await fetchRelationships(accountId);
-        setRelationships(mapRelationshipsFromApi(apiData ?? []));
-      } catch (e) {
-        console.error(e);
-        setRelationships([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadRelationships();
-  }, [accountId]);
 
   /* ---------------- ACCOUNT CHANGE ---------------- */
   useEffect(() => {
     const handler = () => {
       setAccountId(getActiveAccountId());
-      setRelationships([]);
+      setDashboardData([]);
     };
 
     window.addEventListener(ACCOUNT_CHANGED_EVENT, handler);
@@ -80,7 +57,7 @@ export default function RelationshipsPage() {
     <div className="relative overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-sm">
       {loading && <FullscreenLoader />}
 
-<div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500" />
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500" />
 
       {/* Header */}
       <div className="mx-8 my-4 flex items-center justify-between">
@@ -105,7 +82,7 @@ export default function RelationshipsPage() {
 
       {activeTab === "relationships" && (
         <div className="px-8 pb-8">
-          <RelationshipsTable relationships={relationships} />
+          <RelationshipsTable />
         </div>
       )}
     </div>

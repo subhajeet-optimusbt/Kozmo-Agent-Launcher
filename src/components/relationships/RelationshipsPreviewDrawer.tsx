@@ -10,6 +10,16 @@ type Props = {
 
 export default function RelationshipsPreviewDrawer({ relationships, onClose }: Props) {
   const navigate = useNavigate();
+  const formatDate = (value?: string) => {
+  if (!value) return "N/A";
+
+  return new Date(value).toLocaleDateString("en-US", {
+    month: "2-digit",
+    day: "2-digit",
+    year: "2-digit",
+  });
+};
+
   return (
     <Drawer
       open={!!relationships}
@@ -48,8 +58,8 @@ export default function RelationshipsPreviewDrawer({ relationships, onClose }: P
             <div className="grid grid-cols-2 gap-5 text-sm">
               <Info label="Legal Name" value={relationships.legalName} />
               <Info label="Category" value={relationships.category} />
-              <Info label="Created" value={relationships.created} />
-              <Info label="Modified" value={relationships.modified} />
+              <Info label="Created" value={formatDate(relationships.created)} />
+              <Info label="Modified" value={formatDate(relationships.modified)} />
             </div>
 
             <Divider className="my-4" />

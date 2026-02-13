@@ -26,6 +26,16 @@ export default function RelationshipsCardView({
   data: Relationships[];
   onSelect: (c: Relationships) => void;
 }) {
+  const formatDate = (value?: string) => {
+    if (!value) return "N/A";
+
+    return new Date(value).toLocaleDateString("en-US", {
+      month: "2-digit",
+      day: "2-digit",
+      year: "2-digit",
+    });
+  };
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
       {data.map((c) => (
@@ -79,9 +89,7 @@ export default function RelationshipsCardView({
                 <h3 className="text-sm font-semibold text-gray-900 truncate group-hover:text-emerald-700 transition">
                   {c.displayName}
                 </h3>
-                <p className="text-xs text-gray-500 truncate">
-                  {c.legalName}
-                </p>
+                <p className="text-xs text-gray-500 truncate">{c.legalName}</p>
               </div>
             </div>
 
@@ -96,7 +104,7 @@ export default function RelationshipsCardView({
           {/* Meta */}
           <div className="relative mt-4 flex flex-wrap items-center gap-2 text-xs">
             <span className="text-gray-400">•</span>
-            <span className="text-gray-600">{c.created}</span>
+            <span className="text-gray-600">{formatDate(c.created)}</span>
 
             <span className="text-gray-400">•</span>
             <span className="text-gray-500 truncate">{c.category}</span>
@@ -105,7 +113,9 @@ export default function RelationshipsCardView({
           {/* Footer */}
           <div className="relative mt-5 pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-400">
             <span>Modified</span>
-            <span className="font-medium text-gray-500">{c.modified}</span>
+            <span className="font-medium text-gray-500">
+              {formatDate(c.modified)}
+            </span>
           </div>
 
           {/* Hover accent */}
