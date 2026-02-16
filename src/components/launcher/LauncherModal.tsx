@@ -103,11 +103,7 @@ const LauncherModal: React.FC<LauncherModalProps> = ({
       return newList;
     });
 
-    if (app.externalUrl) {
-      window.open(app.externalUrl, "_blank", "noopener,noreferrer");
-    } else {
-      navigate(app.route);
-    }
+    navigate(app.route);
     setLauncherOpen(false);
   };
 

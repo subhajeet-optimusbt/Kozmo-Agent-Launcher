@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Badge, Tag } from "antd";
 import { FileText } from "lucide-react";
 import { type Relationships } from "../../constants/apps";

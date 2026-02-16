@@ -6,7 +6,6 @@ import {
   Printer,
   Settings2,
   Filter,
-  Calendar,
   Eye,
   Star,
   MoreVertical,
@@ -125,18 +124,11 @@ export default function ReportDetails() {
   const navigate = useNavigate();
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
 
   const categoryName =
     CATEGORY_NAMES[categoryId as string] || "Unknown Category";
   const reportName = REPORT_NAMES[reportId as string] || "Unknown Report";
-
-  const handleRowSelect = (id: number) => {
-    setSelectedRows((prev) =>
-      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id],
-    );
-  };
 
   const removeFilter = (filter: string) => {
     setActiveFilters(activeFilters.filter((f) => f !== filter));
@@ -355,41 +347,40 @@ export default function ReportDetails() {
           <div className="overflow-y-auto max-h-[calc(100vh-160px)]">
             <table className="w-full">
               <thead className="bg-gray-50/50 sticky top-0 z-10">
-                <tr className="border-b border-gray-200">
-                  <th className="px-4 py-3 text-left w-10" />
-                  <th className="px-4 py-3 text-left">
-                    <div className="flex items-center gap-1.5">
+                <tr className="border-b border-gray-200 text-center">
+                  <th className="px-4 py-3 text-center">
+                    <div className="flex items-center justify-center gap-1.5">
                       <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
                         Title & Area
                       </span>
                       <ArrowUpDown className="w-3 h-3 text-gray-400" />
                     </div>
                   </th>
-                  <th className="px-4 py-3 text-left">
-                    <div className="flex items-center gap-1.5">
+                  <th className="px-4 py-3 text-center">
+                    <div className="flex items-center justify-center gap-1.5">
                       <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
                         Type
                       </span>
                       <ArrowUpDown className="w-3 h-3 text-gray-400" />
                     </div>
                   </th>
-                  <th className="px-4 py-3 text-left">
-                    <div className="flex items-center gap-1.5">
+                  <th className="px-4 py-3 text-center">
+                    <div className="flex items-center justify-center gap-1.5">
                       <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
                         Status
                       </span>
                       <ArrowUpDown className="w-3 h-3 text-gray-400" />
                     </div>
                   </th>
-                  <th className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-1.5">
+                  <th className="px-4 py-3 text-center">
+                    <div className="flex items-center justify-center gap-1.5">
                       <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
                         Value
                       </span>
                       <ArrowUpDown className="w-3 h-3 text-gray-400" />
                     </div>
                   </th>
-                  <th className="px-4 py-3 text-left">
+                  <th className="px-4 py-3 text-center">
                     <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
                       Counterparty
                     </span>
@@ -407,21 +398,7 @@ export default function ReportDetails() {
                     key={contract.id}
                     className="hover:bg-gray-50/50 transition-all duration-150 group border-b border-gray-100"
                   >
-                    <td className="px-4 py-3.5">
-                      <label className="relative inline-flex items-center cursor-pointer group/check">
-                        <input
-                          type="checkbox"
-                          checked={selectedRows.includes(contract.id)}
-                          onChange={() => handleRowSelect(contract.id)}
-                          className="peer sr-only"
-                        />
-                        <div className="w-4 h-4 rounded-md border-2 border-gray-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-500 flex items-center justify-center transition-all duration-200 group-hover/check:border-emerald-400">
-                          <Check className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
-                        </div>
-                      </label>
-                    </td>
-
-                    <td className="px-4 py-3.5">
+                    <td className="px-4 py-3.5 text-center">
                       <div>
                         <div className="text-xs font-bold text-gray-900 hover:text-emerald-600 cursor-pointer transition-colors">
                           {contract.title}
@@ -429,16 +406,10 @@ export default function ReportDetails() {
                         <div className="text-xs text-gray-500 mt-1 font-medium">
                           {contract.contractArea}
                         </div>
-                        <div className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          <span>{contract.startDate}</span>
-                          <span>—</span>
-                          <span>{contract.endDate}</span>
-                        </div>
                       </div>
                     </td>
 
-                    <td className="px-4 py-3.5">
+                    <td className="px-4 py-3.5 text-center">
                       <div className="text-xs font-medium text-gray-700">
                         {contract.type}
                       </div>
@@ -447,9 +418,9 @@ export default function ReportDetails() {
                       </div>
                     </td>
 
-                    <td className="px-4 py-3.5">
+                    <td className="px-4 py-3.5 text-center">
                       <div
-                        className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border ${
+                        className={`flex flex-col items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border ${
                           STATUS_CONFIG[
                             contract.status as keyof typeof STATUS_CONFIG
                           ]?.className
@@ -468,14 +439,14 @@ export default function ReportDetails() {
                       </div>
                     </td>
 
-                    <td className="px-4 py-3.5 text-right">
+                    <td className="px-4 py-3.5 text-center">
                       <div className="text-xs font-bold text-gray-900">
                         ${contract.value.toLocaleString()}
                       </div>
                     </td>
 
-                    <td className="px-4 py-3.5">
-                      <div className="flex items-center gap-2">
+                    <td className="px-4 py-3.5 text-center">
+                      <div className="flex flex-col items-center gap-2">
                         <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-100 to-teal-100 border border-emerald-200 flex items-center justify-center text-xs font-bold text-emerald-700">
                           {contract.counterparty.charAt(0)}
                         </div>
@@ -485,16 +456,16 @@ export default function ReportDetails() {
                       </div>
                     </td>
 
-                    <td className="px-4 py-3.5">
+                    <td className="px-4 py-3.5 text-center">
                       <div className="flex items-center justify-center gap-1">
                         <button
-                          className="w-7 h-7 rounded-lg hover:bg-emerald-100 flex items-center justify-center text-gray-500 hover:text-emerald-600 transition-all duration-150 opacity-0 group-hover:opacity-100"
+                          className="w-7 h-7 rounded-lg hover:bg-emerald-100 flex items-center justify-center text-gray-500 hover:text-emerald-600 transition-all duration-150"
                           title="View details"
                         >
                           <Eye className="w-3.5 h-3.5" />
                         </button>
                         <button
-                          className="w-7 h-7 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-150 opacity-0 group-hover:opacity-100"
+                          className="w-7 h-7 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-150 "
                           title="More options"
                         >
                           <MoreVertical className="w-3.5 h-3.5" />
