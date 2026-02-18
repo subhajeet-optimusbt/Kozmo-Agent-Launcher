@@ -193,6 +193,18 @@ export const APPS: App[] = [
     category: "",
     actionHint: undefined,
   },
+   {
+    key: "dashboard-reports",
+    name: "Dashboard & Reports",
+    description: "Analytics, insights & reporting",
+    badge: 0,
+    route: "/dashboard-reports",
+    icon: "bar-chart",          
+    color: "purple",            
+    subtitle: undefined,
+    category: "",
+    actionHint: undefined,
+  },
 ];
 
 export const CONTRACTS: Contract[] = Array.from({ length: 42 }).map((_, i) => ({

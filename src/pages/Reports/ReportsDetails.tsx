@@ -28,8 +28,6 @@ import * as XLSX from "xlsx";
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { Toaster } from "react-hot-toast";
-import toast from "react-hot-toast";
 
 export default function ReportDetails() {
   const { categoryId, reportId } = useParams();
@@ -54,57 +52,79 @@ export default function ReportDetails() {
   );
 
   const MAX_EXPORT_COLUMNS = 8;
+  const [showExportWarning, setShowExportWarning] = useState(false);
 
-  const exportableColumnsCount = visibleColumns.length;
+  // const exportableColumnsCount = visibleColumns.length;
 
-  const isExportAllowed = exportableColumnsCount <= MAX_EXPORT_COLUMNS;
+  // const isExportAllowed = exportableColumnsCount <= MAX_EXPORT_COLUMNS;
+  // const validateExport = () => {
+  //   if (!isExportAllowed) {
+  //     toast.custom(
+  //       (t) => (
+  //         <div
+  //           className={`${
+  //             t.visible ? "animate-enter" : "animate-leave"
+  //           } flex items-start gap-3 max-w-sm w-full bg-white border border-amber-300 shadow-xl rounded-xl p-4`}
+  //         >
+  //           {/* Icon */}
+  //           <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-lg">
+  //             ⚠️
+  //           </div>
+
+  //           {/* Content */}
+  //           <div className="flex-1">
+  //             <p className="text-xs font-bold text-gray-900">
+  //               Export limit exceeded
+  //             </p>
+  //             <p className="text-xs text-gray-600 mt-1">
+  //               You can export a maximum of{" "}
+  //               <span className="font-semibold">{MAX_EXPORT_COLUMNS}</span>{" "}
+  //               columns.
+  //               <br />
+  //               Currently selected:{" "}
+  //               <span className="font-semibold text-amber-700">
+  //                 {exportableColumnsCount}
+  //               </span>
+  //             </p>
+  //           </div>
+
+  //           {/* Close */}
+  //           <button
+  //             onClick={() => toast.dismiss(t.id)}
+  //             className="text-gray-400 hover:text-gray-600 transition"
+  //           >
+  //             ✕
+  //           </button>
+  //         </div>
+  //       ),
+  //       { duration: 3500 },
+  //     );
+
+  //     return false;
+  //   }
+
+  //   return true;
+  // };
+  // const validateExport = () => {
+  //   if (visibleColumns.length > MAX_EXPORT_COLUMNS) {
+  //     setColumnModalOpen(true); // auto-open customize modal
+  //     return false;
+  //   }
+  //   return true;
+  // };
+
   const validateExport = () => {
-    if (!isExportAllowed) {
-      toast.custom(
-        (t) => (
-          <div
-            className={`${
-              t.visible ? "animate-enter" : "animate-leave"
-            } flex items-start gap-3 max-w-sm w-full bg-white border border-amber-300 shadow-xl rounded-xl p-4`}
-          >
-            {/* Icon */}
-            <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-lg">
-              ⚠️
-            </div>
-
-            {/* Content */}
-            <div className="flex-1">
-              <p className="text-xs font-bold text-gray-900">
-                Export limit exceeded
-              </p>
-              <p className="text-xs text-gray-600 mt-1">
-                You can export a maximum of{" "}
-                <span className="font-semibold">{MAX_EXPORT_COLUMNS}</span>{" "}
-                columns.
-                <br />
-                Currently selected:{" "}
-                <span className="font-semibold text-amber-700">
-                  {exportableColumnsCount}
-                </span>
-              </p>
-            </div>
-
-            {/* Close */}
-            <button
-              onClick={() => toast.dismiss(t.id)}
-              className="text-gray-400 hover:text-gray-600 transition"
-            >
-              ✕
-            </button>
-          </div>
-        ),
-        { duration: 3500 },
-      );
-
-      return false;
+    return visibleColumns.length <= MAX_EXPORT_COLUMNS;
+  };
+  const handleExportAttempt = (callback: () => void) => {
+    if (!validateExport()) {
+      setShowExportWarning(true); // ✅ show warning
+      setColumnModalOpen(true); // ✅ open modal
+      return;
     }
 
-    return true;
+    setShowExportWarning(false);
+    callback();
   };
 
   const handleExcelExport = () => {
@@ -157,7 +177,7 @@ export default function ReportDetails() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       {/* Compact Top Navigation Bar */}
-      <Toaster position="top-right" />
+      {/* <Toaster position="top-right" /> */}
       <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 shadow-sm">
         <div className="mx-auto px-6 py-3">
           <div className="flex items-center justify-between">
@@ -190,7 +210,7 @@ export default function ReportDetails() {
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1 p-1 bg-gray-50/80 rounded-lg border border-gray-200/60">
                 <button
-                  onClick={handleExcelExport}
+                  onClick={() => handleExportAttempt(handleExcelExport)}
                   className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium
      text-gray-700 hover:text-emerald-700 hover:bg-white"
       `}
@@ -200,7 +220,7 @@ export default function ReportDetails() {
                 </button>
 
                 <button
-                  onClick={handlePdfExport}
+                  onClick={() => handleExportAttempt(handlePdfExport)}
                   className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium
        text-gray-700 hover:text-emerald-700 hover:bg-white"
          "
@@ -211,7 +231,7 @@ export default function ReportDetails() {
                 </button>
 
                 <button
-                  onClick={handlePrint}
+                  onClick={() => handleExportAttempt(handlePrint)}
                   className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium
      text-gray-700 hover:text-emerald-700 hover:bg-white"
         
@@ -223,7 +243,10 @@ export default function ReportDetails() {
               </div>
 
               <button
-                onClick={() => setColumnModalOpen(true)}
+                onClick={() => {
+                  setShowExportWarning(false);
+                  setColumnModalOpen(true);
+                }}
                 className="group relative flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-600 hover:via-emerald-700 hover:to-teal-700 transition-all duration-300 shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/40 hover:scale-[1.02] active:scale-[0.98]"
               >
                 <Settings2 className="w-3.5 h-3.5" />
@@ -611,6 +634,19 @@ export default function ReportDetails() {
           <div className="bg-white w-[420px] rounded-xl p-4 shadow-xl">
             <h3 className="text-sm font-bold mb-3">Manage Report Fields</h3>
 
+            {showExportWarning &&
+              visibleColumns.length > MAX_EXPORT_COLUMNS && (
+                <div className="mb-3 p-3 rounded-lg border border-amber-300 bg-amber-50 text-amber-800 text-xs">
+                  <strong>Export limit exceeded.</strong>
+                  <br />
+                  You can export a maximum of <b>{MAX_EXPORT_COLUMNS}</b>{" "}
+                  columns.
+                  <br />
+                  Currently selected: <b>{visibleColumns.length}</b>
+                  <br />
+                  Please uncheck some columns to continue.
+                </div>
+              )}
             <div className="max-h-[300px] overflow-y-auto space-y-2">
               {ALL_COLUMNS.map((col) => (
                 <label key={col.key} className="flex gap-2 text-xs">
