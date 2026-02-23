@@ -28,6 +28,7 @@ import Reports from "./pages/Reports/Reports";
 import ReportDetails from "./pages/Reports/ReportsDetails";
 import DashboardReportsLayout from "./components/layout/DashboardReports/DashboardReportsLayout";
 import DashboardReportsPage from "./pages/DashboardReports/DashboardReportsPage";
+import DashboardDetails from "./pages/DashboardReports/DashboardDetails";
 export default function App() {
   return (
     <BrowserRouter>
@@ -90,6 +91,7 @@ export default function App() {
           </Route>
            <Route element={<DashboardReportsLayout />}>
             <Route path="/dashboard-reports" element={<DashboardReportsPage />} />
+            <Route path="/dashboard-reports/:dashboardId" element={<DashboardDetails />} />
           </Route>
         </Route>
 
