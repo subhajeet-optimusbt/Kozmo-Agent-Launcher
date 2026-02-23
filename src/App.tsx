@@ -24,7 +24,6 @@ import RelationshipsLayout from "./components/layout/Relationships/Relationships
 import Relationships from "./pages/Relationships/RelationshipsPage";
 import IntakeTableDetails from "./pages/Intake/IntakeTableDetails";
 import RelationshipsTableDetails from "./pages/Relationships/RelationshipsTableDetails";
-import Reports from "./pages/Reports/Reports";
 import ReportDetails from "./pages/Reports/ReportsDetails";
 import DashboardReportsLayout from "./components/layout/DashboardReports/DashboardReportsLayout";
 import DashboardReportsPage from "./pages/DashboardReports/DashboardReportsPage";
@@ -89,18 +88,25 @@ export default function App() {
               element={<RelationshipsTableDetails />}
             />
           </Route>
-           <Route element={<DashboardReportsLayout />}>
-            <Route path="/dashboard-reports" element={<DashboardReportsPage />} />
-            <Route path="/dashboard-reports/:dashboardId" element={<DashboardDetails />} />
+          <Route element={<DashboardReportsLayout />}>
+            <Route
+              path="/dashboard-reports"
+              element={<DashboardReportsPage />}
+            />
+            <Route
+              path="/dashboard-reports/:dashboardId"
+              element={<DashboardDetails />}
+            />
+            <Route
+              path="/reports/:categoryId/:reportId"
+              element={<ReportDetails />}
+            />
           </Route>
         </Route>
 
         {/* ================= PUBLIC ================= */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignupPage />} />
-        <Route path="/reports" element={<Reports />} />
-        <Route path="/reports/:categoryId/:reportId" element={<ReportDetails />} />
-
       </Routes>
     </BrowserRouter>
   );

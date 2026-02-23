@@ -39,9 +39,4 @@ export const ReportsAPI = {
   keyProvisions: (activeAccountId: any) =>
     get(`${baseUrl()}/api/Dashboard/${activeAccountId}/reports/key-provisions`),
 };
-export const normalizeReports = (data: any[] = []) =>
-  data.map((item) => ({
-    name: item.name || item.title || item.label,
-    count: item.count ?? item.value ?? "-",
-    status: item.status || undefined,
-  }));
+

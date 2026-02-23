@@ -2,18 +2,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
 import { ReportsAPI } from "../../services/reports";
-import { normalizeReports } from "../../services/reports";
-import { getActiveAccountId,ACCOUNT_CHANGED_EVENT } from "../../utils/auth";
+import { getActiveAccountId, ACCOUNT_CHANGED_EVENT } from "../../utils/auth";
 import FullscreenLoader from "../../components/ui/FullScreenLoader";
-
+import {
+  mapContractsReports,
+  mapRenewalsReports,
+  mapCounterpartyReports,
+  mapMilestonesReports,
+  mapOtherReports,
+} from "../../services/reportsmapper";
 interface Props {
   PremiumReportGroup: any;
 }
 
 const ReportsSection: React.FC<Props> = ({ PremiumReportGroup }) => {
-  const [activeAccountId, setActiveAccountId] = useState(
-    getActiveAccountId(),
-  );
+  const [activeAccountId, setActiveAccountId] = useState(getActiveAccountId());
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +26,7 @@ const ReportsSection: React.FC<Props> = ({ PremiumReportGroup }) => {
   const [counterparties, setCounterparties] = useState<any[]>([]);
   const [milestones, setMilestones] = useState<any[]>([]);
   const [issues, setIssues] = useState<any[]>([]);
-  const [keyProvisions, setKeyProvisions] = useState<any[]>([]);
+  const [keyProvisions] = useState<any[]>([]);
 
   /* 🔁 listen to account switch (EXACTLY like Dashboard) */
   useEffect(() => {
@@ -32,8 +35,7 @@ const ReportsSection: React.FC<Props> = ({ PremiumReportGroup }) => {
     };
 
     window.addEventListener(ACCOUNT_CHANGED_EVENT, handler);
-    return () =>
-      window.removeEventListener(ACCOUNT_CHANGED_EVENT, handler);
+    return () => window.removeEventListener(ACCOUNT_CHANGED_EVENT, handler);
   }, []);
 
   const fetchReports = async () => {
@@ -43,13 +45,14 @@ const ReportsSection: React.FC<Props> = ({ PremiumReportGroup }) => {
       setLoading(true);
       setError(null);
 
+      // 🔹 Fetch all reports in parallel
       const [
-        contractsData,
-        renewalsData,
-        counterpartiesData,
-        milestonesData,
-        issuesData,
-        keyProvData,
+        contractsResponse,
+        renewalsResponse,
+        counterpartiesResponse,
+        milestonesResponse,
+        issuesResponse,
+        keyProvisionsResponse,
       ] = await Promise.all([
         ReportsAPI.contracts(activeAccountId),
         ReportsAPI.renewals(activeAccountId),
@@ -59,14 +62,26 @@ const ReportsSection: React.FC<Props> = ({ PremiumReportGroup }) => {
         ReportsAPI.keyProvisions(activeAccountId),
       ]);
 
-      setContracts(normalizeReports(contractsData));
-      setRenewals(normalizeReports(renewalsData));
-      setCounterparties(normalizeReports(counterpartiesData));
-      setMilestones(normalizeReports(milestonesData));
-      setIssues(normalizeReports(issuesData));
-      setKeyProvisions(normalizeReports(keyProvData));
-    } catch (e) {
-      console.error("Reports fetch failed", e);
+      // 🔹 Map API responses → UI-ready report groups
+      const contractsReports = mapContractsReports(contractsResponse);
+      const renewalsReports = mapRenewalsReports(renewalsResponse);
+      const counterpartyReports = mapCounterpartyReports(
+        counterpartiesResponse,
+      );
+      const milestoneReports = mapMilestonesReports(milestonesResponse);
+      const otherReports = mapOtherReports(
+        issuesResponse,
+        keyProvisionsResponse,
+      );
+
+      // 🔹 Update state
+      setContracts(contractsReports);
+      setRenewals(renewalsReports);
+      setCounterparties(counterpartyReports);
+      setMilestones(milestoneReports);
+      setIssues(otherReports);
+    } catch (error) {
+      console.error("Reports fetch failed", error);
       setError("Failed to load reports");
     } finally {
       setLoading(false);
@@ -98,6 +113,7 @@ const ReportsSection: React.FC<Props> = ({ PremiumReportGroup }) => {
         description="Visibility into contract lifecycle stages and portfolio posture."
         defaultOpen
         reports={contracts}
+        categoryId="contracts"
       />
 
       <PremiumReportGroup
@@ -105,6 +121,7 @@ const ReportsSection: React.FC<Props> = ({ PremiumReportGroup }) => {
         title="Renewal & Expiration Reports"
         description="Track upcoming, missed, and high-risk renewals."
         reports={renewals}
+        categoryId="renewals"
       />
 
       <PremiumReportGroup
@@ -112,6 +129,7 @@ const ReportsSection: React.FC<Props> = ({ PremiumReportGroup }) => {
         title="Counterparty Reports"
         description="Risk exposure and dependency tracking across partners."
         reports={counterparties}
+        categoryId="counterparties"
       />
 
       <PremiumReportGroup
@@ -119,14 +137,15 @@ const ReportsSection: React.FC<Props> = ({ PremiumReportGroup }) => {
         title="Workflow & Obligations"
         description="Operational tracking of tasks, milestones & compliance."
         reports={milestones}
+        categoryId="milestones"
       />
 
-      {/* ⭐ STRICT RULE */}
       <PremiumReportGroup
         colorIdx={4}
         title="Other Reports"
         description="Issues and contractual provisions."
         reports={[...issues, ...keyProvisions]}
+        categoryId="others"
       />
     </div>
   );

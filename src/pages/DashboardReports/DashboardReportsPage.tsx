@@ -7,7 +7,7 @@ import { BarChart3, ArrowUpRight } from "lucide-react";
 
 import DashboardSection from "./Dashboard";
 import ReportsSection from "./Reports";
-
+import { useNavigate } from "react-router-dom";
 /* ── helpers ── */
 export const cx = (...classes: (string | undefined | false)[]) =>
   classes.filter(Boolean).join(" ");
@@ -161,7 +161,9 @@ export const Zone = ({
 };
 
 /* ── Report Item ── */
-export const ReportItem = ({ name, count, status }: any) => {
+export const ReportItem = ({ name, count, status, payload, categoryId, reportId }: any) => {
+  const navigate = useNavigate();
+  
   const statusConfig: Record<string, any> = {
     warning: {
       dot: "bg-amber-400",
@@ -176,8 +178,16 @@ export const ReportItem = ({ name, count, status }: any) => {
   };
   const s = status ? statusConfig[status] : null;
 
+  const handleReportClick = () => {
+    // Pass data via state
+    navigate(`/reports/${categoryId}/${reportId}`, {
+      state: { reportData: payload, reportName: name }
+    });
+  };
+
   return (
     <button
+      onClick={handleReportClick}
       className={cx(
         "group flex items-center justify-between w-full rounded-xl px-4 py-3 text-left",
         "border border-gray-100 bg-gray-50/60 transition-all duration-150",

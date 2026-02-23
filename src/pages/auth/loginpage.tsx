@@ -109,14 +109,15 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
 
-  // const handleMicrosoftLogin = () => {
-  //   const returnUrl = window.location.origin;
-  //   window.location.href = `https://kozmo-saas.azurewebsites.net/MicrosoftIdentity/Account/SignIn?returnUrl=${encodeURIComponent(returnUrl)}`;
-  // };
-
   const handleMicrosoftLogin = () => {
     window.location.href =
       "https://kozmo-saas.azurewebsites.net/auth/microsoft" +
+      "?returnUrl=" +
+      encodeURIComponent(window.location.origin);
+  };
+    const handleGoogleLogin = () => {
+    window.location.href =
+      "https://kozmo-saas.azurewebsites.net/auth/google" +
       "?returnUrl=" +
       encodeURIComponent(window.location.origin);
   };
@@ -336,7 +337,7 @@ export default function LoginPage() {
                         </span>
                       </button>
 
-                      <button className="h-10 rounded-lg border border-gray-200 flex items-center justify-center gap-3 hover:bg-gray-50 transition text-sm">
+                      <button onClick={handleGoogleLogin} className="h-10 rounded-lg border border-gray-200 flex items-center justify-center gap-3 hover:bg-gray-50 transition text-sm">
                         <img
                           src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
                           alt="Google"

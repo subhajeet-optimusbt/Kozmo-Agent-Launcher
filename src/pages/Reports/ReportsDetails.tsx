@@ -1,5 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react-hooks/set-state-in-render */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   ArrowLeft,
   Download,
@@ -15,13 +18,13 @@ import {
   Check,
   ArrowUpDown,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   MOCK_DATA,
   FILTER_FIELDS,
   ALL_COLUMNS,
-  STATUS_CONFIG,
-  REPORT_NAMES,
+  // STATUS_CONFIG,
+  // REPORT_NAMES,
   CATEGORY_NAMES,
 } from "../../components/reports/mockData";
 import * as XLSX from "xlsx";
@@ -32,14 +35,21 @@ import autoTable from "jspdf-autotable";
 export default function ReportDetails() {
   const { categoryId, reportId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  // ✅ Get data from navigation state (NOT from URL params)
+  const reportData = (location.state as any)?.reportData || [];
+  const reportNameFromState =
+    (location.state as any)?.reportName || "Unknown Report";
+  const categoryIdFromState =
+    (location.state as any)?.categoryId || categoryId || "Unknown";
 
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilters] = useState<string[]>([]);
 
+  // Use state values instead of URL params
   const categoryName =
-    CATEGORY_NAMES[categoryId as string] || "Unknown Category";
-  const reportName = REPORT_NAMES[reportId as string] || "Unknown Report";
-
+    CATEGORY_NAMES[categoryIdFromState as string] || "Unknown Category";
+  const reportName = reportNameFromState;
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [selectedFilterFields, setSelectedFilterFields] = useState<string[]>(
     [],
@@ -51,67 +61,55 @@ export default function ReportDetails() {
     ALL_COLUMNS.map((c) => c.key),
   );
 
+  // ✅ DEFINE HELPER FUNCTIONS FIRST (before useMemo)
+  const formatColumnLabel = (key: string): string => {
+    return key
+      .replace(/([A-Z])/g, " $1")
+      .replace(/^./, (str) => str.toUpperCase())
+      .trim();
+  };
+
+  // ✅ NOW use these functions in useMemo
+  const availableColumns = useMemo(() => {
+    if (!reportData || reportData.length === 0) return [];
+
+    const firstRecord = reportData[0];
+    const keys = Object.keys(firstRecord);
+
+    return keys
+      .filter(
+        (key) => !["partitionKey", "rowKey", "timestamp", "eTag"].includes(key),
+      )
+      .map((key) => ({
+        key,
+        label: formatColumnLabel(key),
+      }));
+  }, [reportData]);
+
+  // Initialize visible columns on first load
+  useMemo(() => {
+    if (availableColumns.length > 0 && visibleColumns.length === 0) {
+      setVisibleColumns(availableColumns.slice(0, 8).map((c) => c.key));
+    }
+  }, [availableColumns]);
+  // ✅ Helper function to safely get nested values
+  const getCellValue = (
+    row: any,
+    key: string,
+  ): string | number | React.ReactNode => {
+    const value = row[key];
+
+    if (value === null || value === undefined) return "-";
+    if (typeof value === "object") return JSON.stringify(value);
+    if (typeof value === "boolean") return value ? "Yes" : "No";
+    if (typeof value === "number" && key.toLowerCase().includes("date"))
+      return new Date(value).toLocaleDateString();
+
+    return String(value);
+  };
+
   const MAX_EXPORT_COLUMNS = 8;
   const [showExportWarning, setShowExportWarning] = useState(false);
-
-  // const exportableColumnsCount = visibleColumns.length;
-
-  // const isExportAllowed = exportableColumnsCount <= MAX_EXPORT_COLUMNS;
-  // const validateExport = () => {
-  //   if (!isExportAllowed) {
-  //     toast.custom(
-  //       (t) => (
-  //         <div
-  //           className={`${
-  //             t.visible ? "animate-enter" : "animate-leave"
-  //           } flex items-start gap-3 max-w-sm w-full bg-white border border-amber-300 shadow-xl rounded-xl p-4`}
-  //         >
-  //           {/* Icon */}
-  //           <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-lg">
-  //             ⚠️
-  //           </div>
-
-  //           {/* Content */}
-  //           <div className="flex-1">
-  //             <p className="text-xs font-bold text-gray-900">
-  //               Export limit exceeded
-  //             </p>
-  //             <p className="text-xs text-gray-600 mt-1">
-  //               You can export a maximum of{" "}
-  //               <span className="font-semibold">{MAX_EXPORT_COLUMNS}</span>{" "}
-  //               columns.
-  //               <br />
-  //               Currently selected:{" "}
-  //               <span className="font-semibold text-amber-700">
-  //                 {exportableColumnsCount}
-  //               </span>
-  //             </p>
-  //           </div>
-
-  //           {/* Close */}
-  //           <button
-  //             onClick={() => toast.dismiss(t.id)}
-  //             className="text-gray-400 hover:text-gray-600 transition"
-  //           >
-  //             ✕
-  //           </button>
-  //         </div>
-  //       ),
-  //       { duration: 3500 },
-  //     );
-
-  //     return false;
-  //   }
-
-  //   return true;
-  // };
-  // const validateExport = () => {
-  //   if (visibleColumns.length > MAX_EXPORT_COLUMNS) {
-  //     setColumnModalOpen(true); // auto-open customize modal
-  //     return false;
-  //   }
-  //   return true;
-  // };
 
   const validateExport = () => {
     return visibleColumns.length <= MAX_EXPORT_COLUMNS;
@@ -152,12 +150,13 @@ export default function ReportDetails() {
 
     const doc = new jsPDF("landscape");
 
-    const headers = visibleColumns.map(
-      (col) => ALL_COLUMNS.find((c) => c.key === col)?.label || col,
-    );
+    const headers = visibleColumns.map((col) => {
+      const column = availableColumns.find((c) => c.key === col);
+      return column?.label || col;
+    });
 
-    const data = MOCK_DATA.map((row) =>
-      visibleColumns.map((col) => (row as any)[col]),
+    const data = reportData.map((row: any) =>
+      visibleColumns.map((col) => getCellValue(row, col)),
     );
 
     autoTable(doc, {
@@ -174,6 +173,24 @@ export default function ReportDetails() {
     window.print();
   };
 
+  // Handle empty data
+  if (!reportData || reportData.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">
+            No data available for this report
+          </p>
+          <button
+            onClick={() => navigate(-1)}
+            className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       {/* Compact Top Navigation Bar */}
@@ -380,91 +397,23 @@ export default function ReportDetails() {
           <div className="overflow-y-auto max-h-[calc(100vh-160px)]">
             <table className="w-full">
               <thead className="bg-gray-50/50 sticky top-0 z-10">
-                <tr className="border-b border-gray-200 text-center">
-                  {visibleColumns.includes("title") && (
-                    <th className="px-4 py-3 text-center">
-                      <div className="flex items-center justify-center gap-1.5">
-                        <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
-                          Title & Area
-                        </span>
-                        <ArrowUpDown className="w-3 h-3 text-gray-400" />
-                      </div>
-                    </th>
-                  )}
-
-                  {visibleColumns.includes("type") && (
-                    <th className="px-4 py-3 text-center">
-                      <div className="flex items-center justify-center gap-1.5">
-                        <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
-                          Type
-                        </span>
-                        <ArrowUpDown className="w-3 h-3 text-gray-400" />
-                      </div>
-                    </th>
-                  )}
-
-                  {visibleColumns.includes("status") && (
-                    <th className="px-4 py-3 text-center">
-                      <div className="flex items-center justify-center gap-1.5">
-                        <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
-                          Status
-                        </span>
-                        <ArrowUpDown className="w-3 h-3 text-gray-400" />
-                      </div>
-                    </th>
-                  )}
-                  {visibleColumns.includes("recordNumber") && (
-                    <th className="px-4 py-3 text-center">
-                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
-                        Record #
-                      </span>
-                    </th>
-                  )}
-
-                  {visibleColumns.includes("owner") && (
-                    <th className="px-4 py-3 text-center">
-                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
-                        Owner
-                      </span>
-                    </th>
-                  )}
-
-                  {visibleColumns.includes("legalEntity") && (
-                    <th className="px-4 py-3 text-center">
-                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
-                        Legal Entity
-                      </span>
-                    </th>
-                  )}
-
-                  {visibleColumns.includes("duration") && (
-                    <th className="px-4 py-3 text-center">
-                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
-                        Duration
-                      </span>
-                    </th>
-                  )}
-
-                  {visibleColumns.includes("value") && (
-                    <th className="px-4 py-3 text-center">
-                      <div className="flex items-center justify-center gap-1.5">
-                        <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
-                          Value
-                        </span>
-                        <ArrowUpDown className="w-3 h-3 text-gray-400" />
-                      </div>
-                    </th>
-                  )}
-
-                  {visibleColumns.includes("counterparty") && (
-                    <th className="px-4 py-3 text-center">
-                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
-                        Counterparty
-                      </span>
-                    </th>
-                  )}
-
-                  {/* ACTIONS COLUMN – ALWAYS SHOWN */}
+                <tr className="border-b border-gray-200">
+                  {visibleColumns.map((colKey) => {
+                    const column = availableColumns.find(
+                      (c) => c.key === colKey,
+                    );
+                    return (
+                      <th key={colKey} className="px-4 py-3 text-left">
+                        <div className="flex items-center justify-between gap-1.5">
+                          <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
+                            {column?.label || colKey}
+                          </span>
+                          <ArrowUpDown className="w-3 h-3 text-gray-400" />
+                        </div>
+                      </th>
+                    );
+                  })}
+                  {/* Actions Column */}
                   <th className="px-4 py-3 text-center w-16">
                     <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
                       Actions
@@ -474,124 +423,25 @@ export default function ReportDetails() {
               </thead>
 
               <tbody className="divide-y divide-gray-100 bg-white">
-                {MOCK_DATA.map((contract) => (
+                {reportData.map((record: any, idx: number) => (
                   <tr
-                    key={contract.id}
+                    key={idx}
                     className="hover:bg-gray-50/50 transition-all duration-150 group border-b border-gray-100"
                   >
-                    {visibleColumns.includes("title") && (
-                      <td className="px-4 py-3.5 text-center">
-                        <div>
-                          <div className="text-xs font-bold text-gray-900 hover:text-emerald-600 cursor-pointer transition-colors">
-                            {contract.title}
-                          </div>
-                          <div className="text-xs text-gray-500 mt-1 font-medium">
-                            {contract.contractArea}
-                          </div>
-                        </div>
-                      </td>
-                    )}
-
-                    {visibleColumns.includes("type") && (
-                      <td className="px-4 py-3.5 text-center">
-                        <div className="text-xs font-medium text-gray-700">
-                          {contract.type}
-                        </div>
-                        <div className="text-xs text-gray-500 mt-0.5">
-                          {contract.businessArea}
-                        </div>
-                      </td>
-                    )}
-
-                    {visibleColumns.includes("status") && (
-                      <td className="px-4 py-3.5 text-center">
-                        <div
-                          className={`flex flex-col items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border ${
-                            STATUS_CONFIG[
-                              contract.status as keyof typeof STATUS_CONFIG
-                            ]?.className
-                          }`}
-                        >
-                          {
-                            STATUS_CONFIG[
-                              contract.status as keyof typeof STATUS_CONFIG
-                            ]?.icon
-                          }
-                          {
-                            STATUS_CONFIG[
-                              contract.status as keyof typeof STATUS_CONFIG
-                            ]?.label
-                          }
-                        </div>
-                      </td>
-                    )}
-
-                    {visibleColumns.includes("recordNumber") && (
-                      <td className="px-4 py-3.5 text-center">
-                        <span className="text-xs font-semibold text-gray-700">
-                          {contract.recordNumber}
-                        </span>
-                      </td>
-                    )}
-
-                    {visibleColumns.includes("owner") && (
-                      <td className="px-4 py-3.5 text-center">
-                        <span className="text-xs font-medium text-gray-700">
-                          {contract.owner}
-                        </span>
-                      </td>
-                    )}
-
-                    {visibleColumns.includes("legalEntity") && (
-                      <td className="px-4 py-3.5 text-center">
+                    {visibleColumns.map((colKey) => (
+                      <td key={colKey} className="px-4 py-3.5 text-left">
                         <span className="text-xs text-gray-700">
-                          {contract.legalEntity}
+                          {getCellValue(record, colKey)}
                         </span>
                       </td>
-                    )}
-
-                    {visibleColumns.includes("duration") && (
-                      <td className="px-4 py-3.5 text-center">
-                        <span className="text-xs font-medium text-gray-700">
-                          {contract.duration}
-                        </span>
-                      </td>
-                    )}
-
-                    {visibleColumns.includes("value") && (
-                      <td className="px-4 py-3.5 text-center">
-                        <div className="text-xs font-bold text-gray-900">
-                          ${contract.value.toLocaleString()}
-                        </div>
-                      </td>
-                    )}
-
-                    {visibleColumns.includes("counterparty") && (
-                      <td className="px-4 py-3.5 text-center">
-                        <div className="flex flex-col items-center gap-2">
-                          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-100 to-teal-100 border border-emerald-200 flex items-center justify-center text-xs font-bold text-emerald-700">
-                            {contract.counterparty.charAt(0)}
-                          </div>
-                          <div className="text-xs font-medium text-gray-700">
-                            {contract.counterparty.split(" ")[0]}
-                          </div>
-                        </div>
-                      </td>
-                    )}
-
-                    {/* ACTIONS – ALWAYS SHOWN */}
+                    ))}
+                    {/* Actions */}
                     <td className="px-4 py-3.5 text-center">
                       <div className="flex items-center justify-center gap-1">
-                        <button
-                          className="w-7 h-7 rounded-lg hover:bg-emerald-100 flex items-center justify-center text-gray-500 hover:text-emerald-600 transition-all duration-150"
-                          title="View details"
-                        >
+                        <button className="w-7 h-7 rounded-lg hover:bg-emerald-100 flex items-center justify-center text-gray-500 hover:text-emerald-600 transition-all duration-150">
                           <Eye className="w-3.5 h-3.5" />
                         </button>
-                        <button
-                          className="w-7 h-7 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-150"
-                          title="More options"
-                        >
+                        <button className="w-7 h-7 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-150">
                           <MoreVertical className="w-3.5 h-3.5" />
                         </button>
                       </div>
