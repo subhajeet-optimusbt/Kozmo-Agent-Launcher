@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable react-hooks/set-state-in-render */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   ArrowLeft,
@@ -18,11 +18,9 @@ import {
   Check,
   ArrowUpDown,
 } from "lucide-react";
-import { useState, useMemo } from "react";
+
 import {
-  MOCK_DATA,
   FILTER_FIELDS,
-  ALL_COLUMNS,
   // STATUS_CONFIG,
   // REPORT_NAMES,
   CATEGORY_NAMES,
@@ -33,7 +31,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 export default function ReportDetails() {
-  const { categoryId, reportId } = useParams();
+  const { categoryId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   // ✅ Get data from navigation state (NOT from URL params)
@@ -57,9 +55,7 @@ export default function ReportDetails() {
   const [appliedFilters, setAppliedFilters] = useState<string[]>([]);
 
   const [columnModalOpen, setColumnModalOpen] = useState(false);
-  const [visibleColumns, setVisibleColumns] = useState<string[]>(
-    ALL_COLUMNS.map((c) => c.key),
-  );
+  const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
 
   // ✅ DEFINE HELPER FUNCTIONS FIRST (before useMemo)
   const formatColumnLabel = (key: string): string => {
@@ -128,7 +124,7 @@ export default function ReportDetails() {
   const handleExcelExport = () => {
     if (!validateExport()) return;
 
-    const rows = MOCK_DATA.map((row) => {
+    const rows = reportData.map((row: any) => {
       const filteredRow: Record<string, any> = {};
 
       visibleColumns.forEach((col) => {
@@ -191,8 +187,28 @@ export default function ReportDetails() {
       </div>
     );
   }
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+  const filteredData = useMemo(() => {
+    if (!searchQuery) return reportData;
+
+    return reportData.filter((row: any) =>
+      Object.values(row).some((val) =>
+        String(val).toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
+    );
+  }, [reportData, searchQuery]);
+
+  const totalPages = Math.ceil(filteredData.length / pageSize);
+
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredData.slice(start, start + pageSize);
+  }, [filteredData, currentPage]);
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <div className="relative overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-sm">
+      {/* Subtle top gradient accent */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500" />
       {/* Compact Top Navigation Bar */}
       {/* <Toaster position="top-right" /> */}
       <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 shadow-sm">
@@ -201,7 +217,7 @@ export default function ReportDetails() {
             {/* Left Section */}
             <div className="flex items-center gap-3 flex-1">
               <button
-                onClick={() => navigate(-1)}
+                onClick={() => navigate("/dashboard-reports")}
                 className="group flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium text-gray-600 hover:text-emerald-600 bg-gray-50/50 hover:bg-emerald-50 border border-gray-200/60 hover:border-emerald-200 transition-all duration-200 hover:shadow-sm"
               >
                 <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform duration-200" />
@@ -423,7 +439,7 @@ export default function ReportDetails() {
               </thead>
 
               <tbody className="divide-y divide-gray-100 bg-white">
-                {reportData.map((record: any, idx: number) => (
+                {paginatedData.map((record: any, idx: number) => (
                   <tr
                     key={idx}
                     className="hover:bg-gray-50/50 transition-all duration-150 group border-b border-gray-100"
@@ -456,23 +472,41 @@ export default function ReportDetails() {
           <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between text-xs">
             <div className="text-gray-600">
               Showing{" "}
-              <span className="font-semibold">1-{MOCK_DATA.length}</span> of{" "}
-              <span className="font-semibold">{MOCK_DATA.length}</span> results
+              <span className="font-semibold">
+                {(currentPage - 1) * pageSize + 1}-
+                {Math.min(currentPage * pageSize, filteredData.length)}
+              </span>{" "}
+              of <span className="font-semibold">{filteredData.length}</span>{" "}
+              results
             </div>
             <div className="flex items-center gap-1.5">
-              <button className="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-700 hover:bg-white border border-gray-200 transition-all">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-700 hover:bg-white border border-gray-200 transition-all disabled:opacity-40"
+              >
                 Prev
               </button>
-              <button className="w-7 h-7 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-medium text-xs shadow-lg shadow-emerald-500/30">
-                1
-              </button>
-              <button className="w-7 h-7 rounded-lg text-xs font-medium text-gray-700 hover:bg-white border border-gray-200 transition-all">
-                2
-              </button>
-              <button className="w-7 h-7 rounded-lg text-xs font-medium text-gray-700 hover:bg-white border border-gray-200 transition-all">
-                3
-              </button>
-              <button className="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-700 hover:bg-white border border-gray-200 transition-all">
+
+              {Array.from({ length: totalPages }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`w-7 h-7 rounded-lg text-xs font-medium ${
+                    currentPage === i + 1
+                      ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
+                      : "text-gray-700 hover:bg-white border border-gray-200"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => p + 1)}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-700 hover:bg-white border border-gray-200 transition-all disabled:opacity-40"
+              >
                 Next
               </button>
             </div>
@@ -498,7 +532,7 @@ export default function ReportDetails() {
                 </div>
               )}
             <div className="max-h-[300px] overflow-y-auto space-y-2">
-              {ALL_COLUMNS.map((col) => (
+              {availableColumns.map((col) => (
                 <label key={col.key} className="flex gap-2 text-xs">
                   <input
                     type="checkbox"

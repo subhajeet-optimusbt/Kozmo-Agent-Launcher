@@ -98,7 +98,7 @@ export default function App() {
               element={<DashboardDetails />}
             />
             <Route
-              path="/reports/:categoryId/:reportId"
+              path="/reports/:categoryId"
               element={<ReportDetails />}
             />
           </Route>

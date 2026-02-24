@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { baseUrl } from "../utils/baseUrl";
 
@@ -39,4 +38,3 @@ export const ReportsAPI = {
   keyProvisions: (activeAccountId: any) =>
     get(`${baseUrl()}/api/Dashboard/${activeAccountId}/reports/key-provisions`),
 };
-

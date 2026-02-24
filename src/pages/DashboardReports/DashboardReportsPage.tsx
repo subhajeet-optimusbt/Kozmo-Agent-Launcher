@@ -161,9 +161,15 @@ export const Zone = ({
 };
 
 /* ── Report Item ── */
-export const ReportItem = ({ name, count, status, payload, categoryId, reportId }: any) => {
+export const ReportItem = ({
+  name,
+  count,
+  status,
+  payload,
+  categoryId,
+}: any) => {
   const navigate = useNavigate();
-  
+
   const statusConfig: Record<string, any> = {
     warning: {
       dot: "bg-amber-400",
@@ -180,8 +186,8 @@ export const ReportItem = ({ name, count, status, payload, categoryId, reportId 
 
   const handleReportClick = () => {
     // Pass data via state
-    navigate(`/reports/${categoryId}/${reportId}`, {
-      state: { reportData: payload, reportName: name }
+    navigate(`/reports/${categoryId}`, {
+      state: { reportData: payload, reportName: name },
     });
   };
 
@@ -264,6 +270,7 @@ export const PremiumReportGroup = ({
   reports,
   defaultOpen = false,
   colorIdx = 0,
+  categoryId,
 }: any) => {
   const [open, setOpen] = React.useState(defaultOpen);
   const cfg = GROUP_COLORS[colorIdx % GROUP_COLORS.length];
@@ -324,7 +331,7 @@ export const PremiumReportGroup = ({
         <div className="px-5 pb-4 flex flex-col gap-2">
           <div className="h-px bg-gray-100 mb-1" />
           {reports.map((r: any) => (
-            <ReportItem key={r.name} {...r} />
+            <ReportItem key={r.name} {...r} categoryId={categoryId} />
           ))}
         </div>
       </div>
