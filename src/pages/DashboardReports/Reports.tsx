@@ -126,7 +126,7 @@ const ReportsSection: React.FC<Props> = ({ PremiumReportGroup }) => {
 
       <PremiumReportGroup
         colorIdx={2}
-        title="Counterparty Reports"
+        title="Relationship Reports"
         description="Risk exposure and dependency tracking across partners."
         reports={counterparties}
         categoryId="counterparties"

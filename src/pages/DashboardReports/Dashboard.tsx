@@ -95,7 +95,7 @@ const DashboardSection: React.FC<Props> = ({ Zone }) => {
               parseInt(id?.replace(/[^\d]/g, "") || "0", 10);
             return getNumber(a.dashboardId) - getNumber(b.dashboardId);
           })
-          .map((d, index) => {
+          .map((d) => {
             let metricsObj: any = {};
             try {
               metricsObj = JSON.parse(d.metrics || "{}");
@@ -196,8 +196,8 @@ const DashboardSection: React.FC<Props> = ({ Zone }) => {
             return (
               <Zone
                 key={d.dashboardId}
-                title={`Zone ${index + 1}: ${d.dashboardName}`}
-                description={categoryKey}
+                title={d.dashboardName}
+                // description={categoryKey}
                 icon={ICON_MAP[d.dashboardName] || BarChart3}
                 palette={PALETTE_MAP[d.dashboardName] || "emerald"}
                 kpis={kpis}

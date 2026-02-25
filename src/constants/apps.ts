@@ -113,7 +113,7 @@ export const APPS: App[] = [
     name: "Home",
     description: "Indexes, quadrants, portfolio health",
     badge: 0,
-    route: "/Home",
+    route: "/home",
     icon: "dashboard",
     color: "rose",
     subtitle: undefined,

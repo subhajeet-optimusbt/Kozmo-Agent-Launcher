@@ -136,7 +136,7 @@
 
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import React, {type KeyboardEvent } from "react";
-import { StarOutlined, StarFilled } from "@ant-design/icons";
+// import { StarOutlined, StarFilled } from "@ant-design/icons";
 import {
   DashboardOutlined,
   InboxOutlined,
@@ -173,12 +173,12 @@ interface AppTileProps {
 
 const AppTile: React.FC<AppTileProps> = ({
   app,
-  isPinned = false,
+  // isPinned = false,
   isFocused = false,
   compact = false,
   showAvatar = true,
   onClick,
-  onPinToggle,
+  // onPinToggle,
 }) => {
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter" || e.key === " ") {
@@ -234,7 +234,7 @@ const AppTile: React.FC<AppTileProps> = ({
       </div>
 
       {/* Pin Button */}
-      <button
+      {/* <button
         type="button"
         onClick={(e) => {
           e.stopPropagation();
@@ -253,7 +253,7 @@ const AppTile: React.FC<AppTileProps> = ({
         ) : (
           <StarOutlined className="text-base" />
         )}
-      </button>
+      </button> */}
     </div>
   );
 };

@@ -14,14 +14,10 @@ export const PremiumReportGroup = ({
   const navigate = useNavigate();
 
   // ✅ Handle report click - navigate to details with data
-  const handleReportClick = (report: any, reportIndex: number) => {
+  const handleReportClick = (report: any) => {
     // Generate a unique reportId (slug from report name)
-    const reportId = report.name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "");
 
-    navigate(`/reports/${categoryId}/${reportId}`, {
+    navigate(`/reports/${categoryId}`, {
       state: {
         reportData: report.payload || [],
         reportName: report.name,
@@ -45,13 +41,16 @@ export const PremiumReportGroup = ({
 
       {open && (
         <div className="px-6 pb-6 flex flex-wrap gap-3">
-          {reports.map((r: any, index: number) => (
+          {reports.map((r: any) => (
             <button
-              key={`${r.name}-${index}`}
-              onClick={() => handleReportClick(r, index)}
+              key={`${r.name}`}
+              onClick={() => handleReportClick(r)}
               className="px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200 hover:shadow-md text-sm font-medium cursor-pointer transition-all duration-200"
             >
-              {r.name} {r.count && `(${r.count})`}
+             
+              {r.name} ({r.count > 0 ? r.count : "n/a"})
+               
+            
             </button>
           ))}
         </div>

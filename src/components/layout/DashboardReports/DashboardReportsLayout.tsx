@@ -20,7 +20,6 @@ export default function ContractsLayout() {
           <Outlet />
         </main>
       </div>
-
       <LauncherModal
         launcherOpen={launcherOpen}
         setLauncherOpen={setLauncherOpen}

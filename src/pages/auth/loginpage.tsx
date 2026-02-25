@@ -30,7 +30,7 @@ export default function LoginPage() {
       .then((session) => {
         if (session?.isAuthenticated) {
           localStorage.setItem("user", JSON.stringify(session));
-          navigate("/Home", { replace: true });
+          navigate("/home", { replace: true });
         }
       })
       .catch(() => {
@@ -97,7 +97,7 @@ export default function LoginPage() {
       const storage = keepSignedIn ? localStorage : sessionStorage;
       storage.setItem("user", JSON.stringify(userContext));
 
-      navigate("/Home", { replace: true });
+      navigate("/home", { replace: true });
     } catch (err: any) {
       toast.error(err.message || "Something went wrong");
     } finally {

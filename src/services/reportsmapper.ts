@@ -20,6 +20,7 @@ export const mapContractsReports = (data: any) => [
   {
     name: "Draft Contracts",
     count: data.draftContracts?.length ?? 0,
+    status: "neutral",
     payload: data.draftContracts,
   },
 ];
@@ -46,12 +47,12 @@ export const mapRenewalsReports = (data: any) => [
 
 export const mapCounterpartyReports = (data: any) => [
   {
-    name: "Active Counterparties",
+    name: "Active Relationships",
     count: data.activeCounterparties?.length ?? 0,
     payload: data.activeCounterparties,
   },
   {
-    name: "Counterparty Contacts",
+    name: "Relationship Contacts",
     count: data.counterpartyContacts?.length ?? 0,
     payload: data.counterpartyContacts,
   },

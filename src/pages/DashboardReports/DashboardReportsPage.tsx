@@ -3,7 +3,7 @@
 /* eslint-disable react-refresh/only-export-components */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
-import { BarChart3, ArrowUpRight } from "lucide-react";
+import { BarChart3 } from "lucide-react";
 
 import DashboardSection from "./Dashboard";
 import ReportsSection from "./Reports";
@@ -102,21 +102,14 @@ export const ZONE_CONFIGS: Record<string, any> = {
 };
 
 /* ── Zone card ── */
-export const Zone = ({
-  title,
-  description,
-  icon: Icon,
-  kpis,
-  palette,
-  onClick,
-}: any) => {
+export const Zone = ({ title, icon: Icon, kpis, palette, onClick }: any) => {
   const cfg = ZONE_CONFIGS[palette];
   return (
     <div
       onClick={onClick}
       className={cx(
         "group relative flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-5",
-        "shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5",
+        "shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 cursor-pointer",
         cfg.border,
       )}
     >
@@ -126,8 +119,8 @@ export const Zone = ({
         style={{ background: cfg.accent, opacity: 0.7 }}
       />
 
-      <div className="flex items-start justify-between pt-1">
-        <div className="flex items-start gap-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
           <div
             className={cx(
               "h-10 w-10 rounded-xl flex items-center justify-center shrink-0",
@@ -136,19 +129,9 @@ export const Zone = ({
           >
             <Icon className="h-5 w-5" />
           </div>
-          <div>
-            <h3 className="font-semibold text-gray-800 text-sm leading-tight">
-              {title}
-            </h3>
-            <p className="text-xs text-gray-400 mt-0.5">{description}</p>
-          </div>
+
+          <h2 className="font-semibold text-gray-800 text-sm">{title}</h2>
         </div>
-        <button
-          onClick={onClick}
-          className="flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-500 hover:bg-white hover:border-gray-300 hover:text-gray-700 transition-all duration-150"
-        >
-          Open <ArrowUpRight className="h-3 w-3" />
-        </button>
       </div>
 
       <div className="grid grid-cols-2 gap-2.5">
@@ -181,11 +164,19 @@ export const ReportItem = ({
       badge: "bg-rose-50 text-rose-700 border-rose-200",
       row: "hover:bg-rose-50/50",
     },
+    neutral: {
+      dot: "bg-gray-400",
+      badge: "bg-gray-50 text-gray-600 border-gray-200",
+      row: "hover:bg-gray-100/70",
+    },
   };
   const s = status ? statusConfig[status] : null;
 
+  const isClickable = count > 0;
+
   const handleReportClick = () => {
-    // Pass data via state
+    if (!isClickable) return;
+
     navigate(`/reports/${categoryId}`, {
       state: { reportData: payload, reportName: name },
     });
@@ -197,8 +188,13 @@ export const ReportItem = ({
       className={cx(
         "group flex items-center justify-between w-full rounded-xl px-4 py-3 text-left",
         "border border-gray-100 bg-gray-50/60 transition-all duration-150",
-        s ? s.row : "hover:bg-gray-100/80",
+        isClickable
+          ? s
+            ? s.row
+            : "hover:bg-gray-100/80 cursor-pointer"
+          : "opacity-60 cursor-not-allowed bg-gray-100",
       )}
+      disabled={!isClickable}
     >
       <div className="flex items-center gap-3">
         <div
@@ -209,16 +205,15 @@ export const ReportItem = ({
         />
         <span className="text-sm font-medium text-gray-700">{name}</span>
       </div>
-      {count && (
-        <span
-          className={cx(
-            "text-xs font-semibold px-2.5 py-1 rounded-full border tabular-nums",
-            s ? s.badge : "bg-white text-gray-500 border-gray-200",
-          )}
-        >
-          {count}
-        </span>
-      )}
+
+      <span
+        className={cx(
+          "text-xs font-semibold px-2.5 py-1 rounded-full border tabular-nums",
+          s ? s.badge : "bg-white text-gray-500 border-gray-200",
+        )}
+      >
+        {count > 0 ? count : "n/a"}
+      </span>
     </button>
   );
 };
@@ -328,11 +323,12 @@ export const PremiumReportGroup = ({
             "max-height 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease",
         }}
       >
-        <div className="px-5 pb-4 flex flex-col gap-2">
-          <div className="h-px bg-gray-100 mb-1" />
-          {reports.map((r: any) => (
-            <ReportItem key={r.name} {...r} categoryId={categoryId} />
-          ))}
+        <div className="px-5 pb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-8">
+            {reports.map((r: any) => (
+              <ReportItem key={r.name} {...r} categoryId={categoryId} />
+            ))}
+          </div>
         </div>
       </div>
     </div>
