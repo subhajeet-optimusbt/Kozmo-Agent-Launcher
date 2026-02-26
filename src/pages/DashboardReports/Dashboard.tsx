@@ -90,6 +90,7 @@ const DashboardSection: React.FC<Props> = ({ Zone }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {[...dashboards]
+          .filter((d) => d.isActive === true && d.isLandingPage === false)
           .sort((a, b) => {
             const getNumber = (id: string) =>
               parseInt(id?.replace(/[^\d]/g, "") || "0", 10);

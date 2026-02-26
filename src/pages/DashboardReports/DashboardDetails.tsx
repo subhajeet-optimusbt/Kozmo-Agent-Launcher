@@ -330,7 +330,7 @@ const DashboardDetails = () => {
       </div>
 
       {/* ===== Widgets Grid ===== */}
-      <div style={{ flex: 1, padding: "20px 24px" }}>
+      <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
         <div
           style={{
             display: "grid",
