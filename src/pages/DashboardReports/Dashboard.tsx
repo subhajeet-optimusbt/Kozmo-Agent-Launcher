@@ -119,13 +119,13 @@ const DashboardSection: React.FC<Props> = ({ Zone }) => {
               kpis = [
                 {
                   label: "Active Value",
-                  value: `₹${Number(totalValue).toLocaleString("en-IN", {
+                  value: `$${Number(totalValue).toLocaleString("en-IN", {
                     minimumFractionDigits: 2,
                   })} Cr`,
                 },
                 {
                   label: "Outstanding",
-                  value: `₹${Number(outstanding).toLocaleString("en-IN", {
+                  value: `$${Number(outstanding).toLocaleString("en-IN", {
                     minimumFractionDigits: 2,
                   })} Cr`,
                 },

@@ -60,7 +60,7 @@ export const KPI = ({ label, value }: any) => {
         {label}
       </p>
 
-      <p className="text-lg font-bold text-gray-800 tabular-nums truncate">
+      <p className="text-xs font-bold text-gray-800 tabular-nums truncate">
         {animated}
       </p>
     </div>

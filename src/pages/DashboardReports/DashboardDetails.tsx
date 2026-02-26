@@ -330,12 +330,12 @@ const DashboardDetails = () => {
       </div>
 
       {/* ===== Widgets Grid ===== */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
+      <div style={{ flex: 1, padding: "20px 24px" }}>
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-            gap: "16px",
+            gridTemplateColumns: "repeat(auto-fill, minmax(20rem, 1fr))",
+            gap: "2rem",
             alignItems: "start",
           }}
         >
