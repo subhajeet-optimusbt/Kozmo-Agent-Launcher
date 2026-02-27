@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-
 import ProtectedRoute from "./routes/ProtectedRoute";
-
+import { getActiveAccountId } from "./utils/auth";
 import HomeLayout from "./components/layout/Home/HomeLayout";
 import ContractsLayout from "./components/layout/Contracts/ContractsLayout";
 import RenewalsLayout from "./components/layout/Renewals/RenewalsLayout";
@@ -29,6 +30,34 @@ import DashboardReportsLayout from "./components/layout/DashboardReports/Dashboa
 import DashboardReportsPage from "./pages/DashboardReports/DashboardReportsPage";
 import DashboardDetails from "./pages/DashboardReports/DashboardDetails";
 export default function App() {
+
+  useEffect(() => {
+
+    const userRaw =
+      localStorage.getItem("user") ||
+      sessionStorage.getItem("user");
+
+    if (!userRaw) return;
+
+    const user = JSON.parse(userRaw);
+
+    const activeAccountId = getActiveAccountId();
+
+    // 🔥 Broken session condition
+    if (!activeAccountId || !user.accounts?.length) {
+
+      console.log("Broken session → Logout");
+
+      localStorage.removeItem("user");
+      sessionStorage.removeItem("user");
+
+      window.location.replace("/login");
+
+      return;
+    }
+
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>

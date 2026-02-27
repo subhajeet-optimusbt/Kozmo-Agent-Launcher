@@ -334,8 +334,8 @@ const DashboardDetails = () => {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(20rem, 1fr))",
-            gap: "2rem",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: "20px",
             alignItems: "start",
           }}
         >
