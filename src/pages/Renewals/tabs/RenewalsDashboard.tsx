@@ -227,7 +227,7 @@ export default function RenewalsDashboard({loading}: Props) {
                 className="group relative overflow-hidden rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-4 hover:shadow-lg transition"
               >
                 <div
-                  className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${list.color}`}
+                  className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${list.color}`}
                 />
                 <h4 className="text-sm font-semibold text-gray-900">
                   {list.title}

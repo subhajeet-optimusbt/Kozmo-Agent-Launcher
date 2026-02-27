@@ -1,25 +1,32 @@
 import React from "react";
 
-const Card: React.FC<{
+interface CardProps {
   children: React.ReactNode;
   className?: string;
   title?: string;
   extra?: React.ReactNode;
-}> = ({ children, className = "", title, extra }) => (
+}
+
+const Card: React.FC<CardProps> = ({
+  children,
+  className = "",
+  title,
+  extra,
+}) => (
   <div
-    className={`bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden ${className}`}
+    className={`bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden ${className}`}
   >
     {(title || extra) && (
-      <div className="px-4 py-3 border-b border-gray-100 flex justify-between items-center">
+      <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-gray-50 to-white">
         {title && (
-          <h3 className="text-xs font-black text-gray-500 uppercase tracking-wider">
+          <h3 className="text-xs font-black text-gray-700 uppercase tracking-wider">
             {title}
           </h3>
         )}
-        {extra && <div>{extra}</div>}
+        {extra && <div className="text-sm">{extra}</div>}
       </div>
     )}
-    <div className="p-4">{children}</div>
+    <div className="p-6">{children}</div>
   </div>
 );
 

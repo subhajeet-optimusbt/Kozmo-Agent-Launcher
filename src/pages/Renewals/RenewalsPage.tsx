@@ -57,7 +57,7 @@ export default function RenewalsPage() {
   return (
     <div className="relative overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-sm">
       {loading && <FullscreenLoader />}
-
+  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500" />
       {/* Header */}
       <div className="mx-8 my-4 flex items-center">
         <div>
