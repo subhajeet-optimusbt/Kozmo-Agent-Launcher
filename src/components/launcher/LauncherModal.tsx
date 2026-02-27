@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
+ 
 // /* eslint-disable react-hooks/immutability */
 // import React, { useEffect, useMemo, useState, useRef } from "react";
 // import { Modal } from "antd";
@@ -347,7 +348,7 @@
 
 // export default LauncherModal;
 
-/* eslint-disable react-hooks/immutability */
+ 
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { Modal } from "antd";
 import { SearchOutlined, AppstoreOutlined } from "@ant-design/icons";
@@ -425,13 +426,27 @@ const activeAppKey = useMemo(() => {
   }, [leftApps.length, focusedIndex]);
 
   /* ───────────────── Navigation ───────────────── */
-  const openApp = (appKey: string) => {
-    const app = APPS.find((a) => a.key === appKey);
-    if (!app) return;
+  // const openApp = (appKey: string) => {
+  //   const app = APPS.find((a) => a.key === appKey);
+  //   if (!app) return;
 
+  //   navigate(app.route);
+  //   setLauncherOpen(false);
+  // };
+  const openApp = (appKey: string) => {
+  const app = APPS.find((a) => a.key === appKey);
+  if (!app) return;
+
+  // ✅ If external app → open in new tab
+  if (app.externalUrl) {
+    window.open(app.externalUrl, "_blank", "noopener,noreferrer");
+  } else {
+    // ✅ Internal navigation
     navigate(app.route);
-    setLauncherOpen(false);
-  };
+  }
+
+  setLauncherOpen(false);
+};
 
   const togglePin = (appKey: string) => {
     setPinnedKeys((prev) =>

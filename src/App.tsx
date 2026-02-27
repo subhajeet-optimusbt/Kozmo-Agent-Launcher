@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -30,36 +29,6 @@ import DashboardReportsLayout from "./components/layout/DashboardReports/Dashboa
 import DashboardReportsPage from "./pages/DashboardReports/DashboardReportsPage";
 import DashboardDetails from "./pages/DashboardReports/DashboardDetails";
 export default function App() {
-  useEffect(() => {
-    const originalFetch = window.fetch;
-
-    window.fetch = async (...args) => {
-      try {
-        const response = await originalFetch(...args);
-
-        if (response.status === 401) {
-          localStorage.clear();
-          sessionStorage.clear();
-          window.location.href = "/login";
-        }
-
-        return response;
-      } catch (error) {
-        // 🔥 If completely failed (network or server down)
-        console.error("Network error:", error);
-
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href = "/login";
-
-        throw error;
-      }
-    };
-
-    return () => {
-      window.fetch = originalFetch;
-    };
-  }, []);
   return (
     <BrowserRouter>
       <Routes>
