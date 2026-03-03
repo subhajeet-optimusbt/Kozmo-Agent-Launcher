@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { useState } from "react";
 import {
   ResponsiveContainer,
   PieChart,
@@ -16,6 +17,7 @@ import {
   CartesianGrid,
   Legend,
 } from "recharts";
+import { LayoutGrid, List, X } from "lucide-react";
 
 /* ===================== Palette ===================== */
 const COLORS = [
@@ -316,8 +318,600 @@ const SectionHeader = ({ title }: { title: string }) => (
   </div>
 );
 
+/* ===================== NEW: Chart Header with view toggle ===================== */
+const ChartHeader = ({
+  title,
+  viewMode,
+  onViewChange,
+  onTitleClick,
+  totalCount,
+}: {
+  title: string;
+  viewMode: "graph" | "list";
+  onViewChange: (mode: "graph" | "list") => void;
+  onTitleClick?: () => void;
+  totalCount?: number;
+}) => (
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      padding: "6px 12px 6px 16px",
+      background: "linear-gradient(90deg,#f0fdfa 0%,#f8fafc 100%)",
+      borderBottom: "1px solid #e2e8f0",
+    }}
+  >
+    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+      <div
+        style={{
+          width: "3px",
+          height: "14px",
+          borderRadius: "2px",
+          background: "#0d9488",
+        }}
+      />
+      <span
+        onClick={onTitleClick}
+        style={{
+          fontSize: "10px",
+          fontWeight: 700,
+          letterSpacing: "0.1em",
+          textTransform: "uppercase",
+          color: "#0d9488",
+          cursor: onTitleClick ? "pointer" : "default",
+          textDecoration: onTitleClick ? "underline dotted" : "none",
+        }}
+      >
+        {title}
+      </span>
+      {onTitleClick && totalCount !== undefined && (
+        <span
+          onClick={onTitleClick}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "1px 8px",
+            borderRadius: "20px",
+            fontSize: "10px",
+            fontWeight: 700,
+            background: "#f0fdfa",
+            color: "#0d9488",
+            border: "1px solid #99f6e4",
+            cursor: "pointer",
+          }}
+        >
+          {totalCount} total
+        </span>
+      )}
+    </div>
+    {/* View toggle */}
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "2px",
+        background: "#f1f5f9",
+        borderRadius: "8px",
+        padding: "2px",
+      }}
+    >
+      <button
+        onClick={() => onViewChange("graph")}
+        title="Graph View"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "26px",
+          height: "26px",
+          borderRadius: "6px",
+          border: "none",
+          cursor: "pointer",
+          background: viewMode === "graph" ? "#ffffff" : "transparent",
+          color: viewMode === "graph" ? "#0d9488" : "#94a3b8",
+          boxShadow:
+            viewMode === "graph" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+          transition: "all 0.15s ease",
+        }}
+      >
+        <LayoutGrid size={13} />
+      </button>
+      <button
+        onClick={() => onViewChange("list")}
+        title="List View"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "26px",
+          height: "26px",
+          borderRadius: "6px",
+          border: "none",
+          cursor: "pointer",
+          background: viewMode === "list" ? "#ffffff" : "transparent",
+          color: viewMode === "list" ? "#0d9488" : "#94a3b8",
+          boxShadow:
+            viewMode === "list" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+          transition: "all 0.15s ease",
+        }}
+      >
+        <List size={13} />
+      </button>
+    </div>
+  </div>
+);
+
+/* ===================== NEW: Drill-down Modal ===================== */
+const DrillDownModal = ({
+  title,
+  segmentName,
+  items,
+  onClose,
+}: {
+  title: string;
+  segmentName: string;
+  items: any[];
+  onClose: () => void;
+}) => {
+  if (!items || items.length === 0) return null;
+
+  const skipKeys = new Set([
+    "partitionKey",
+    "rowKey",
+    "timestamp",
+    "eTag",
+    "modifiedBy",
+    "createdBy",
+    "created",
+    "modified",
+  ]);
+
+  const allKeys = Object.keys(items[0]).filter((k) => !skipKeys.has(k));
+
+  const formatCell = (key: string, val: any): string => {
+    if (val === null || val === undefined || val === "") return "—";
+    if (typeof val === "boolean") return val ? "Yes" : "No";
+    if (typeof val === "string" && val.match(/^\d{4}-\d{2}-\d{2}T/)) {
+      return new Date(val).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    }
+    if (typeof val === "number") {
+      if (/value|amount|total/i.test(key)) {
+        return `$${val.toLocaleString()}`;
+      }
+      return val.toLocaleString();
+    }
+    return String(val);
+  };
+
+  const labelify = (key: string) =>
+    key
+      .replace(/([A-Z])/g, " $1")
+      .replace(/^./, (s) => s.toUpperCase())
+      .trim();
+
+  const statusColor = (status: string) => {
+    const map: Record<string, { bg: string; color: string }> = {
+      Active: { bg: "#f0fdfa", color: "#0d9488" },
+      Signed: { bg: "#eef2ff", color: "#6366f1" },
+      Expired: { bg: "#fffbeb", color: "#d97706" },
+      Pending: { bg: "#fff7ed", color: "#ea580c" },
+    };
+    return map[status] || { bg: "#f1f5f9", color: "#64748b" };
+  };
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 1000,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "rgba(15,23,42,0.45)",
+        backdropFilter: "blur(4px)",
+        padding: "20px",
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: "#ffffff",
+          borderRadius: "20px",
+          boxShadow:
+            "0 24px 64px rgba(0,0,0,0.18), 0 4px 16px rgba(13,148,136,0.08)",
+          width: "100%",
+          maxWidth: "900px",
+          maxHeight: "80vh",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          fontFamily: "'Inter', sans-serif",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Modal Header */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "16px 20px",
+            background: "linear-gradient(90deg, #f0fdfa, #f8fafc)",
+            borderBottom: "1px solid #e2e8f0",
+            flexShrink: 0,
+          }}
+        >
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div
+                style={{
+                  width: "4px",
+                  height: "16px",
+                  borderRadius: "2px",
+                  background: "#0d9488",
+                }}
+              />
+              <span
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#0f172a",
+                  letterSpacing: "0.01em",
+                }}
+              >
+                {title}
+              </span>
+              {segmentName && (
+                <span
+                  style={{
+                    padding: "2px 10px",
+                    borderRadius: "20px",
+                    background: "#f0fdfa",
+                    color: "#0d9488",
+                    fontSize: "11px",
+                    fontWeight: 700,
+                    border: "1px solid #99f6e4",
+                  }}
+                >
+                  {segmentName === "All" ? "All Records" : segmentName}
+                </span>
+              )}
+            </div>
+            <p style={{ fontSize: "11px", color: "#94a3b8", marginTop: "3px", paddingLeft: "12px" }}>
+              {items.length} {items.length === 1 ? "record" : "records"}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "32px",
+              height: "32px",
+              borderRadius: "8px",
+              border: "1px solid #e2e8f0",
+              background: "#f8fafc",
+              cursor: "pointer",
+              color: "#64748b",
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "#fef2f2";
+              e.currentTarget.style.color = "#dc2626";
+              e.currentTarget.style.borderColor = "#fecaca";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "#f8fafc";
+              e.currentTarget.style.color = "#64748b";
+              e.currentTarget.style.borderColor = "#e2e8f0";
+            }}
+          >
+            <X size={15} />
+          </button>
+        </div>
+
+        {/* Modal Table */}
+        <div style={{ overflowY: "auto", flex: 1 }}>
+          <table
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+              fontSize: "12px",
+              fontFamily: "'Inter', sans-serif",
+            }}
+          >
+            <thead
+              style={{
+                position: "sticky",
+                top: 0,
+                zIndex: 1,
+              }}
+            >
+              <tr
+                style={{
+                  background: "linear-gradient(90deg,#f0fdfa,#f8fafc)",
+                }}
+              >
+                {allKeys.map((k) => (
+                  <th
+                    key={k}
+                    style={{
+                      padding: "10px 16px",
+                      textAlign: "left",
+                      fontSize: "10px",
+                      fontWeight: 700,
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      color: "#0d9488",
+                      borderBottom: "2px solid #e2e8f0",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {labelify(k)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((row: any, idx: number) => (
+                <tr
+                  key={idx}
+                  style={{
+                    background: idx % 2 === 0 ? "#ffffff" : "#f8fafc",
+                    transition: "background 0.12s",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLTableRowElement).style.background =
+                      "#f0fdfa";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLTableRowElement).style.background =
+                      idx % 2 === 0 ? "#ffffff" : "#f8fafc";
+                  }}
+                >
+                  {allKeys.map((k, ci) => (
+                    <td
+                      key={k}
+                      style={{
+                        padding: "10px 16px",
+                        borderBottom: "1px solid #f1f5f9",
+                        color: ci === 0 ? "#0f172a" : "#475569",
+                        fontWeight: ci === 0 ? 600 : 400,
+                        maxWidth: "200px",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {k === "status" ? (
+                        <span
+                          style={{
+                            padding: "2px 10px",
+                            borderRadius: "20px",
+                            fontSize: "10px",
+                            fontWeight: 700,
+                            background: statusColor(row[k]).bg,
+                            color: statusColor(row[k]).color,
+                          }}
+                        >
+                          {row[k] || "—"}
+                        </span>
+                      ) : (
+                        formatCell(k, row[k])
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ===================== NEW: List View — mirrors chart segments ===================== */
+// Receives the same `formatted` array the chart uses: [{name, value}]
+// plus an optional drillLookup so rows are clickable to open the modal
+const ChartListView = ({
+  rows,
+  onRowClick,
+  drillLookup,
+}: {
+  rows: { name: string; value: number }[];
+  onRowClick?: (name: string) => void;
+  drillLookup?: Record<string, any[]>;
+}) => {
+  if (!rows || rows.length === 0)
+    return (
+      <div
+        style={{
+          padding: "24px",
+          textAlign: "center",
+          color: "#94a3b8",
+          fontSize: "12px",
+        }}
+      >
+        No data
+      </div>
+    );
+
+  return (
+    <div style={{ overflowX: "auto", flex: 1 }}>
+      <table
+        style={{
+          width: "100%",
+          borderCollapse: "collapse",
+          fontSize: "12px",
+          fontFamily: "'Inter', sans-serif",
+        }}
+      >
+        <thead>
+          <tr style={{ background: "linear-gradient(90deg,#f0fdfa,#f8fafc)" }}>
+            {["Segment", "Count"].map((h) => (
+              <th
+                key={h}
+                style={{
+                  padding: "10px 16px",
+                  textAlign: "left",
+                  fontSize: "10px",
+                  fontWeight: 700,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  color: "#0d9488",
+                  borderBottom: "2px solid #e2e8f0",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {h}
+              </th>
+            ))}
+            {drillLookup && (
+              <th
+                style={{
+                  padding: "10px 16px",
+                  textAlign: "left",
+                  fontSize: "10px",
+                  fontWeight: 700,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  color: "#0d9488",
+                  borderBottom: "2px solid #e2e8f0",
+                }}
+              >
+                Details
+              </th>
+            )}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, idx) => {
+            const hasDrill = !!(drillLookup && drillLookup[row.name]?.length);
+            return (
+              <tr
+                key={idx}
+                style={{
+                  background: idx % 2 === 0 ? "#ffffff" : "#f8fafc",
+                  transition: "background 0.12s",
+                  cursor: hasDrill ? "pointer" : "default",
+                }}
+                onClick={() => hasDrill && onRowClick && onRowClick(row.name)}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLTableRowElement).style.background =
+                    "#f0fdfa";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLTableRowElement).style.background =
+                    idx % 2 === 0 ? "#ffffff" : "#f8fafc";
+                }}
+              >
+                <td
+                  style={{
+                    padding: "10px 16px",
+                    borderBottom: "1px solid #f1f5f9",
+                    fontWeight: 600,
+                    color: "#0f172a",
+                  }}
+                >
+                  {row.name || "—"}
+                </td>
+                <td
+                  style={{
+                    padding: "10px 16px",
+                    borderBottom: "1px solid #f1f5f9",
+                    color: "#0d9488",
+                    fontWeight: 700,
+                  }}
+                >
+                  {row.value.toLocaleString()}
+                </td>
+                {drillLookup && (
+                  <td
+                    style={{
+                      padding: "10px 16px",
+                      borderBottom: "1px solid #f1f5f9",
+                    }}
+                  >
+                    {hasDrill ? (
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "4px",
+                          padding: "2px 10px",
+                          borderRadius: "20px",
+                          fontSize: "10px",
+                          fontWeight: 700,
+                          background: "#f0fdfa",
+                          color: "#0d9488",
+                          border: "1px solid #99f6e4",
+                        }}
+                      >
+                        View {drillLookup[row.name].length} records →
+                      </span>
+                    ) : (
+                      <span style={{ color: "#cbd5e1", fontSize: "11px" }}>
+                        —
+                      </span>
+                    )}
+                  </td>
+                )}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      <div
+        style={{
+          padding: "8px 16px",
+          background: "#f8fafc",
+          borderTop: "1px solid #f1f5f9",
+          display: "flex",
+          alignItems: "center",
+          gap: "6px",
+        }}
+      >
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "18px",
+            height: "18px",
+            borderRadius: "50%",
+            background: "#0d948820",
+            color: "#0d9488",
+            fontSize: "10px",
+            fontWeight: 700,
+          }}
+        >
+          {rows.length}
+        </span>
+        <span style={{ fontSize: "11px", color: "#94a3b8", fontWeight: 500 }}>
+          {rows.length === 1 ? "segment" : "segments"}
+        </span>
+      </div>
+    </div>
+  );
+};
+
 /* ===================== Main Component ===================== */
 const WidgetRenderer = ({ widget }: any) => {
+  const [viewMode, setViewMode] = useState<"graph" | "list">("graph");
+  const [drillModal, setDrillModal] = useState<{
+    segmentName: string;
+    items: any[];
+  } | null>(null);
+
   if (!widget?.success) {
     return (
       <div
@@ -611,7 +1205,19 @@ const WidgetRenderer = ({ widget }: any) => {
      Pie / Donut
   ===================================================== */
   if (chartType === "Pie" || chartType === "Donut") {
-    const formatted = normalizeKeyValue(data);
+    // Extract the correct breakdown sub-object for chart rendering
+    let chartSourceData = data;
+    if (data && typeof data === "object" && !Array.isArray(data)) {
+      if (data.stageWiseBreakdown) chartSourceData = data.stageWiseBreakdown;
+      else if (data.statusWiseBreakdown) chartSourceData = data.statusWiseBreakdown;
+    }
+    // Normalize segment names: empty string key becomes "Unknown"
+    const formatted: { name: string; value: number }[] = chartSourceData && typeof chartSourceData === "object" && !Array.isArray(chartSourceData)
+      ? Object.entries(chartSourceData).map(([k, v]) => ({
+          name: k && k.trim() !== "" ? k : "Unknown",
+          value: Number(v) || 0,
+        }))
+      : normalizeKeyValue(data);
     const total = formatted.reduce((acc, d) => acc + d.value, 0);
     const formattedWithTotal = formatted.map((d) => ({ ...d, total }));
 
@@ -644,146 +1250,243 @@ const WidgetRenderer = ({ widget }: any) => {
       );
     }
 
+    // Build drill-down lookup: segment name → drillBreakoff items
+    const drillLookup: Record<string, any[]> = {};
+    if (data && typeof data === "object" && !Array.isArray(data)) {
+      // Check for stageWiseBreakdown (Donut) or statusWiseBreakdown (Pie)
+      const breakdownKey = data.stageWiseBreakdown
+        ? "stageWiseBreakdown"
+        : data.statusWiseBreakdown
+          ? "statusWiseBreakdown"
+          : null;
+
+      if (breakdownKey && data.drillBreakoff?.items) {
+        const allItems: any[] = data.drillBreakoff.items;
+        const breakdownField = breakdownKey === "stageWiseBreakdown" ? "stage" : "status";
+        // Group items by their segment field
+        allItems.forEach((item) => {
+          const key = item[breakdownField] ?? "";
+          const displayKey = key === "" ? "Unknown" : key;
+          if (!drillLookup[displayKey]) drillLookup[displayKey] = [];
+          drillLookup[displayKey].push(item);
+        });
+      }
+    }
+
+    // For bar chart with Active/Expired nested structure
+    if (data && typeof data === "object" && !Array.isArray(data)) {
+      Object.entries(data).forEach(([k, v]: any) => {
+        if (v && typeof v === "object" && v.drillBreakoff?.items) {
+          drillLookup[k] = v.drillBreakoff.items;
+        }
+      });
+    }
+
+    const handleSegmentClick = (segmentName: string) => {
+      // Try exact match, then case-insensitive, then "Unknown" for empty
+      let items = drillLookup[segmentName];
+      if (!items) {
+        const matchKey = Object.keys(drillLookup).find(
+          (k) => k.toLowerCase() === segmentName.toLowerCase(),
+        );
+        if (matchKey) items = drillLookup[matchKey];
+      }
+      if (!items && segmentName === "Unknown") items = drillLookup[""] || [];
+      if (items && items.length > 0) {
+        setDrillModal({ segmentName, items });
+      }
+    };
+
     const isDonut = chartType === "Donut";
     return (
-      <div style={{ ...card, padding: "20px", minHeight: "300px" }}>
-        <p style={cardTitle}>{widgetName}</p>
-        <div
-          style={{
-            flex: 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            minHeight: "200px",
-          }}
-        >
-          <ResponsiveContainer width="100%" height={220}>
-            <PieChart>
-              <defs>
-                {GRADIENTS.map((grad, i) => (
-                  <radialGradient
-                    key={i}
-                    id={`pieGrad${i}`}
-                    cx="50%"
-                    cy="50%"
-                    r="50%"
-                  >
-                    <stop offset="0%" stopColor={grad[1]} stopOpacity={0.95} />
-                    <stop offset="100%" stopColor={grad[0]} stopOpacity={1} />
-                  </radialGradient>
-                ))}
-              </defs>
-              <Pie
-                data={formattedWithTotal}
-                dataKey="value"
-                innerRadius={isDonut ? 52 : 0}
-                outerRadius={74}
-                paddingAngle={isDonut ? 4 : 2}
-                labelLine={false}
-                label={renderPieLabel}
-                isAnimationActive={true}
-                animationBegin={0}
-                animationDuration={900}
-              >
-                {formattedWithTotal.map((_, i) => (
-                  <Cell
-                    key={i}
-                    fill={`url(#pieGrad${i})`}
-                    stroke="#ffffff"
-                    strokeWidth={3}
-                    style={{
-                      cursor: "pointer",
-                      filter: "drop-shadow(0px 2px 6px rgba(0,0,0,0.1))",
-                    }}
-                  />
-                ))}
-              </Pie>
-              <Tooltip content={<PieTooltip />} />
-              {isDonut && (
-                <text
-                  x="50%"
-                  y="50%"
-                  textAnchor="middle"
-                  dominantBaseline="central"
-                >
-                  <tspan
-                    x="50%"
-                    dy="-10"
-                    fontSize="24"
-                    fontWeight="800"
-                    fill="#0f172a"
-                    fontFamily="'Inter',sans-serif"
-                  >
-                    {total.toLocaleString()}
-                  </tspan>
-                  <tspan
-                    x="50%"
-                    dy="18"
-                    fontSize="10"
-                    fill="#94a3b8"
-                    fontFamily="'Inter',sans-serif"
-                    fontWeight="600"
-                    letterSpacing="0.08em"
-                  >
-                    TOTAL
-                  </tspan>
-                </text>
-              )}
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
+      <>
+        {drillModal && (
+          <DrillDownModal
+            title={widgetName}
+            segmentName={drillModal.segmentName}
+            items={drillModal.items}
+            onClose={() => setDrillModal(null)}
+          />
+        )}
+        <div style={{ ...card, padding: 0 }}>
+          <ChartHeader
+            title={widgetName}
+            viewMode={viewMode}
+            onViewChange={setViewMode}
+            // onTitleClick={() => { const ai = data && data.drillBreakoff && data.drillBreakoff.items ? data.drillBreakoff.items : Object.values(drillLookup).flat(); if (ai.length > 0) setDrillModal({ segmentName: "All", items: ai }); }}
+            totalCount={data && (data.totalContracts || (data.drillBreakoff && data.drillBreakoff.totalItems))}
+          />
 
-        {/* Legend pills */}
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "6px",
-            justifyContent: "center",
-            marginTop: "4px",
-          }}
-        >
-          {formatted.map((item, i) => (
-            <div
-              key={i}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                background: `${COLORS[i % COLORS.length]}10`,
-                border: `1px solid ${COLORS[i % COLORS.length]}30`,
-                borderRadius: "20px",
-                padding: "4px 12px",
-                cursor: "default",
-              }}
-            >
+          {viewMode === "list" ? (
+            <ChartListView
+              rows={formatted}
+              drillLookup={drillLookup}
+              onRowClick={handleSegmentClick}
+            />
+          ) : (
+            <div style={{ padding: "20px" }}>
               <div
                 style={{
-                  width: "8px",
-                  height: "8px",
-                  borderRadius: "50%",
-                  background: COLORS[i % COLORS.length],
-                  flexShrink: 0,
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  minHeight: "200px",
                 }}
-              />
-              <span
-                style={{ fontSize: "11px", color: "#475569", fontWeight: 500 }}
               >
-                {item.name}
-              </span>
-              <span
+                <ResponsiveContainer width="100%" height={220}>
+                  <PieChart>
+                    <defs>
+                      {GRADIENTS.map((grad, i) => (
+                        <radialGradient
+                          key={i}
+                          id={`pieGrad${i}`}
+                          cx="50%"
+                          cy="50%"
+                          r="50%"
+                        >
+                          <stop
+                            offset="0%"
+                            stopColor={grad[1]}
+                            stopOpacity={0.95}
+                          />
+                          <stop
+                            offset="100%"
+                            stopColor={grad[0]}
+                            stopOpacity={1}
+                          />
+                        </radialGradient>
+                      ))}
+                    </defs>
+                    <Pie
+                      data={formattedWithTotal}
+                      dataKey="value"
+                      innerRadius={isDonut ? 52 : 0}
+                      outerRadius={74}
+                      paddingAngle={isDonut ? 4 : 2}
+                      labelLine={false}
+                      label={renderPieLabel}
+                      isAnimationActive={true}
+                      animationBegin={0}
+                      animationDuration={900}
+                      onClick={(entry: any) => {
+                        handleSegmentClick(entry.name);
+                      }}
+                    >
+                      {formattedWithTotal.map((_, i) => (
+                        <Cell
+                          key={i}
+                          fill={`url(#pieGrad${i})`}
+                          stroke="#ffffff"
+                          strokeWidth={3}
+                          style={{
+                            cursor: "pointer",
+                            filter:
+                              "drop-shadow(0px 2px 6px rgba(0,0,0,0.1))",
+                          }}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip content={<PieTooltip />} />
+                    {isDonut && (
+                      <text
+                        x="50%"
+                        y="50%"
+                        textAnchor="middle"
+                        dominantBaseline="central"
+                        style={{ cursor: "pointer" }}
+                        onClick={() => {
+                          const allItems = data && data.drillBreakoff && data.drillBreakoff.items ? data.drillBreakoff.items : Object.values(drillLookup).flat();
+                          if (allItems.length > 0) setDrillModal({ segmentName: "All", items: allItems });
+                        }}
+                      >
+                        <tspan
+                          x="50%"
+                          dy="-10"
+                          fontSize="24"
+                          fontWeight="800"
+                          fill="#0d9488"
+                          fontFamily="'Inter',sans-serif"
+                          style={{ textDecoration: "underline" }}
+                        >
+                          {total.toLocaleString()}
+                        </tspan>
+                        <tspan
+                          x="50%"
+                          dy="18"
+                          fontSize="10"
+                          fill="#94a3b8"
+                          fontFamily="'Inter',sans-serif"
+                          fontWeight="600"
+                          letterSpacing="0.08em"
+                        >
+                          TOTAL
+                        </tspan>
+                      </text>
+                    )}
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Legend pills */}
+              <div
                 style={{
-                  fontSize: "12px",
-                  color: COLORS[i % COLORS.length],
-                  fontWeight: 800,
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "6px",
+                  justifyContent: "center",
+                  marginTop: "4px",
                 }}
               >
-                {item.value.toLocaleString()}
-              </span>
+                {formatted.map((item, i) => (
+                  <div
+                    key={i}
+                    onClick={() => handleSegmentClick(item.name)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      background: `${COLORS[i % COLORS.length]}10`,
+                      border: `1px solid ${COLORS[i % COLORS.length]}30`,
+                      borderRadius: "20px",
+                      padding: "4px 12px",
+                      cursor: drillLookup[item.name] ? "pointer" : "default",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "8px",
+                        height: "8px",
+                        borderRadius: "50%",
+                        background: COLORS[i % COLORS.length],
+                        flexShrink: 0,
+                      }}
+                    />
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        color: "#475569",
+                        fontWeight: 500,
+                      }}
+                    >
+                      {item.name}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "12px",
+                        color: COLORS[i % COLORS.length],
+                        fontWeight: 800,
+                      }}
+                    >
+                      {item.value.toLocaleString()}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
+          )}
         </div>
-      </div>
+      </>
     );
   }
 
@@ -875,254 +1578,351 @@ const WidgetRenderer = ({ widget }: any) => {
       return <EmptyCard title={widgetName} />;
     }
 
+    // Build drill-down lookup for bar charts
+    const barDrillLookup: Record<string, any[]> = {};
+    if (data && typeof data === "object" && !Array.isArray(data)) {
+      Object.entries(data).forEach(([k, v]: any) => {
+        if (v && typeof v === "object" && v.drillBreakoff?.items) {
+          barDrillLookup[k] = v.drillBreakoff.items;
+        }
+      });
+    }
+
+    // Build list-view rows for bar: always { name, value } where value = count or totalValue
+    // Uses barDrillLookup when available (nested shape), else falls back to formatted
+    const barListRows: { name: string; value: number }[] = Object.keys(barDrillLookup).length > 0
+      ? Object.entries(barDrillLookup).map(([k, items]) => ({
+          name: k,
+          value: items.length,
+        }))
+      : formatted.map((d: any) => ({
+          name: d.name,
+          value: typeof d.value === "number" ? d.value : (d.count ?? d.totalValue ?? 0),
+        }));
+
+    const handleBarClick = (barData: any) => {
+      if (!barData) return;
+      const segName = barData.name || barData.activeLabel;
+      if (!segName) return;
+      let items = barDrillLookup[segName];
+      if (!items) {
+        const matchKey = Object.keys(barDrillLookup).find(
+          (k) => k.toLowerCase() === String(segName).toLowerCase(),
+        );
+        if (matchKey) items = barDrillLookup[matchKey];
+      }
+      if (items && items.length > 0) {
+        setDrillModal({ segmentName: segName, items });
+      }
+    };
+
     // Chart height: horizontal bars need more height per item
     const chartHeight = isHorizontal
       ? Math.max(200, formatted.length * 48 + 40)
       : 220;
 
     return (
-      <div
-        style={{
-          ...card,
-          minHeight: isHorizontal ? "auto" : "300px",
-          overflow: "hidden",
-        }}
-      >
-        {/* Teal header stripe */}
-        <SectionHeader title={widgetName} />
+      <>
+        {drillModal && (
+          <DrillDownModal
+            title={widgetName}
+            segmentName={drillModal.segmentName}
+            items={drillModal.items}
+            onClose={() => setDrillModal(null)}
+          />
+        )}
+        <div
+          style={{
+            ...card,
+            minHeight: isHorizontal ? "auto" : "300px",
+            overflow: "hidden",
+          }}
+        >
+          <ChartHeader
+            title={widgetName}
+            viewMode={viewMode}
+            onViewChange={setViewMode}
+            onTitleClick={() => { const ai = Object.values(barDrillLookup).flat(); if (ai.length > 0) setDrillModal({ segmentName: "All", items: ai }); }}
+            totalCount={Object.values(barDrillLookup).flat().length || undefined}
+          />
 
-        <div style={{ padding: "16px 20px 20px", flex: 1 }}>
-          <div style={{ height: chartHeight }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={formatted}
-                layout={isHorizontal ? "vertical" : "horizontal"}
-                margin={
-                  isHorizontal
-                    ? { left: 100, right: 60, top: 8, bottom: 8 }
-                    : { top: 28, right: 20, left: 0, bottom: 36 }
-                }
-              >
-                <defs>
-                  {GRADIENTS.map((grad, i) => (
-                    <linearGradient
-                      key={i}
-                      id={`barG${i}`}
-                      x1={isHorizontal ? "0" : "0"}
-                      y1={isHorizontal ? "0" : "0"}
-                      x2={isHorizontal ? "1" : "0"}
-                      y2={isHorizontal ? "0" : "1"}
-                    >
-                      <stop offset="0%" stopColor={grad[1]} stopOpacity={0.9} />
-                      <stop offset="100%" stopColor={grad[0]} stopOpacity={1} />
-                    </linearGradient>
-                  ))}
-                </defs>
+          {viewMode === "list" ? (
+            <ChartListView
+              rows={barListRows}
+              drillLookup={barDrillLookup}
+              onRowClick={(name) => handleBarClick({ name })}
+            />
+          ) : (
+            <div style={{ padding: "16px 20px 20px", flex: 1 }}>
+              <div style={{ height: chartHeight }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={formatted}
+                    layout={isHorizontal ? "vertical" : "horizontal"}
+                    margin={
+                      isHorizontal
+                        ? { left: 100, right: 60, top: 8, bottom: 8 }
+                        : { top: 28, right: 20, left: 0, bottom: 36 }
+                    }
+                    onClick={(chartData: any) => {
+                      if (chartData && chartData.activePayload?.length) {
+                        handleBarClick({
+                          name: chartData.activeLabel,
+                        });
+                      }
+                    }}
+                    style={{ cursor: Object.keys(barDrillLookup).length > 0 ? "pointer" : "default" }}
+                  >
+                    <defs>
+                      {GRADIENTS.map((grad, i) => (
+                        <linearGradient
+                          key={i}
+                          id={`barG${i}`}
+                          x1={isHorizontal ? "0" : "0"}
+                          y1={isHorizontal ? "0" : "0"}
+                          x2={isHorizontal ? "1" : "0"}
+                          y2={isHorizontal ? "0" : "1"}
+                        >
+                          <stop
+                            offset="0%"
+                            stopColor={grad[1]}
+                            stopOpacity={0.9}
+                          />
+                          <stop
+                            offset="100%"
+                            stopColor={grad[0]}
+                            stopOpacity={1}
+                          />
+                        </linearGradient>
+                      ))}
+                    </defs>
 
-                <CartesianGrid
-                  strokeDasharray="4 4"
-                  stroke="#f1f5f9"
-                  vertical={isHorizontal}
-                  horizontal={!isHorizontal}
-                />
-
-                {isHorizontal ? (
-                  <>
-                    <XAxis
-                      type="number"
-                      tick={{ fontSize: 10, fill: "#94a3b8" }}
-                      axisLine={false}
-                      tickLine={false}
+                    <CartesianGrid
+                      strokeDasharray="4 4"
+                      stroke="#f1f5f9"
+                      vertical={isHorizontal}
+                      horizontal={!isHorizontal}
                     />
-                    <YAxis
-                      type="category"
-                      dataKey="name"
-                      tick={{ fontSize: 11, fill: "#64748b", fontWeight: 500 }}
-                      width={95}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <XAxis
-                      dataKey="name"
-                      tick={{ fontSize: 11, fill: "#64748b", fontWeight: 500 }}
-                      angle={formatted.length > 4 ? -18 : 0}
-                      textAnchor={formatted.length > 4 ? "end" : "middle"}
-                      interval={0}
-                      axisLine={false}
-                      tickLine={false}
-                      height={40}
-                    />
-                    <YAxis
-                      tick={{ fontSize: 10, fill: "#94a3b8" }}
-                      width={40}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                  </>
-                )}
 
-                <Tooltip
-                  content={<CustomTooltip />}
-                  cursor={{ fill: "rgba(13,148,136,0.05)", radius: 6 } as any}
-                />
+                    {isHorizontal ? (
+                      <>
+                        <XAxis
+                          type="number"
+                          tick={{ fontSize: 10, fill: "#94a3b8" }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          type="category"
+                          dataKey="name"
+                          tick={{
+                            fontSize: 11,
+                            fill: "#64748b",
+                            fontWeight: 500,
+                          }}
+                          width={95}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <XAxis
+                          dataKey="name"
+                          tick={{
+                            fontSize: 11,
+                            fill: "#64748b",
+                            fontWeight: 500,
+                          }}
+                          angle={formatted.length > 4 ? -18 : 0}
+                          textAnchor={
+                            formatted.length > 4 ? "end" : "middle"
+                          }
+                          interval={0}
+                          axisLine={false}
+                          tickLine={false}
+                          height={40}
+                        />
+                        <YAxis
+                          tick={{ fontSize: 10, fill: "#94a3b8" }}
+                          width={40}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                      </>
+                    )}
 
-                {/* STACKED bars */}
-                {isStacked && multiKeys.length > 0 ? (
-                  <>
-                    {multiKeys.map((key, i) => (
-                      <Bar
-                        key={key}
-                        dataKey={key}
-                        stackId="a"
-                        fill={`url(#barG${i})`}
-                        radius={
-                          i === multiKeys.length - 1
-                            ? [6, 6, 0, 0]
-                            : [0, 0, 0, 0]
-                        }
-                      >
-                        {i === multiKeys.length - 1 && (
-                          <LabelList
+                    <Tooltip
+                      content={<CustomTooltip />}
+                      cursor={
+                        { fill: "rgba(13,148,136,0.05)", radius: 6 } as any
+                      }
+                    />
+
+                    {/* STACKED bars */}
+                    {isStacked && multiKeys.length > 0 ? (
+                      <>
+                        {multiKeys.map((key, i) => (
+                          <Bar
+                            key={key}
                             dataKey={key}
+                            stackId="a"
+                            fill={`url(#barG${i})`}
+                            radius={
+                              i === multiKeys.length - 1
+                                ? [6, 6, 0, 0]
+                                : [0, 0, 0, 0]
+                            }
+                          >
+                            {i === multiKeys.length - 1 && (
+                              <LabelList
+                                dataKey={key}
+                                position="top"
+                                content={<BarTopLabel />}
+                              />
+                            )}
+                          </Bar>
+                        ))}
+                        <Legend
+                          iconType="circle"
+                          wrapperStyle={{
+                            fontSize: "11px",
+                            color: "#64748b",
+                            paddingTop: "8px",
+                          }}
+                        />
+                      </>
+                    ) : !isStacked && multiKeys.length > 0 ? (
+                      /* GROUPED multi-series bars */
+                      <>
+                        {multiKeys.map((key, i) => (
+                          <Bar
+                            key={key}
+                            dataKey={key}
+                            fill={`url(#barG${i})`}
+                            radius={
+                              isHorizontal ? [0, 6, 6, 0] : [6, 6, 0, 0]
+                            }
+                            maxBarSize={44}
+                          >
+                            <LabelList
+                              dataKey={key}
+                              position={isHorizontal ? "right" : "top"}
+                              content={
+                                isHorizontal ? (
+                                  <HBarRightLabel />
+                                ) : (
+                                  <BarTopLabel />
+                                )
+                              }
+                            />
+                          </Bar>
+                        ))}
+                        <Legend
+                          iconType="circle"
+                          wrapperStyle={{
+                            fontSize: "11px",
+                            color: "#64748b",
+                            paddingTop: "8px",
+                          }}
+                        />
+                      </>
+                    ) : (
+                      /* SIMPLE single-series */
+                      <Bar
+                        dataKey="value"
+                        radius={isHorizontal ? [0, 8, 8, 0] : [8, 8, 0, 0]}
+                        maxBarSize={52}
+                      >
+                        {formatted.map((_: any, i: number) => (
+                          <Cell
+                            key={i}
+                            fill={`url(#barG${i % GRADIENTS.length})`}
+                            style={{
+                              filter:
+                                "drop-shadow(0 2px 4px rgba(0,0,0,0.08))",
+                            }}
+                          />
+                        ))}
+                        {isHorizontal ? (
+                          <LabelList
+                            dataKey="value"
+                            position="right"
+                            content={<HBarRightLabel />}
+                          />
+                        ) : (
+                          <LabelList
+                            dataKey="value"
                             position="top"
                             content={<BarTopLabel />}
                           />
                         )}
                       </Bar>
-                    ))}
-                    <Legend
-                      iconType="circle"
-                      wrapperStyle={{
-                        fontSize: "11px",
-                        color: "#64748b",
-                        paddingTop: "8px",
-                      }}
-                    />
-                  </>
-                ) : !isStacked && multiKeys.length > 0 ? (
-                  /* GROUPED multi-series bars */
-                  <>
-                    {multiKeys.map((key, i) => (
-                      <Bar
-                        key={key}
-                        dataKey={key}
-                        fill={`url(#barG${i})`}
-                        radius={isHorizontal ? [0, 6, 6, 0] : [6, 6, 0, 0]}
-                        maxBarSize={44}
-                      >
-                        <LabelList
-                          dataKey={key}
-                          position={isHorizontal ? "right" : "top"}
-                          content={
-                            isHorizontal ? <HBarRightLabel /> : <BarTopLabel />
-                          }
-                        />
-                      </Bar>
-                    ))}
-                    <Legend
-                      iconType="circle"
-                      wrapperStyle={{
-                        fontSize: "11px",
-                        color: "#64748b",
-                        paddingTop: "8px",
-                      }}
-                    />
-                  </>
-                ) : (
-                  /* SIMPLE single-series */
-                  <Bar
-                    dataKey="value"
-                    radius={isHorizontal ? [0, 8, 8, 0] : [8, 8, 0, 0]}
-                    maxBarSize={52}
-                  >
-                    {formatted.map((_: any, i: number) => (
-                      <Cell
-                        key={i}
-                        fill={`url(#barG${i % GRADIENTS.length})`}
-                        style={{
-                          filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.08))",
-                        }}
-                      />
-                    ))}
-                    {isHorizontal ? (
-                      <LabelList
-                        dataKey="value"
-                        position="right"
-                        content={<HBarRightLabel />}
-                      />
-                    ) : (
-                      <LabelList
-                        dataKey="value"
-                        position="top"
-                        content={<BarTopLabel />}
-                      />
                     )}
-                  </Bar>
-                )}
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
 
-          {/* Summary pills (simple series only) */}
-          {multiKeys.length === 0 && formatted.length > 0 && (
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "6px",
-                marginTop: "12px",
-              }}
-            >
-              {formatted.map((item: any, i: number) => (
+              {/* Summary pills (simple series only) */}
+              {multiKeys.length === 0 && formatted.length > 0 && (
                 <div
-                  key={i}
                   style={{
                     display: "flex",
-                    alignItems: "center",
-                    gap: "5px",
-                    background: `${COLORS[i % COLORS.length]}0d`,
-                    border: `1px solid ${COLORS[i % COLORS.length]}30`,
-                    borderRadius: "20px",
-                    padding: "3px 10px",
-                    cursor: "default",
+                    flexWrap: "wrap",
+                    gap: "6px",
+                    marginTop: "12px",
                   }}
                 >
-                  <div
-                    style={{
-                      width: "7px",
-                      height: "7px",
-                      borderRadius: "50%",
-                      background: COLORS[i % COLORS.length],
-                      flexShrink: 0,
-                    }}
-                  />
-                  <span
-                    style={{
-                      fontSize: "11px",
-                      color: "#475569",
-                      fontWeight: 500,
-                    }}
-                  >
-                    {item.name}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: "11px",
-                      color: COLORS[i % COLORS.length],
-                      fontWeight: 800,
-                    }}
-                  >
-                    {(item.value ?? 0).toLocaleString()}
-                  </span>
+                  {formatted.map((item: any, i: number) => (
+                    <div
+                      key={i}
+                      onClick={() => handleBarClick({ name: item.name })}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "5px",
+                        background: `${COLORS[i % COLORS.length]}0d`,
+                        border: `1px solid ${COLORS[i % COLORS.length]}30`,
+                        borderRadius: "20px",
+                        padding: "3px 10px",
+                        cursor: barDrillLookup[item.name] ? "pointer" : "default",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "7px",
+                          height: "7px",
+                          borderRadius: "50%",
+                          background: COLORS[i % COLORS.length],
+                          flexShrink: 0,
+                        }}
+                      />
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          color: "#475569",
+                          fontWeight: 500,
+                        }}
+                      >
+                        {item.name}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          color: COLORS[i % COLORS.length],
+                          fontWeight: 800,
+                        }}
+                      >
+                        {(item.value ?? 0).toLocaleString()}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
           )}
         </div>
-      </div>
+      </>
     );
   }
 
@@ -1219,6 +2019,7 @@ const WidgetRenderer = ({ widget }: any) => {
                 display: "flex",
                 gap: "8px",
                 marginTop: "12px",
+                justifyContent: "center",
                 flexWrap: "wrap",
               }}
             >
@@ -1230,7 +2031,7 @@ const WidgetRenderer = ({ widget }: any) => {
                   bg: "#f0fdfa",
                 },
                 {
-                  label: "Peak",
+                  label: "High",
                   val: Math.max(...lineData.map((d) => d.value)),
                   color: "#6366f1",
                   bg: "#eef2ff",
