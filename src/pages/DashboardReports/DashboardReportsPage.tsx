@@ -273,7 +273,7 @@ export const PremiumReportGroup = ({
   return (
     <div className="rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
       {/* top gradient bar */}
-      <div className={cx("h-0.5 w-full bg-gradient-to-r", cfg.bar)} />
+      {/* <div className={cx("h-0.5 w-full bg-gradient-to-r", cfg.bar)} /> */}
 
       <button
         onClick={() => setOpen(!open)}

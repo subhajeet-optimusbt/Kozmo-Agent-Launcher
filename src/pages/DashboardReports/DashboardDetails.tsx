@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import WidgetRenderer from "./WidgetRenderer";
 import { baseUrl } from "../../utils/baseUrl";
@@ -28,7 +28,6 @@ const DashboardDetails = () => {
   const [dashboard, setDashboard] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const widgetRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
     if (!dashboardId || !accountId) return;
@@ -78,7 +77,11 @@ const DashboardDetails = () => {
   const getGridLayout = (widgets: any[]) =>
     widgets.map((widget) => {
       const { chartType } = widget;
-      if (chartType === "KPI" || chartType === "Gauge")
+      if (
+        chartType === "KPI" ||
+        chartType === "Gauge" ||
+        chartType === "Heatmap"
+      )
         return { ...widget, priority: "high" };
       if (chartType === "Table" || chartType === "Timeline")
         return { ...widget, priority: "medium" };
@@ -460,6 +463,8 @@ const DashboardDetails = () => {
               chartType === "StackedBar"
             ) {
               gridColumn = "span 2";
+            } else if (chartType === "Heatmap") {
+              gridColumn = "span 1";
             }
 
             return (
