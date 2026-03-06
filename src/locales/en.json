@@ -1,0 +1,61 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "language": "Language",
+    "home": "Home",
+    "contracts": "Contracts",
+    "renewals": "Renewals",
+    "intake": "Intake",
+    "documents": "Documents",
+    "relationships": "Relationships",
+    "reports": "Reports",
+    "logout": "Logout",
+    "settings": "Settings",
+    "search": "Search",
+    "create": "Create",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "header": {
+    "selectLanguage": "Select Language",
+    "english": "English",
+    "hindi": "हिन्दी",
+    "french": "Français"
+  },
+  "pages": {
+    "home": {
+      "title": "Dashboard",
+      "subtitle": "Welcome to your dashboard"
+    },
+    "contracts": {
+      "title": "Contracts",
+      "createNew": "Create New Contract",
+      "viewDetails": "View Contract Details"
+    },
+    "renewals": {
+      "title": "Renewals",
+      "createNew": "Create New Renewal"
+    },
+    "intake": {
+      "title": "Intake Requests",
+      "createNew": "Create New Request"
+    },
+    "documents": {
+      "title": "Documents",
+      "createNew": "Create New Document"
+    },
+    "relationships": {
+      "title": "Relationships",
+      "viewDetails": "View Relationship Details"
+    },
+    "reports": {
+      "title": "Reports & Analytics"
+    }
+  }
+}

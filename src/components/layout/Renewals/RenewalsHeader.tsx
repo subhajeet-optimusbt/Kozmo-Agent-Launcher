@@ -108,8 +108,8 @@ const RenewalHeader: React.FC<RenewalHeaderProps> = ({
   }, []);
 
   const onCreateRenewals = () => {
-    navigate("/renewals/CreateNewRenewals")
-  }
+    navigate("/renewals/CreateNewRenewals");
+  };
   return (
     <header className="flex items-center justify-between mb-2 relative">
       {/* LEFT */}
@@ -201,7 +201,7 @@ const RenewalHeader: React.FC<RenewalHeaderProps> = ({
 
       {/* RIGHT */}
       <div className="flex items-center gap-2">
-           <Tooltip title="Create new Renewals">
+        <Tooltip title="Create new Renewals">
           <button
             onClick={onCreateRenewals}
             className="
@@ -224,6 +224,9 @@ const RenewalHeader: React.FC<RenewalHeaderProps> = ({
         {/* Help */}
         <Tooltip title="Help">
           <button
+            onClick={() =>
+              window.open("https://kozmo-saas.azurewebsites.net/Help", "_blank")
+            }
             className="
       w-9 h-9 flex items-center justify-center rounded-lg
       text-emerald-600/70

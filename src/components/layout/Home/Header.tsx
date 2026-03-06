@@ -12,12 +12,15 @@ import { Tooltip } from "antd";
 import { useNavigate } from "react-router-dom";
 import { baseUrl } from "../../../utils/baseUrl";
 import toast from "react-hot-toast";
+import LanguageSwitcher from "../../LanguageSwitcher/LanguageSwitcher";
+import { useTranslation } from "react-i18next";
 import { setActiveAccountId } from "../../../utils/auth";
 const Header: React.FC<{ onOpenLauncher: () => void }> = ({
   onOpenLauncher,
 }) => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const {t} = useTranslation();
 const [user, setUser] = useState(() => {
   const raw =
     localStorage.getItem("user") || sessionStorage.getItem("user");
@@ -138,8 +141,11 @@ const [user, setUser] = useState(() => {
       {/* RIGHT */}
       <div className="flex items-center gap-2">
         {/* Help */}
+        <h1>{t('common.welcome')}</h1>
+         <LanguageSwitcher />
         <Tooltip title="Help">
           <button
+           onClick={() => window.open("https://kozmo-saas.azurewebsites.net/Help", "_blank")}
             className="
       w-9 h-9 flex items-center justify-center rounded-lg
       text-emerald-600/70

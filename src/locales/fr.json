@@ -1,0 +1,61 @@
+{
+  "common": {
+    "welcome": "Bienvenue",
+    "language": "Langue",
+    "home": "Accueil",
+    "contracts": "Contrats",
+    "renewals": "Renouvellements",
+    "intake": "Admission",
+    "documents": "Documents",
+    "relationships": "Relations",
+    "reports": "Rapports",
+    "logout": "Déconnexion",
+    "settings": "Paramètres",
+    "search": "Rechercher",
+    "create": "Créer",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succ��s"
+  },
+  "header": {
+    "selectLanguage": "Sélectionner la langue",
+    "english": "English",
+    "hindi": "हिन्दी",
+    "french": "Français"
+  },
+  "pages": {
+    "home": {
+      "title": "Tableau de bord",
+      "subtitle": "Bienvenue dans votre tableau de bord"
+    },
+    "contracts": {
+      "title": "Contrats",
+      "createNew": "Créer un nouveau contrat",
+      "viewDetails": "Voir les détails du contrat"
+    },
+    "renewals": {
+      "title": "Renouvellements",
+      "createNew": "Créer un nouveau renouvellement"
+    },
+    "intake": {
+      "title": "Demandes d'admission",
+      "createNew": "Créer une nouvelle demande"
+    },
+    "documents": {
+      "title": "Documents",
+      "createNew": "Créer un nouveau document"
+    },
+    "relationships": {
+      "title": "Relations",
+      "viewDetails": "Voir les détails de la relation"
+    },
+    "reports": {
+      "title": "Rapports et analyses"
+    }
+  }
+}

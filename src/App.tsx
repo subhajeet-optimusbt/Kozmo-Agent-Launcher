@@ -29,13 +29,12 @@ import ReportDetails from "./pages/Reports/ReportsDetails";
 import DashboardReportsLayout from "./components/layout/DashboardReports/DashboardReportsLayout";
 import DashboardReportsPage from "./pages/DashboardReports/DashboardReportsPage";
 import DashboardDetails from "./pages/DashboardReports/DashboardDetails";
+import { useLanguagePreference } from "./hooks/useLanguagePreference";
 export default function App() {
-
+  useLanguagePreference();
   useEffect(() => {
-
     const userRaw =
-      localStorage.getItem("user") ||
-      sessionStorage.getItem("user");
+      localStorage.getItem("user") || sessionStorage.getItem("user");
 
     if (!userRaw) return;
 
@@ -45,7 +44,6 @@ export default function App() {
 
     // 🔥 Broken session condition
     if (!activeAccountId || !user.accounts?.length) {
-
       console.log("Broken session → Logout");
 
       localStorage.removeItem("user");
@@ -55,7 +53,6 @@ export default function App() {
 
       return;
     }
-
   }, []);
 
   return (

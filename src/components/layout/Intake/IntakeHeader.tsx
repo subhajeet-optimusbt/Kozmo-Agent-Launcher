@@ -227,6 +227,9 @@ const IntakeHeader: React.FC<IntakeHeaderProps> = ({
         {/* Help */}
         <Tooltip title="Help">
           <button
+            onClick={() =>
+              window.open("https://kozmo-saas.azurewebsites.net/Help", "_blank")
+            }
             className="
       w-9 h-9 flex items-center justify-center rounded-lg
       text-emerald-600/70
