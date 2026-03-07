@@ -1202,7 +1202,7 @@ export default function Home() {
             ════════════════════════════════════ */}
             <div className="agent-panels">
               <div>
-                <h2>AI Agent Activity</h2>
+                <SectionLabel>AI AGENT ACTIVITY</SectionLabel>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
                   {loading ? (
                     [...Array(4)].map((_, i) => (
