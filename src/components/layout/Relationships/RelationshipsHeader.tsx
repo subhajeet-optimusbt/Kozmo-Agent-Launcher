@@ -6,7 +6,13 @@ import {
   LogoutOutlined,
   CheckOutlined,
 } from "@ant-design/icons";
-import { LifeBuoy, Sparkles, LayoutDashboard, Link2, Plus } from "lucide-react";
+import {
+  HelpCircle,
+  BookOpen,
+  LayoutDashboard,
+  Link2,
+  Plus,
+} from "lucide-react";
 import { Tooltip } from "antd";
 import { useNavigate } from "react-router-dom";
 import { baseUrl } from "../../../utils/baseUrl";
@@ -235,7 +241,7 @@ const RelationshipsHeader: React.FC<RelationshipsHeaderProps> = ({
       transition-all duration-150
     "
             >
-              <LifeBuoy size={22} strokeWidth={2} />
+              <HelpCircle size={22} strokeWidth={2} />
             </button>
           </Tooltip>
           <Tooltip title="Guide">
@@ -249,7 +255,7 @@ const RelationshipsHeader: React.FC<RelationshipsHeaderProps> = ({
       transition-all duration-150
     "
             >
-              <Sparkles size={22} strokeWidth={2} />
+              <BookOpen size={22} strokeWidth={2} />
             </button>
           </Tooltip>
 

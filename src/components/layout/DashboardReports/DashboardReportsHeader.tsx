@@ -7,7 +7,7 @@ import {
   LogoutOutlined,
   CheckOutlined,
 } from "@ant-design/icons";
-import { LifeBuoy, Sparkles } from "lucide-react";
+import { HelpCircle , BookOpen } from "lucide-react";
 import { Tooltip } from "antd";
 import { useNavigate } from "react-router-dom";
 import { baseUrl } from "../../../utils/baseUrl";
@@ -151,7 +151,7 @@ const DashboardReportsHeader: React.FC<{ onOpenLauncher: () => void }> = ({
       transition-all duration-150
     "
           >
-            <LifeBuoy size={22} strokeWidth={2} />
+            <HelpCircle  size={22} strokeWidth={2} />
           </button>
         </Tooltip>
 
@@ -166,7 +166,7 @@ const DashboardReportsHeader: React.FC<{ onOpenLauncher: () => void }> = ({
       transition-all duration-150
     "
           >
-            <Sparkles size={22} strokeWidth={2} />
+            <BookOpen size={22} strokeWidth={2} />
           </button>
         </Tooltip>
 

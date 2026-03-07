@@ -89,9 +89,12 @@ const SectionLabel: React.FC<{
   <div className="flex items-center justify-between mb-4">
     <div className="flex items-center gap-3">
       <div className="h-4 w-1 rounded-full bg-gradient-to-b from-emerald-500 to-blue-500" />
-      <span className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">
+      {/* <span className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">
         {children}
-      </span>
+      </span> */}
+      <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">
+        {children}
+      </div>
     </div>
     {action && <div>{action}</div>}
   </div>
@@ -258,6 +261,7 @@ const KpiCard: React.FC<KpiCardProps> = ({
   footnote,
 }) => {
   const c = kpiAccentMap[accentColor] || kpiAccentMap.slate;
+
   return (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-px transition-all duration-300 relative overflow-hidden flex flex-col h-full group cursor-default">
       {/* 2 px accent top bar */}
@@ -366,7 +370,9 @@ const DotBadge: React.FC<{
   <div className="flex items-center gap-2 text-[10px] font-medium text-slate-500 py-0.5">
     <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${dotClass}`} />
     <span>{label}:</span>
-    <span className="font-bold text-slate-700">{count}</span>
+    <span className="font-bold text-slate-700">
+      {typeof count === "number" ? count : 0}
+    </span>
   </div>
 );
 
@@ -620,11 +626,11 @@ export default function Home() {
     widgets.find((w: any) => w.widgetId === id)?.data;
 
   const totalContractsData = getWidgetData("WG001");
-  const chiScore: number = getWidgetData("WG006") ?? 0;
+  const chiScore: number = Number(getWidgetData("WG006")) || 0;
   const revenueAtRisk = getWidgetData("WG011");
-  const paymentRel: number = getWidgetData("WG012") ?? 0;
+  const paymentRel: number = Number(getWidgetData("WG012")) || 0;
   const expiringContracts: any[] = getWidgetData("WG009") ?? [];
-  const openIssues: number = getWidgetData("WG016") ?? 0;
+  const openIssues: number = Number(getWidgetData("WG016")) || 0;
   const outstandingInv = getWidgetData("WG013");
   const invoiceDistrib = getWidgetData("WG014");
   const topContracts: any[] = getWidgetData("WG033") ?? [];
@@ -649,14 +655,14 @@ export default function Home() {
           ];
           return `${months[parseInt(m) - 1]} '${y.slice(2)}`;
         }),
-        value: val as number,
+        value: typeof val === "number" ? val : Number(val) || 0, // ← guard here
       }))
     : [];
 
   const invoiceChartData = invoiceDistrib
     ? Object.entries(invoiceDistrib).map(([name, value]) => ({
         name,
-        value: value as number,
+        value: typeof value === "number" ? value : Number(value) || 0, // ← guard
         color:
           name === "Pending"
             ? "#f59e0b"
@@ -676,7 +682,6 @@ export default function Home() {
     (s) => s === "error",
   ).length;
   const widgetsFailed = apiStatus?.widgets === "error";
-
   return (
     <>
       {loading && <FullscreenLoader />}
@@ -687,23 +692,25 @@ export default function Home() {
         <div className="mx-8 my-4 flex items-center">
           <div className="flex-1 min-w-0 pb-8 pt-2 space-y-8">
             {/* ── Page Title ── */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-black text-gray-900 tracking-tight">
-                  Dashboard
-                </h1>
-                <p className="text-[12px] text-gray-400 font-medium mt-0.5">
-                  Real-time contract, renewal &amp; financial metrics
-                </p>
-              </div>
-              <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-full px-3 py-1.5">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                </span>
-                <span className="text-[10px] font-bold text-emerald-600">
-                  Live Data
-                </span>
+            <div className="dashboard-hero">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-black text-gray-900 tracking-tight">
+                    Dashboard
+                  </h1>
+                  <p className="text-[12px] text-gray-400 font-medium mt-0.5">
+                    Real-time contract, renewal &amp; financial metrics
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-full px-3 py-1.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                  </span>
+                  <span className="text-[10px] font-bold text-emerald-600">
+                    Live Data
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -715,7 +722,11 @@ export default function Home() {
                   <p className="text-rose-800 text-sm font-black">
                     Dashboard unavailable
                   </p>
-                  <p className="text-rose-600 text-[11px] mt-0.5">{error}</p>
+                  <p className="text-rose-600 text-[11px] mt-0.5">
+                    {typeof error === "string"
+                      ? error
+                      : (error as any)?.message || JSON.stringify(error)}
+                  </p>
                 </div>
               </div>
             )}
@@ -748,133 +759,136 @@ export default function Home() {
                  * All cards use flex-col h-full so they all stretch
                  * to the tallest item in the row (the gauge cards).
                  */
-                <div
-                  className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4"
-                  style={{ alignItems: "stretch" }}
-                >
-                  {/* 1 — Total Contracts */}
-                  <KpiCard
-                    label="Total Contracts"
-                    value={totalContractsData?.totalContracts ?? 0}
-                    icon={<FileTextOutlined />}
-                    accentColor="emerald"
-                    footnote="All-time contract portfolio"
-                    sub={
-                      <div className="flex flex-col gap-1 mt-1">
-                        {Object.entries(
-                          totalContractsData?.statusWiseBreakdown ?? {},
-                        ).map(([s, v]) => (
-                          <DotBadge
-                            key={s}
-                            label={s}
-                            count={v as number}
-                            dotClass={
-                              s === "Active"
-                                ? "bg-emerald-400"
-                                : s === "Signed"
-                                  ? "bg-sky-400"
-                                  : "bg-rose-400"
-                            }
-                          />
-                        ))}
-                      </div>
-                    }
-                  />
+                <div className="kpi-cards-section">
+                  <div
+                    className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4"
+                    style={{ alignItems: "stretch" }}
+                  >
+                    {/* 1 — Total Contracts */}
+                    <KpiCard
+                      label="Total Contracts"
+                      value={totalContractsData?.totalContracts ?? 0}
+                      icon={<FileTextOutlined />}
+                      accentColor="emerald"
+                      footnote="All-time contract portfolio"
+                      sub={
+                        <div className="flex flex-col gap-1 mt-1">
+                          {Object.entries(
+                            totalContractsData?.statusWiseBreakdown ?? {},
+                          ).map(([s, v]) => (
+                            <DotBadge
+                              key={s}
+                              label={s}
+                              count={typeof v === "number" ? v : Number(v) || 0}
+                              dotClass={
+                                s === "Active"
+                                  ? "bg-emerald-400"
+                                  : s === "Signed"
+                                    ? "bg-sky-400"
+                                    : "bg-rose-400"
+                              }
+                            />
+                          ))}
+                        </div>
+                      }
+                    />
 
-                  {/* 2 — CHI Average Gauge */}
-                  <GaugeKpi
-                    label="CHI Average"
-                    value={chiScore}
-                    topBar="from-amber-400 to-orange-400"
-                  />
+                    {/* 2 — CHI Average Gauge */}
+                    <GaugeKpi
+                      label="CHI Average"
+                      value={chiScore}
+                      topBar="from-amber-400 to-orange-400"
+                    />
 
-                  {/* 3 — Revenue at Risk */}
-                  <KpiCard
-                    label="Revenue at Risk"
-                    value={formatCurrency(revenueAtRisk?.totalRevenueAtRisk)}
-                    icon={<ThunderboltOutlined />}
-                    accentColor="amber"
-                    footnote="Contracts with CHI < 60"
-                  />
+                    {/* 3 — Revenue at Risk */}
+                    <KpiCard
+                      label="Revenue at Risk"
+                      value={formatCurrency(revenueAtRisk?.totalRevenueAtRisk)}
+                      icon={<ThunderboltOutlined />}
+                      accentColor="amber"
+                      footnote="Contracts with CHI < 60"
+                    />
 
-                  {/* 4 — Payment Reliability Gauge */}
-                  <GaugeKpi
-                    label="Payment Reliability"
-                    value={paymentRel}
-                    topBar="from-emerald-400 to-teal-500"
-                  />
+                    {/* 4 — Payment Reliability Gauge */}
+                    <GaugeKpi
+                      label="Payment Reliability"
+                      value={paymentRel}
+                      topBar="from-emerald-400 to-teal-500"
+                    />
 
-                  {/* 5 — Expiring 90 Days */}
-                  {/* <KpiCard
+                    {/* 5 — Expiring 90 Days */}
+                    {/* <KpiCard
                     label="Expiring (90 days)"
                     value={expiringContracts.length}
                     icon={<ClockCircleOutlined />}
                     accentColor="rose"
                     footnote="Need attention"
                   /> */}
-                  {/* 5 — Outstanding Invoices */}
-                  {/* 5 — Outstanding Invoices */}
-                  <KpiCard
-                    label="Outstanding Invoices"
-                    value={formatCurrency(
-                      outstandingInv?.totalOutstandingAmount,
-                    )}
-                    icon={<ExclamationCircleOutlined />}
-                    accentColor="rose"
-                    sub={
-                      outstandingInv && (
-                        <div className="space-y-3">
-                          {/* Pending invoices */}
-                          <div className="flex items-center gap-2 py-1.5 px-2 bg-amber-50 rounded-lg border border-amber-100">
-                            <ExclamationCircleOutlined className="text-amber-500 text-[10px]" />
-                            <span className="text-[10px] text-amber-700 font-bold">
-                              {outstandingInv.pendingInvoicesCount ?? 0} pending
-                              invoices
-                            </span>
+                    {/* 5 — Outstanding Invoices */}
+                    {/* 5 — Outstanding Invoices */}
+                    <KpiCard
+                      label="Outstanding Invoices"
+                      value={formatCurrency(
+                        outstandingInv?.totalOutstandingAmount,
+                      )}
+                      icon={<ExclamationCircleOutlined />}
+                      accentColor="rose"
+                      sub={
+                        outstandingInv && (
+                          <div className="space-y-3">
+                            {/* Pending invoices */}
+                            <div className="flex items-center gap-2 py-1.5 px-2 bg-amber-50 rounded-lg border border-amber-100">
+                              <ExclamationCircleOutlined className="text-amber-500 text-[10px]" />
+                              <span className="text-[10px] text-amber-700 font-bold">
+                                {outstandingInv.pendingInvoicesCount ?? 0}{" "}
+                                pending invoices
+                              </span>
+                            </div>
+
+                            {/* Pending Amount */}
+                            <ProgressRow
+                              label="Pending Amount"
+                              value={formatCurrency(
+                                outstandingInv.totalpendingamount,
+                              )}
+                              pct={
+                                (outstandingInv.totalpendingamount /
+                                  Math.max(
+                                    outstandingInv.totalOutstandingAmount,
+                                    1,
+                                  )) *
+                                100
+                              }
+                              color="amber"
+                            />
+
+                            {/* Invoices Paid */}
+                            <ProgressRow
+                              label="Invoices Paid"
+                              value={`${invoiceChartData.find((i) => i.name === "Paid")?.value ?? 0} / ${totalInvoices}`}
+                              pct={
+                                ((invoiceChartData.find(
+                                  (i) => i.name === "Paid",
+                                )?.value ?? 0) /
+                                  Math.max(totalInvoices, 1)) *
+                                100
+                              }
+                              color="emerald"
+                            />
                           </div>
+                        )
+                      }
+                    />
 
-                          {/* Pending Amount */}
-                          <ProgressRow
-                            label="Pending Amount"
-                            value={formatCurrency(
-                              outstandingInv.totalpendingamount,
-                            )}
-                            pct={
-                              (outstandingInv.totalpendingamount /
-                                Math.max(
-                                  outstandingInv.totalOutstandingAmount,
-                                  1,
-                                )) *
-                              100
-                            }
-                            color="amber"
-                          />
-
-                          {/* Invoices Paid */}
-                          <ProgressRow
-                            label="Invoices Paid"
-                            value={`${invoiceChartData.find((i) => i.name === "Paid")?.value ?? 0} / ${totalInvoices}`}
-                            pct={
-                              ((invoiceChartData.find((i) => i.name === "Paid")
-                                ?.value ?? 0) /
-                                Math.max(totalInvoices, 1)) *
-                              100
-                            }
-                            color="emerald"
-                          />
-                        </div>
-                      )
-                    }
-                  />
-
-                  {/* 6 — Open Issues */}
-                  <KpiCard
-                    label="Open Issues"
-                    value={openIssues}
-                    icon={<AlertOutlined />}
-                    accentColor={openIssues > 5 ? "rose" : "sky"}
-                    footnote="Unresolved"
-                  />
+                    {/* 6 — Open Issues */}
+                    <KpiCard
+                      label="Open Issues"
+                      value={openIssues}
+                      icon={<AlertOutlined />}
+                      accentColor={openIssues > 5 ? "rose" : "sky"}
+                      footnote="Unresolved"
+                    />
+                  </div>
                 </div>
               )}
             </div>
@@ -882,202 +896,213 @@ export default function Home() {
             {/* ════════════════════════════════════
         SECTION 2 — CHARTS + ALERTS
 ════════════════════════════════════ */}
-            <div className="space-y-6">
-              {/* ================= ROW 1 ================= */}
-              <div className="grid grid-cols-1 lg:grid-cols-10 gap-5">
-                {/* Health Index Trend — 70% */}
-                <div className="lg:col-span-7">
-                  {loading ? (
-                    <Skeleton active paragraph={{ rows: 6 }} />
-                  ) : (
-                    <Card
-                      title="Health Index Trend (Snapshot)"
-                      badge="Monthly Trend"
-                    >
-                      {healthTrendData.length === 0 ? (
-                        <PanelError message="Health trend data unavailable" />
-                      ) : (
-                        <>
-                          <div className="h-[260px] mt-2">
-                            <ResponsiveContainer width="100%" height="100%">
-                              <AreaChart
-                                data={healthTrendData}
-                                margin={{
-                                  top: 5,
-                                  right: 5,
-                                  bottom: 0,
-                                  left: 0,
-                                }}
-                              >
-                                <defs>
-                                  <linearGradient
-                                    id="chiAreaGrad"
-                                    x1="0"
-                                    y1="0"
-                                    x2="0"
-                                    y2="1"
-                                  >
-                                    <stop
-                                      offset="0%"
-                                      stopColor="#10b981"
-                                      stopOpacity={0.15}
-                                    />
-                                    <stop
-                                      offset="100%"
-                                      stopColor="#10b981"
-                                      stopOpacity={0}
-                                    />
-                                  </linearGradient>
-                                </defs>
-
-                                <CartesianGrid
-                                  strokeDasharray="3 3"
-                                  vertical={false}
-                                  stroke="#f8fafc"
-                                />
-
-                                <XAxis
-                                  dataKey="name"
-                                  axisLine={false}
-                                  tickLine={false}
-                                  tick={{
-                                    fontSize: 10,
-                                    fontWeight: 700,
-                                    fill: "#94a3b8",
+            <div className="charts-section">
+              <div className="space-y-6">
+                {/* ================= ROW 1 ================= */}
+                <div className="grid grid-cols-1 lg:grid-cols-10 gap-5">
+                  {/* Health Index Trend — 70% */}
+                  <div className="lg:col-span-7">
+                    {loading ? (
+                      <Skeleton active paragraph={{ rows: 6 }} />
+                    ) : (
+                      <Card
+                        title="Health Index Trend (Snapshot)"
+                        badge="Monthly Trend"
+                        className="health-trend-card"
+                      >
+                        {healthTrendData.length === 0 ? (
+                          <PanelError message="Health trend data unavailable" />
+                        ) : (
+                          <>
+                            <div
+                              className="w-full h-[260px]"
+                              style={{ minWidth: 0 }}
+                            >
+                              <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart
+                                  data={healthTrendData}
+                                  margin={{
+                                    top: 5,
+                                    right: 5,
+                                    bottom: 0,
+                                    left: 0,
                                   }}
-                                />
-
-                                <YAxis
-                                  axisLine={false}
-                                  tickLine={false}
-                                  tick={{
-                                    fontSize: 10,
-                                    fontWeight: 700,
-                                    fill: "#94a3b8",
-                                  }}
-                                  domain={[50, 100]}
-                                  tickCount={4}
-                                />
-
-                                <RechartsTooltip content={<CustomTooltip />} />
-
-                                <Area
-                                  type="monotone"
-                                  dataKey="value"
-                                  stroke="#10b981"
-                                  strokeWidth={2.5}
-                                  fill="url(#chiAreaGrad)"
-                                />
-                              </AreaChart>
-                            </ResponsiveContainer>
-                          </div>
-
-                          <p className="text-[10px] text-gray-400 font-medium mt-2 px-1">
-                            Portfolio CHI average (monthly snapshots)
-                          </p>
-                        </>
-                      )}
-                    </Card>
-                  )}
-                </div>
-
-                {/* Invoice Distribution — 30% */}
-                <div className="lg:col-span-3">
-                  {loading ? (
-                    <Skeleton active paragraph={{ rows: 4 }} />
-                  ) : (
-                    <Card title="Invoice Distribution" badge="Donut">
-                      {invoiceChartData.length === 0 ? (
-                        <PanelError message="Invoice distribution unavailable" />
-                      ) : (
-                        <>
-                          <div className="h-[260px] relative">
-                            <ResponsiveContainer width="100%" height="100%">
-                              <PieChart>
-                                <Pie
-                                  data={invoiceChartData}
-                                  cx="50%"
-                                  cy="50%"
-                                  innerRadius={55}
-                                  outerRadius={85}
-                                  paddingAngle={4}
-                                  dataKey="value"
-                                  strokeWidth={0}
                                 >
-                                  {invoiceChartData.map((entry, index) => (
-                                    <Cell key={index} fill={entry.color} />
-                                  ))}
-                                </Pie>
-                              </PieChart>
-                            </ResponsiveContainer>
+                                  <defs>
+                                    <linearGradient
+                                      id="chiAreaGrad"
+                                      x1="0"
+                                      y1="0"
+                                      x2="0"
+                                      y2="1"
+                                    >
+                                      <stop
+                                        offset="0%"
+                                        stopColor="#10b981"
+                                        stopOpacity={0.15}
+                                      />
+                                      <stop
+                                        offset="100%"
+                                        stopColor="#10b981"
+                                        stopOpacity={0}
+                                      />
+                                    </linearGradient>
+                                  </defs>
 
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="text-center">
-                                <p className="text-2xl font-black text-gray-800">
-                                  {totalInvoices}
-                                </p>
-                                <p className="text-[10px] font-bold text-gray-400 uppercase">
-                                  Total
-                                </p>
+                                  <CartesianGrid
+                                    strokeDasharray="3 3"
+                                    vertical={false}
+                                    stroke="#f8fafc"
+                                  />
+
+                                  <XAxis
+                                    dataKey="name"
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{
+                                      fontSize: 10,
+                                      fontWeight: 700,
+                                      fill: "#94a3b8",
+                                    }}
+                                  />
+
+                                  <YAxis
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{
+                                      fontSize: 10,
+                                      fontWeight: 700,
+                                      fill: "#94a3b8",
+                                    }}
+                                    domain={[50, 100]}
+                                    tickCount={4}
+                                  />
+
+                                  <RechartsTooltip
+                                    content={<CustomTooltip />}
+                                  />
+
+                                  <Area
+                                    type="monotone"
+                                    dataKey="value"
+                                    stroke="#10b981"
+                                    strokeWidth={2.5}
+                                    fill="url(#chiAreaGrad)"
+                                  />
+                                </AreaChart>
+                              </ResponsiveContainer>
+                            </div>
+
+                            <p className="text-[10px] text-gray-400 font-medium mt-2 px-1">
+                              Portfolio CHI average (monthly snapshots)
+                            </p>
+                          </>
+                        )}
+                      </Card>
+                    )}
+                  </div>
+
+                  {/* Invoice Distribution — 30% */}
+                  <div className="lg:col-span-3">
+                    {loading ? (
+                      <Skeleton active paragraph={{ rows: 4 }} />
+                    ) : (
+                      <Card
+                        title="Invoice Distribution"
+                        badge="Donut"
+                        className="invoice-distribution-card"
+                      >
+                        {invoiceChartData.length === 0 ? (
+                          <PanelError message="Invoice distribution unavailable" />
+                        ) : (
+                          <>
+                            <div className="h-[260px] relative">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                  <Pie
+                                    data={invoiceChartData}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={55}
+                                    outerRadius={85}
+                                    paddingAngle={4}
+                                    dataKey="value"
+                                    strokeWidth={0}
+                                  >
+                                    {invoiceChartData.map((entry, index) => (
+                                      <Cell key={index} fill={entry.color} />
+                                    ))}
+                                  </Pie>
+                                </PieChart>
+                              </ResponsiveContainer>
+
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="text-center">
+                                  <p className="text-2xl font-black text-gray-800">
+                                    {totalInvoices}
+                                  </p>
+                                  <p className="text-[10px] font-bold text-gray-400 uppercase">
+                                    Total
+                                  </p>
+                                </div>
                               </div>
                             </div>
-                          </div>
 
-                          <div className="flex justify-center gap-4 mt-2 flex-wrap">
-                            {invoiceChartData.map((item) => (
-                              <div
-                                key={item.name}
-                                className="flex items-center gap-1.5"
-                              >
+                            <div className="flex justify-center gap-4 mt-2 flex-wrap">
+                              {invoiceChartData.map((item) => (
                                 <div
-                                  className="w-2 h-2 rounded-full"
-                                  style={{ backgroundColor: item.color }}
-                                />
-                                <span className="text-[10px] font-bold text-gray-500">
-                                  {item.name}
-                                  <span className="text-gray-800 ml-1">
-                                    {item.value}
+                                  key={item.name}
+                                  className="flex items-center gap-1.5"
+                                >
+                                  <div
+                                    className="w-2 h-2 rounded-full"
+                                    style={{ backgroundColor: item.color }}
+                                  />
+                                  <span className="text-[10px] font-bold text-gray-500">
+                                    {item.name}
+                                    <span className="text-gray-800 ml-1">
+                                      {item.value}
+                                    </span>
                                   </span>
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </>
-                      )}
-                    </Card>
-                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </Card>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              {/* ================= ROW 2 ================= */}
-              <div className="grid grid-cols-1 lg:grid-cols-10 gap-5 items-stretch">
-                {/* Top Contracts — 70% */}
-                <div className="lg:col-span-7 h-full">
-                  {loading ? (
-                    <Skeleton active paragraph={{ rows: 6 }} />
-                  ) : (
-                    <Card
-                      title="Top 10 High Value Contracts"
-                      badge="By Value"
-                      className="h-full"
-                    >
-                      {topContracts.length === 0 ? (
-                        <PanelError message="Contract data unavailable" />
-                      ) : (
-                        <div className="overflow-x-auto -mx-5">
-                          <table className="w-full text-[11px]">
-                            <thead>
-                              <tr className="border-b border-gray-100">
-                                {[
-                                  "Contract",
-                                  "Counterparty",
-                                  "Type",
-                                  "Value",
-                                  "Status",
-                                ].map((h, i) => (
-                                  <th
-                                    key={h}
-                                    className={`py-3 px-4 font-black text-gray-400 uppercase tracking-wider text-[10px]
+                {/* ================= ROW 2 ================= */}
+                <div className="grid grid-cols-1 lg:grid-cols-10 gap-5 items-stretch">
+                  {/* Top Contracts — 70% */}
+                  <div className="lg:col-span-7 h-full">
+                    {loading ? (
+                      <Skeleton active paragraph={{ rows: 6 }} />
+                    ) : (
+                      <Card
+                        title="Top 10 High Value Contracts"
+                        badge="By Value"
+                        className="h-full top-contracts-card"
+                      >
+                        {topContracts.length === 0 ? (
+                          <PanelError message="Contract data unavailable" />
+                        ) : (
+                          <div className="overflow-x-auto -mx-5">
+                            <table className="w-full text-[11px]">
+                              <thead>
+                                <tr className="border-b border-gray-100">
+                                  {[
+                                    "Contract",
+                                    "Counterparty",
+                                    "Type",
+                                    "Value",
+                                    "Status",
+                                  ].map((h, i) => (
+                                    <th
+                                      key={h}
+                                      className={`py-3 px-4 font-black text-gray-400 uppercase tracking-wider text-[10px]
                         ${
                           i === 3
                             ? "text-right"
@@ -1085,88 +1110,89 @@ export default function Home() {
                               ? "text-center"
                               : "text-left"
                         }`}
-                                  >
-                                    {h}
-                                  </th>
-                                ))}
-                              </tr>
-                            </thead>
+                                    >
+                                      {h}
+                                    </th>
+                                  ))}
+                                </tr>
+                              </thead>
 
-                            <tbody>
-                              {topContracts
-                                .slice(0, 8)
-                                .map((c: any, idx: number) => (
-                                  <tr
-                                    key={c.contractId}
-                                    className={`border-b border-gray-50 hover:bg-gray-50/80
+                              <tbody>
+                                {topContracts
+                                  .slice(0, 8)
+                                  .map((c: any, idx: number) => (
+                                    <tr
+                                      key={c.contractId}
+                                      className={`border-b border-gray-50 hover:bg-gray-50/80
                       ${idx % 2 !== 0 ? "bg-gray-50/30" : ""}`}
-                                  >
-                                    <td className="py-3 px-4 font-semibold text-gray-800">
-                                      <Tooltip title={c.title}>
-                                        <span className="truncate block">
-                                          {c.title.length > 35
-                                            ? c.title.substring(0, 35) + "…"
-                                            : c.title}
-                                        </span>
-                                      </Tooltip>
-                                    </td>
+                                    >
+                                      <td className="py-3 px-4 font-semibold text-gray-800">
+                                        <Tooltip title={c.title}>
+                                          <span className="truncate block">
+                                            {c.title.length > 35
+                                              ? c.title.substring(0, 35) + "…"
+                                              : c.title}
+                                          </span>
+                                        </Tooltip>
+                                      </td>
 
-                                    <td className="py-3 px-4 text-gray-400">
-                                      {c.counterparty?.split(",")[0]}
-                                    </td>
+                                      <td className="py-3 px-4 text-gray-400">
+                                        {c.counterparty?.split(",")[0]}
+                                      </td>
 
-                                    <td className="py-3 px-4 text-gray-400">
-                                      {c.type}
-                                    </td>
+                                      <td className="py-3 px-4 text-gray-400">
+                                        {c.type}
+                                      </td>
 
-                                    <td className="py-3 px-4 font-black text-right">
-                                      {formatCurrency(c.value)}
-                                    </td>
+                                      <td className="py-3 px-4 font-black text-right">
+                                        {formatCurrency(c.value)}
+                                      </td>
 
-                                    <td className="py-3 px-4 text-center">
-                                      <StatusBadge status={c.status} />
-                                    </td>
-                                  </tr>
-                                ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
-                    </Card>
-                  )}
-                </div>
-
-                {/* Alerts & Summaries — 30% */}
-                <div className="lg:col-span-3 h-full">
-                  {loading ? (
-                    <Skeleton active paragraph={{ rows: 5 }} />
-                  ) : (
-                    <div className="h-full flex flex-col">
-                      <SectionLabel>Alerts & Summaries</SectionLabel>
-
-                      <Card
-                        title="Expiring Soon"
-                        badge="90 days"
-                        className="flex flex-col flex-1"
-                      >
-                        {/* Dynamic height — fills full space */}
-                        <div className="space-y-2.5 flex-1 overflow-y-auto custom-scroll">
-                          {expiringContracts.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center h-full">
-                              <SafetyCertificateOutlined className="text-3xl text-emerald-200 mb-2" />
-                              <p className="text-sm text-gray-400 font-medium">
-                                No upcoming expirations
-                              </p>
-                            </div>
-                          ) : (
-                            expiringContracts.map((c: any, i: number) => (
-                              <ExpiringItem key={i} contract={c} />
-                            ))
-                          )}
-                        </div>
+                                      <td className="py-3 px-4 text-center">
+                                        <StatusBadge status={c.status} />
+                                      </td>
+                                    </tr>
+                                  ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
                       </Card>
-                    </div>
-                  )}
+                    )}
+                  </div>
+
+                  {/* Alerts & Summaries — 30% */}
+                  <div className="lg:col-span-3 h-full alerts-section">
+                    {loading ? (
+                      <Skeleton active paragraph={{ rows: 5 }} />
+                    ) : (
+                      <div className="h-full flex flex-col">
+                        <SectionLabel>Alerts & Summaries</SectionLabel>
+
+                        <Card
+                          title="Expiring Soon"
+                          badge="90 days"
+                          className="flex flex-col flex-1"
+                        >
+                          {/* Dynamic height — fills full space */}
+                          <div className="space-y-2.5 flex-1 overflow-y-auto custom-scroll">
+                            {expiringContracts.length === 0 ? (
+                              <div className="flex flex-col items-center justify-center h-full">
+                                <SafetyCertificateOutlined className="text-3xl text-emerald-200 mb-2" />
+                                <p className="text-sm text-gray-400 font-medium">
+                                  No upcoming expirations
+                                </p>
+                              </div>
+                            ) : (
+                              expiringContracts.map((c: any, i: number) => (
+                                <ExpiringItem key={i} contract={c} />
+                              ))
+                            )}
+                          </div>
+                        </Card>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1174,139 +1200,138 @@ export default function Home() {
             {/* ════════════════════════════════════
                 SECTION 3 — AI AGENT PANELS
             ════════════════════════════════════ */}
-            <div>
-              <SectionLabel>
-                AI Agent Activity
-                <span className="ml-2 text-[9px] font-bold bg-gradient-to-r from-emerald-100 to-blue-100 text-gray-500 px-2 py-0.5 rounded-full border border-gray-100">
-                  Today
-                </span>
-              </SectionLabel>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
-                {loading ? (
-                  [...Array(4)].map((_, i) => (
-                    <Skeleton key={i} active paragraph={{ rows: 4 }} />
-                  ))
-                ) : (
-                  <>
-                    <AgentPanel
-                      title="Intake Agent"
-                      subtitle="Redlines, briefs & document intelligence."
-                      linkLabel="Inbox"
-                      accentColor="violet"
-                      hasError={apiStatus?.intake === "error"}
-                      errorMsg="Intake agent data unavailable"
-                      completionRate={im?.completionRate}
-                      bullets={
-                        im
-                          ? [
-                              { text: `${im.running} requests in progress` },
-                              {
-                                text: `${im.withDocuments} requests with documents`,
-                              },
-                              { text: `${im.completed} completed today` },
-                              { text: `${im.failed} failed requests` },
-                            ]
-                          : []
-                      }
-                      actions={[
-                        { label: "Summarize all" },
-                        { label: "Generate briefs" },
-                        { label: "My queue" },
-                      ]}
-                    />
-                    <AgentPanel
-                      title="Document Agent"
-                      subtitle="Redlines, briefs & document intelligence."
-                      linkLabel="Documents"
-                      accentColor="blue"
-                      hasError={apiStatus?.document === "error"}
-                      errorMsg="Document agent data unavailable"
-                      completionRate={
-                        dm
-                          ? (dm.completed / Math.max(dm.totalDocuments, 1)) *
-                            100
-                          : undefined
-                      }
-                      bullets={
-                        dm
-                          ? [
-                              { text: `${dm.running} documents in progress` },
-                              { text: `${dm.completed} documents completed` },
-                              { text: `${dm.failed} documents need attention` },
-                              {
-                                text: `${dm.totalDocuments} total documents today`,
-                              },
-                            ]
-                          : []
-                      }
-                      actions={[
-                        { label: "Summarize all" },
-                        { label: "Generate briefs" },
-                        { label: "My queue" },
-                      ]}
-                    />
-                    <AgentPanel
-                      title="Contract Agent"
-                      subtitle="Obligations, billing, risk & compliance."
-                      linkLabel="Contracts"
-                      accentColor="teal"
-                      hasError={apiStatus?.contract === "error"}
-                      errorMsg="Contract agent data unavailable"
-                      bullets={
-                        cm
-                          ? [
-                              {
-                                text: `${cm.activeContracts} active contracts tracked`,
-                              },
-                              {
-                                text: `${cm.highRiskContracts} high-risk contracts`,
-                              },
-                              {
-                                text: `${cm.expireWithin30Days} expiring within 30 days`,
-                              },
-                              { text: `${cm.expired} expired contracts` },
-                            ]
-                          : []
-                      }
-                      actions={[
-                        { label: "View obligations" },
-                        { label: "Contract brief" },
-                        { label: "Billing anomalies" },
-                      ]}
-                    />
-                    <AgentPanel
-                      title="Renewal Agent"
-                      subtitle="Renewals, risk signals & value retention."
-                      linkLabel="Renewal"
-                      accentColor="orange"
-                      hasError={apiStatus?.renewal === "error"}
-                      errorMsg="Renewal agent data unavailable"
-                      bullets={
-                        rm
-                          ? [
-                              {
-                                text: `${rm.totalRenewals} contracts entering renewal window`,
-                              },
-                              {
-                                text: `${rm.autoRenewals} auto-renew clauses detected`,
-                              },
-                              {
-                                text: `${rm.overdueRenewals} overdue renewals`,
-                              },
-                              {
-                                text: `${formatCurrency(rm.totalContractValue)} renewal value at stake`,
-                              },
-                            ]
-                          : []
-                      }
-                      actions={[
-                        { label: "Renewal readiness" },
-                        { label: "Risk & leverage analysis" },
-                        { label: "Launch renewal playbook" },
-                      ]}
-                    />
-                  </>
-                )}
+            <div className="agent-panels">
+              <div>
+                <h2>AI Agent Activity</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+                  {loading ? (
+                    [...Array(4)].map((_, i) => (
+                      <Skeleton key={i} active paragraph={{ rows: 4 }} />
+                    ))
+                  ) : (
+                    <>
+                      <AgentPanel
+                        title="Intake Agent"
+                        subtitle="Redlines, briefs & document intelligence."
+                        linkLabel="Inbox"
+                        accentColor="violet"
+                        hasError={apiStatus?.intake === "error"}
+                        errorMsg="Intake agent data unavailable"
+                        completionRate={im?.completionRate}
+                        bullets={
+                          im
+                            ? [
+                                { text: `${im.running} requests in progress` },
+                                {
+                                  text: `${im.withDocuments} requests with documents`,
+                                },
+                                { text: `${im.completed} completed today` },
+                                { text: `${im.failed} failed requests` },
+                              ]
+                            : []
+                        }
+                        actions={[
+                          { label: "Summarize all" },
+                          { label: "Generate briefs" },
+                          { label: "My queue" },
+                        ]}
+                      />
+                      <AgentPanel
+                        title="Document Agent"
+                        subtitle="Redlines, briefs & document intelligence."
+                        linkLabel="Documents"
+                        accentColor="blue"
+                        hasError={apiStatus?.document === "error"}
+                        errorMsg="Document agent data unavailable"
+                        completionRate={
+                          dm
+                            ? (dm.completed / Math.max(dm.totalDocuments, 1)) *
+                              100
+                            : undefined
+                        }
+                        bullets={
+                          dm
+                            ? [
+                                { text: `${dm.running} documents in progress` },
+                                { text: `${dm.completed} documents completed` },
+                                {
+                                  text: `${dm.failed} documents need attention`,
+                                },
+                                {
+                                  text: `${dm.totalDocuments} total documents today`,
+                                },
+                              ]
+                            : []
+                        }
+                        actions={[
+                          { label: "Summarize all" },
+                          { label: "Generate briefs" },
+                          { label: "My queue" },
+                        ]}
+                      />
+                      <AgentPanel
+                        title="Contract Agent"
+                        subtitle="Obligations, billing, risk & compliance."
+                        linkLabel="Contracts"
+                        accentColor="teal"
+                        hasError={apiStatus?.contract === "error"}
+                        errorMsg="Contract agent data unavailable"
+                        bullets={
+                          cm
+                            ? [
+                                {
+                                  text: `${cm.activeContracts} active contracts tracked`,
+                                },
+                                {
+                                  text: `${cm.highRiskContracts} high-risk contracts`,
+                                },
+                                {
+                                  text: `${cm.expireWithin30Days} expiring within 30 days`,
+                                },
+                                { text: `${cm.expired} expired contracts` },
+                              ]
+                            : []
+                        }
+                        actions={[
+                          { label: "View obligations" },
+                          { label: "Contract brief" },
+                          { label: "Billing anomalies" },
+                        ]}
+                      />
+                      <AgentPanel
+                        title="Renewal Agent"
+                        subtitle="Renewals, risk signals & value retention."
+                        linkLabel="Renewal"
+                        accentColor="orange"
+                        hasError={apiStatus?.renewal === "error"}
+                        errorMsg="Renewal agent data unavailable"
+                        bullets={
+                          rm
+                            ? [
+                                {
+                                  text: `${rm.totalRenewals} contracts entering renewal window`,
+                                },
+                                {
+                                  text: `${rm.autoRenewals} auto-renew clauses detected`,
+                                },
+                                {
+                                  text: `${rm.overdueRenewals} overdue renewals`,
+                                },
+                                {
+                                  text: `${formatCurrency(rm.totalContractValue)} renewal value at stake`,
+                                },
+                              ]
+                            : []
+                        }
+                        actions={[
+                          { label: "Renewal readiness" },
+                          { label: "Risk & leverage analysis" },
+                          { label: "Launch renewal playbook" },
+                        ]}
+                      />
+                    </>
+                  )}
+                </div>
               </div>
             </div>
 

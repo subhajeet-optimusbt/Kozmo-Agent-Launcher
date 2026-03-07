@@ -99,3 +99,141 @@ html,
 .animate-leave {
   animation: leave 0.2s ease-in forwards;
 }
+
+/* Enhanced Guide Modal Styles */
+
+.guide-modal .ant-modal-content {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.guide-modal .ant-modal-body {
+  overflow: visible;
+}
+
+/* Smooth animations */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.guide-modal .ant-modal {
+  animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Button hover effects */
+.guide-modal button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.guide-modal button:active {
+  transform: scale(0.98);
+}
+
+/* Progress indicator animation */
+.guide-modal [style*="width"] {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Text selection styling */
+.guide-modal p,
+.guide-modal li {
+  user-select: text;
+}
+
+/* Keyboard shortcut styling */
+.guide-modal kbd {
+  font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas,
+    "Courier New", monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Interactive Guide Styles */
+
+/* Smooth transitions */
+@keyframes spotlight {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Tooltip animations */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.guide-tooltip {
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Pulsing ring animation */
+svg circle {
+  animation: spotlight 2s ease-in-out infinite;
+}
+
+/* Spotlight overlay */
+.spotlight-overlay {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Button interactions */
+button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* Tooltip arrow */
+.tooltip-arrow {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Text selection */
+.guide-text {
+  user-select: text;
+}

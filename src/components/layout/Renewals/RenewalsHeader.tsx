@@ -7,8 +7,8 @@ import {
   CheckOutlined,
 } from "@ant-design/icons";
 import {
-  LifeBuoy,
-  Sparkles,
+  HelpCircle,
+  BookOpen,
   LayoutDashboard,
   RefreshCw,
   Briefcase,
@@ -236,7 +236,7 @@ const RenewalHeader: React.FC<RenewalHeaderProps> = ({
       transition-all duration-150
     "
           >
-            <LifeBuoy size={22} strokeWidth={2} />
+            <HelpCircle size={22} strokeWidth={2} />
           </button>
         </Tooltip>
 
@@ -251,7 +251,7 @@ const RenewalHeader: React.FC<RenewalHeaderProps> = ({
       transition-all duration-150
     "
           >
-            <Sparkles size={22} strokeWidth={2} />
+            <BookOpen size={22} strokeWidth={2} />
           </button>
         </Tooltip>
 
