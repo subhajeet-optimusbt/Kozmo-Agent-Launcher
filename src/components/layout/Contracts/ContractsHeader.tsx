@@ -247,7 +247,7 @@ const ContractHeader: React.FC<ContractHeaderProps> = ({
             </button>
           </Tooltip>
 
-          <Tooltip title="Interactive Guide Tour">
+          <Tooltip title="Take a Product Tour">
             <button
               onClick={() => setGuideOpen(true)}
               className="

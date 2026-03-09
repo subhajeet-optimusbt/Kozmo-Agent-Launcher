@@ -68,16 +68,15 @@ export interface Renewal {
 export interface Intake {
   [x: string]: any;
   key: string;
-
   subject: string;
   currentJobName: string;
   source: string;
-
   noOfDocuments: number;
   Status: string;
-
   created: string;
+   createdRaw: string;
   updated: string;
+  updatedRaw: string; // ← add this (ISO string for sorting)
   RequestId: any;
 }
 
@@ -88,7 +87,9 @@ export interface Document {
   source: string;
   status: string;
   created: string;
+  createdRaw: string;
   updated: string;
+  updatedRaw: string;
 }
 
 export type RelationshipStatus =

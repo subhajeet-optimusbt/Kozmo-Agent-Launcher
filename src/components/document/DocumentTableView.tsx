@@ -7,7 +7,7 @@ import { type Document } from "../../constants/apps";
 
 type Sorter = {
   field?: keyof Document;
-  order?: "ascend" | "descend";
+  order?:  "descend" | "ascend";
 };
 
 export default function DocumentTableView({

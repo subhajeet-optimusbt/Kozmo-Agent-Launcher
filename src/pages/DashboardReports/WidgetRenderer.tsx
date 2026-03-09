@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState } from "react";
@@ -1783,24 +1784,102 @@ const WidgetRenderer = ({ widget }: any) => {
     let formatted: any[] = [];
     let multiKeys: string[] = [];
 
-    // ── StackedBar: always array of objects with sub-items ──
-    if (isStacked && Array.isArray(data)) {
-      formatted = data.map((d: any) => {
-        const obj: any = { name: d.escalationLevel || d.businessArea || "—" };
-        if (d.issues) {
-          d.issues.forEach((issue: any) => {
-            const key = issue.severity || issue.issueType || "Issue";
+    // ── StackedBar: always array of objects ──
+    if (isStacked && Array.isArray(data) && data.length > 0) {
+      const first = data[0];
+
+      // Detect the best "name" field: prefer known label keys, else first string field
+      const knownNameFields = [
+        "escalationLevel",
+        "businessArea",
+        "counterpartyName",
+        "name",
+        "label",
+        "category",
+        "type",
+        "stage",
+        "status",
+      ];
+      const nameField =
+        knownNameFields.find(
+          (f) => f in first && typeof first[f] === "string",
+        ) ||
+        Object.keys(first).find((k) => typeof first[k] === "string") ||
+        Object.keys(first)[0];
+
+      // Detect numeric value fields (skip the name field itself)
+      const numericFields = Object.keys(first).filter(
+        (k) => k !== nameField && typeof first[k] === "number",
+      );
+
+      // Shape A — has sub-array (e.g. `issues`) → stack by a categorical field within it
+      const subArrayField = Object.keys(first).find((k) =>
+        Array.isArray(first[k]),
+      );
+
+      if (subArrayField) {
+        // e.g. D005: issues[] → stack by severity/issueType
+        formatted = data.map((d: any) => {
+          const obj: any = {
+            name: d[nameField] ?? "—",
+            _originalEntry: d,
+          };
+          (d[subArrayField] as any[]).forEach((item: any) => {
+            const key =
+              item.severity ||
+              item.issueType ||
+              item.type ||
+              item.category ||
+              "Item";
             obj[key] = (obj[key] || 0) + 1;
           });
+          return obj;
+        });
+      } else if (numericFields.length > 1) {
+        // Shape B — multiple numeric fields.
+        // Check if fields are on wildly different scales (e.g. totalValue=100k vs contractCount=1).
+        // If max values differ by >10x, use only the largest-scale field for the bar;
+        // store the rest as metadata (_originalEntry already has them for the modal).
+        const fieldMaxes = numericFields.map((f) => ({
+          field: f,
+          max: Math.max(...data.map((d: any) => Number(d[f]) || 0)),
+        }));
+        fieldMaxes.sort((a, b) => b.max - a.max);
+        const dominantField = fieldMaxes[0].field;
+        const scaleRatio =
+          fieldMaxes[0].max / (fieldMaxes[fieldMaxes.length - 1].max || 1);
+
+        if (scaleRatio > 10) {
+          // Use only dominant field — render as single-series bar (Shape C fallthrough)
+          formatted = data.map((d: any) => ({
+            name: d[nameField] ?? "—",
+            [dominantField]: d[dominantField] ?? 0,
+            _originalEntry: d,
+          }));
         } else {
-          obj["Count"] = d.issueCount || 1;
+          // Comparable scales — stack them all
+          formatted = data.map((d: any) => {
+            const obj: any = { name: d[nameField] ?? "—", _originalEntry: d };
+            numericFields.forEach((f) => {
+              obj[f] = d[f] ?? 0;
+            });
+            return obj;
+          });
         }
-        return obj;
-      });
+      } else {
+        // Shape C — single numeric field → treat as simple bar with one series
+        const valueField = numericFields[0] || "value";
+        formatted = data.map((d: any) => ({
+          name: d[nameField] ?? "—",
+          [valueField]: d[valueField] ?? d.issueCount ?? 0,
+          _originalEntry: d,
+        }));
+      }
+
       const keys = new Set<string>();
       formatted.forEach((d) =>
         Object.keys(d)
-          .filter((k) => k !== "name")
+          .filter((k) => k !== "name" && k !== "_originalEntry")
           .forEach((k) => keys.add(k)),
       );
       multiKeys = Array.from(keys);
@@ -1927,6 +2006,7 @@ const WidgetRenderer = ({ widget }: any) => {
           "stage",
           "type",
           "category",
+          "severity",
         ];
         const groupField =
           candidateFields.find((f) =>
@@ -1993,10 +2073,68 @@ const WidgetRenderer = ({ widget }: any) => {
       }
     };
 
-    // Chart height: horizontal bars need more height per item
-    const chartHeight = isHorizontal
-      ? Math.max(200, formatted.length * 48 + 40)
-      : 220;
+    // ── StackedBar drill lookup: key = "barName||segmentKey" → items[] ──
+    // Also "barName" alone → all items for that bar row
+    const stackedDrillLookup: Record<string, any[]> = {};
+    if (isStacked && Array.isArray(data) && data.length > 0) {
+      const first = data[0];
+      const knownNameFields = [
+        "escalationLevel",
+        "businessArea",
+        "counterpartyName",
+        "name",
+        "label",
+        "category",
+        "type",
+        "stage",
+        "status",
+      ];
+      const nameField =
+        knownNameFields.find(
+          (f) => f in first && typeof first[f] === "string",
+        ) ||
+        Object.keys(first).find((k) => typeof first[k] === "string") ||
+        Object.keys(first)[0];
+      const subArrayField = Object.keys(first).find((k) =>
+        Array.isArray(first[k]),
+      );
+
+      data.forEach((d: any) => {
+        const barName = d[nameField] ?? "—";
+        if (subArrayField) {
+          // e.g. issues[] → group by severity per bar
+          const subItems: any[] = d[subArrayField] || [];
+          stackedDrillLookup[barName] = subItems;
+          subItems.forEach((item: any) => {
+            const segKey =
+              item.severity ||
+              item.issueType ||
+              item.type ||
+              item.category ||
+              "Item";
+            const compoundKey = `${barName}||${segKey}`;
+            if (!stackedDrillLookup[compoundKey])
+              stackedDrillLookup[compoundKey] = [];
+            stackedDrillLookup[compoundKey].push(item);
+          });
+        } else {
+          // Flat shape (e.g. D006) — the row itself IS the drill record
+          stackedDrillLookup[barName] = [d];
+        }
+      });
+    }
+    // Auto-switch to horizontal for StackedBar with many/long-named items
+    const avgNameLength =
+      formatted.reduce((s: number, d: any) => s + (d.name?.length || 0), 0) /
+      (formatted.length || 1);
+    const forceHorizontal =
+      isStacked && (formatted.length > 5 || avgNameLength > 12);
+
+    // Chart height
+    const chartHeight =
+      isHorizontal || forceHorizontal
+        ? Math.max(200, formatted.length * 44 + 40)
+        : 220;
 
     // Pre-compute for ChartHeader to avoid complex inline JSX expressions
     const barAllItems: any[] =
@@ -2028,7 +2166,7 @@ const WidgetRenderer = ({ widget }: any) => {
         <div
           style={{
             ...card,
-            minHeight: isHorizontal ? "auto" : "300px",
+            minHeight: isHorizontal || forceHorizontal ? "auto" : "300px",
             overflow: "hidden",
           }}
         >
@@ -2052,10 +2190,14 @@ const WidgetRenderer = ({ widget }: any) => {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={formatted}
-                    layout={isHorizontal ? "vertical" : "horizontal"}
+                    layout={
+                      isHorizontal || forceHorizontal
+                        ? "vertical"
+                        : "horizontal"
+                    }
                     margin={
-                      isHorizontal
-                        ? { left: 100, right: 60, top: 8, bottom: 8 }
+                      isHorizontal || forceHorizontal
+                        ? { left: 140, right: 80, top: 8, bottom: 8 }
                         : { top: 28, right: 20, left: 0, bottom: 36 }
                     }
                     tabIndex={-1}
@@ -2069,7 +2211,8 @@ const WidgetRenderer = ({ widget }: any) => {
                     style={{
                       cursor:
                         Object.keys(barDrillLookup).length > 0 ||
-                        data?.drillBreakoff?.items?.length > 0
+                        data?.drillBreakoff?.items?.length > 0 ||
+                        Object.keys(stackedDrillLookup).length > 0
                           ? "pointer"
                           : "default",
                     }}
@@ -2079,10 +2222,10 @@ const WidgetRenderer = ({ widget }: any) => {
                         <linearGradient
                           key={i}
                           id={`barG${i}`}
-                          x1={isHorizontal ? "0" : "0"}
-                          y1={isHorizontal ? "0" : "0"}
-                          x2={isHorizontal ? "1" : "0"}
-                          y2={isHorizontal ? "0" : "1"}
+                          x1={isHorizontal || forceHorizontal ? "0" : "0"}
+                          y1={isHorizontal || forceHorizontal ? "0" : "0"}
+                          x2={isHorizontal || forceHorizontal ? "1" : "0"}
+                          y2={isHorizontal || forceHorizontal ? "0" : "1"}
                         >
                           <stop
                             offset="0%"
@@ -2101,11 +2244,11 @@ const WidgetRenderer = ({ widget }: any) => {
                     <CartesianGrid
                       strokeDasharray="4 4"
                       stroke="#f1f5f9"
-                      vertical={isHorizontal}
-                      horizontal={!isHorizontal}
+                      vertical={isHorizontal || forceHorizontal}
+                      horizontal={!(isHorizontal || forceHorizontal)}
                     />
 
-                    {isHorizontal ? (
+                    {isHorizontal || forceHorizontal ? (
                       <>
                         <XAxis
                           type="number"
@@ -2121,7 +2264,7 @@ const WidgetRenderer = ({ widget }: any) => {
                             fill: "#64748b",
                             fontWeight: 500,
                           }}
-                          width={95}
+                          width={forceHorizontal ? 160 : 95}
                           axisLine={false}
                           tickLine={false}
                         />
@@ -2167,30 +2310,65 @@ const WidgetRenderer = ({ widget }: any) => {
                             dataKey={key}
                             stackId="a"
                             fill={`url(#barG${i})`}
-                            activeBar={false}
+                            activeBar={{
+                              fill: COLORS[i % COLORS.length],
+                              opacity: 0.85,
+                            }}
                             radius={
                               i === multiKeys.length - 1
-                                ? [6, 6, 0, 0]
+                                ? forceHorizontal || isHorizontal
+                                  ? [0, 6, 6, 0]
+                                  : [6, 6, 0, 0]
                                 : [0, 0, 0, 0]
                             }
+                            style={{ cursor: "pointer" }}
+                            onClick={(_barEntry: any, _index: number) => {
+                              // recharts passes the chart event as 3rd arg;
+                              // we need the activeLabel from the BarChart click event
+                              // Instead, use barEntry which has `name` directly
+                              if (_barEntry && _barEntry.name) {
+                                const items =
+                                  stackedDrillLookup[
+                                    `${_barEntry.name}||${key}`
+                                  ] || stackedDrillLookup[_barEntry.name];
+                                if (items && items.length > 0) {
+                                  setDrillModal({
+                                    segmentName: `${_barEntry.name} — ${key}`,
+                                    items,
+                                  });
+                                }
+                              }
+                            }}
                           >
                             {i === multiKeys.length - 1 && (
                               <LabelList
                                 dataKey={key}
-                                position="top"
-                                content={<BarTopLabel />}
+                                position={
+                                  forceHorizontal || isHorizontal
+                                    ? "right"
+                                    : "top"
+                                }
+                                content={
+                                  forceHorizontal || isHorizontal ? (
+                                    <HBarRightLabel />
+                                  ) : (
+                                    <BarTopLabel />
+                                  )
+                                }
                               />
                             )}
                           </Bar>
                         ))}
-                        <Legend
-                          iconType="circle"
-                          wrapperStyle={{
-                            fontSize: "11px",
-                            color: "#64748b",
-                            paddingTop: "8px",
-                          }}
-                        />
+                        {multiKeys.length > 1 && (
+                          <Legend
+                            iconType="circle"
+                            wrapperStyle={{
+                              fontSize: "11px",
+                              color: "#64748b",
+                              paddingTop: "8px",
+                            }}
+                          />
+                        )}
                       </>
                     ) : !isStacked && multiKeys.length > 0 ? (
                       /* GROUPED multi-series bars */

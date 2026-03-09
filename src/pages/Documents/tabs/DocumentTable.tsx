@@ -29,12 +29,15 @@ export default function DocumentTable({ document }: { document: Document[] }) {
   const [activeDocument, setActiveDocument] = useState<Document | null>(null);
 
   const [search, setSearch] = useState("");
-  const [sorter, setSorter] = useState<Sorter>({});
-const [filters, setFilters] = useState<Filters>({
-  status: ["All"],
-  subject: [],
-  currentJobName: ["All"],
-});
+  const [sorter, setSorter] = useState<Sorter>({
+    field: "updated",
+    order: "descend",
+  });
+  const [filters, setFilters] = useState<Filters>({
+    status: ["All"],
+    subject: [],
+    currentJobName: ["All"],
+  });
 
   const [filterOpen, setFilterOpen] = useState(false);
 
@@ -44,19 +47,37 @@ const [filters, setFilters] = useState<Filters>({
   // }, [renewals]);
 
   /* ---------------- sorting ---------------- */
+  // const sortedDocument = useMemo(() => {
+  //   if (!sorter.field || !sorter.order) return document;
+
+  //   return [...document].sort((a, b) => {
+  //     const aVal = a[sorter.field!];
+  //     const bVal = b[sorter.field!];
+
+  //     if (aVal < bVal) return sorter.order === "ascend" ? -1 : 1;
+  //     if (aVal > bVal) return sorter.order === "ascend" ? 1 : -1;
+  //     return 0;
+  //   });
+  // }, [document, sorter]);
+
   const sortedDocument = useMemo(() => {
     if (!sorter.field || !sorter.order) return document;
 
     return [...document].sort((a, b) => {
-      const aVal = a[sorter.field!];
-      const bVal = b[sorter.field!];
+      // Use raw ISO value for date fields
+      const sortField =
+        sorter.field === "updated"
+          ? (`${sorter.field}Raw` as keyof Document)
+          : sorter.field!;
+
+      const aVal = a[sortField] ?? a[sorter.field!];
+      const bVal = b[sortField] ?? b[sorter.field!];
 
       if (aVal < bVal) return sorter.order === "ascend" ? -1 : 1;
       if (aVal > bVal) return sorter.order === "ascend" ? 1 : -1;
       return 0;
     });
   }, [document, sorter]);
-
   /* ---------------- search ---------------- */
   const searchedDocument = useMemo(() => {
     if (!search) return sortedDocument;

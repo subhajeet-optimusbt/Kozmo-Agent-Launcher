@@ -30,7 +30,7 @@ export default function IntakeTable({ intake }: { intake: Intake[] }) {
   const [activeIntake, setActiveIntake] = useState<Intake | null>(null);
 
   const [search, setSearch] = useState("");
-  const [sorter, setSorter] = useState<Sorter>({});
+  const [sorter, setSorter] = useState<Sorter>({ field: "updated", order: "descend" });
   const [filters, setFilters] = useState<Filters>({
     Status: [],
     subject: [],
@@ -46,19 +46,36 @@ export default function IntakeTable({ intake }: { intake: Intake[] }) {
   // }, [renewals]);
 
   /* ---------------- sorting ---------------- */
+  // const sortedIntake = useMemo(() => {
+  //   if (!sorter.field || !sorter.order) return intake;
+
+  //   return [...intake].sort((a, b) => {
+  //     const aVal = a[sorter.field!];
+  //     const bVal = b[sorter.field!];
+
+  //     if (aVal < bVal) return sorter.order === "ascend" ? -1 : 1;
+  //     if (aVal > bVal) return sorter.order === "ascend" ? 1 : -1;
+  //     return 0;
+  //   });
+  // }, [intake, sorter]);
+
   const sortedIntake = useMemo(() => {
-    if (!sorter.field || !sorter.order) return intake;
+  if (!sorter.field || !sorter.order) return intake;
 
-    return [...intake].sort((a, b) => {
-      const aVal = a[sorter.field!];
-      const bVal = b[sorter.field!];
+  return [...intake].sort((a, b) => {
+    // Use raw ISO value for date fields
+    const sortField = sorter.field === "updated" || sorter.field === "created"
+      ? (`${sorter.field}Raw` as keyof Intake)
+      : sorter.field!;
 
-      if (aVal < bVal) return sorter.order === "ascend" ? -1 : 1;
-      if (aVal > bVal) return sorter.order === "ascend" ? 1 : -1;
-      return 0;
-    });
-  }, [intake, sorter]);
+    const aVal = a[sortField] ?? a[sorter.field!];
+    const bVal = b[sortField] ?? b[sorter.field!];
 
+    if (aVal < bVal) return sorter.order === "ascend" ? -1 : 1;
+    if (aVal > bVal) return sorter.order === "ascend" ? 1 : -1;
+    return 0;
+  });
+}, [intake, sorter]);
   /* ---------------- search ---------------- */
   const searchedIntake = useMemo(() => {
     if (!search) return sortedIntake;

@@ -11,20 +11,18 @@ export const mapDocumentFromApi = (apiData: Array<any>) => {
     // File Name shown as Subject
     subject: d.fileName ?? "Untitled Document",
 
-   currentJobName: d.currentJobName?.trim() || "N/A",
+    currentJobName: d.currentJobName?.trim() || "N/A",
 
     // API does not provide source
     source: d.source?.trim() || "N/A",
 
-
     status: d.status ?? "NotStarted",
 
-    created: d.created
-      ? dayjs(d.created).fromNow()
-      : "N/A",
+    // created: d.created ? dayjs(d.created).fromNow() : "N/A",
+    created: new Date(d.created).toLocaleString(),
+    createdRaw: d.created,
 
-    updated: d.modified
-      ? dayjs(d.modified).fromNow()
-      : "N/A",
+    updated: new Date(d.modified).toLocaleString(),
+    updatedRaw: d.updated,
   }));
 };

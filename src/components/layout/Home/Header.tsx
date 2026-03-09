@@ -167,7 +167,7 @@ const Header: React.FC<{ onOpenLauncher: () => void }> = ({
             </button>
           </Tooltip>
 
-          <Tooltip title="Interactive Guide Tour">
+          <Tooltip title="Take a Product Tour">
             <button
               onClick={() => setGuideOpen(true)}
               className="

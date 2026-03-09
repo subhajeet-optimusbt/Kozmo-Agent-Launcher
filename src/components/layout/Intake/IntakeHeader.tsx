@@ -243,7 +243,7 @@ const IntakeHeader: React.FC<IntakeHeaderProps> = ({
           </button>
         </Tooltip>
 
-        <Tooltip title="Guide">
+        <Tooltip title="Take a Product Tour">
           <button
             className="
       w-9 h-9 flex items-center justify-center rounded-lg

@@ -10,20 +10,22 @@ export const mapIntakeFromApi = (apiData: Array<any>) => {
     key: c.RowKey,
 
     // Screenshot shows "Untitled Request"
-    subject: c.Intent ?? "Untitled Request",
+    subject: c.Subject || "N/A",
 
     currentJobName: c.CurrentJobName ?? "0",
 
     // API doesn’t give source → show fallback
-    source: c.source?.trim() || "N/A",
+    source: c.Source?.trim() || "N/A",
 
     noOfDocuments: c.NoOfDocuments ?? 0,
 
     Status: c.Status,
 
-    created: dayjs(c.Created).fromNow(),
-    updated: dayjs(c.Modified).fromNow(),
+    created: new Date(c.Created).toLocaleString(),
+    createdRaw: c.created,
 
+    updated: new Date(c.Modified).toLocaleString(),
+    updatedRaw: c.updated,
     RequestId: c.RequestId,
   }));
 };
