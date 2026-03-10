@@ -1,19 +1,7 @@
-/* eslint-disable react-hooks/immutability */
-/* eslint-disable react-hooks/set-state-in-effect */
-/**
- * FILE: src/components/common/InteractiveGuide.tsx
- *
- * DROP-IN REPLACEMENT for your existing InteractiveGuide.
- * – Light theme (white cards, subtle shadows) to match your app's UX
- * – Game-install style WelcomeScreen on every open
- * – ALWAYS resets to Step 1 when re-opened
- * – Rectangular spotlight with animated border (not a circle)
- * – Smart tooltip positioning with directional arrow (auto-flips)
- * – Confetti burst on tour completion
- * – Keyboard: ← → navigate, ESC close
- */
-
-import React, { useState, useEffect, useRef, useCallback } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+ 
+ 
+import React, { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, X, BookOpen } from "lucide-react";
 import { GUIDE_CONTENT } from "../../constants/guides";
 
@@ -105,81 +93,6 @@ const ACCENT: Record<
 
 const clamp = (v: number, min: number, max: number) =>
   Math.max(min, Math.min(max, v));
-
-// ─── Confetti Canvas ──────────────────────────────────────────────────────────
-const Confetti: React.FC<{
-  active: boolean;
-  color: (typeof ACCENT)[string];
-}> = ({ active, color }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    if (!active) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d")!;
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    const cols = [color.primary, color.dark, "#ffffff", "#fbbf24", color.bg];
-    type Particle = {
-      x: number;
-      y: number;
-      r: number;
-      d: number;
-      color: string;
-      tilt: number;
-      tiltAngle: number;
-      tiltAngleIncrement: number;
-    };
-    const particles: Particle[] = Array.from({ length: 90 }, () => ({
-      x: Math.random() * canvas.width,
-      y: -10,
-      r: Math.random() * 6 + 3,
-      d: Math.random() * 4 + 1,
-      color: cols[Math.floor(Math.random() * cols.length)],
-      tilt: 0,
-      tiltAngle: 0,
-      tiltAngleIncrement: Math.random() * 0.07 + 0.05,
-    }));
-
-    let frame = 0;
-    let raf: number;
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach((p) => {
-        p.tiltAngle += p.tiltAngleIncrement;
-        p.y += (Math.cos(frame + p.d) + p.d + p.r / 2) * 0.75;
-        p.x += Math.sin(frame) * 0.5;
-        p.tilt = Math.sin(p.tiltAngle - frame / 3) * 12;
-        ctx.beginPath();
-        ctx.lineWidth = p.r;
-        ctx.strokeStyle = p.color;
-        ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
-        ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 4);
-        ctx.stroke();
-      });
-      frame++;
-      if (frame < 200) raf = requestAnimationFrame(draw);
-      else ctx.clearRect(0, 0, canvas.width, canvas.height);
-    };
-    raf = requestAnimationFrame(draw);
-    return () => cancelAnimationFrame(raf);
-  }, [active]);
-
-  if (!active) return null;
-  return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 11000,
-        pointerEvents: "none",
-      }}
-    />
-  );
-};
 
 // ─── Welcome Screen ───────────────────────────────────────────────────────────
 const WelcomeScreen: React.FC<{
@@ -822,7 +735,7 @@ const TooltipCard: React.FC<{
               }}
             >
               {isLast ? (
-                "🎉 Finish"
+                "Finish"
               ) : (
                 <>
                   Next <ChevronRight size={14} />
@@ -836,72 +749,6 @@ const TooltipCard: React.FC<{
   );
 };
 
-// ─── Done Screen ──────────────────────────────────────────────────────────────
-const DoneScreen: React.FC<{
-  moduleKey: string;
-  color: (typeof ACCENT)[string];
-}> = ({ moduleKey, color }) => {
-  const guide = GUIDE_CONTENT[moduleKey];
-  return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 10010,
-        background: "rgba(15,23,42,0.5)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        backdropFilter: "blur(6px)",
-      }}
-    >
-      <div
-        style={{
-          textAlign: "center",
-          animation: "guideDonePop 0.5s cubic-bezier(0.34,1.56,0.64,1)",
-        }}
-      >
-        <div
-          style={{
-            width: 80,
-            height: 80,
-            borderRadius: 20,
-            background: "#ffffff",
-            border: `2px solid ${color.border}`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 40,
-            margin: "0 auto 16px",
-            boxShadow: `0 8px 32px ${color.primary}30`,
-          }}
-        >
-          🎉
-        </div>
-        <h2
-          style={{
-            fontSize: 24,
-            fontWeight: 900,
-            color: "#ffffff",
-            margin: "0 0 8px",
-            letterSpacing: "-0.02em",
-          }}
-        >
-          Tour Complete!
-        </h2>
-        <p style={{ color: "#94a3b8", fontSize: 14 }}>
-          You know{" "}
-          <strong style={{ color: color.primary }}>
-            {guide?.title ?? moduleKey}
-          </strong>{" "}
-          inside out now.
-        </p>
-      </div>
-      <style>{`@keyframes guideDonePop { from { transform: scale(0.6); opacity: 0 } to { transform: scale(1); opacity: 1 } }`}</style>
-    </div>
-  );
-};
-
 // ─── Main Component ───────────────────────────────────────────────────────────
 const InteractiveGuide: React.FC<InteractiveGuideProps> = ({
   isOpen,
@@ -909,14 +756,13 @@ const InteractiveGuide: React.FC<InteractiveGuideProps> = ({
   moduleKey,
   targets,
 }) => {
-  const [phase, setPhase] = useState<"welcome" | "tour" | "done">("welcome");
+  const [phase, setPhase] = useState<"welcome" | "tour">("welcome");
   const [step, setStep] = useState(0);
   const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
   const [arrowDir, setArrowDir] = useState<"top" | "bottom" | "left" | "right">(
     "bottom",
   );
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
-  const [confetti, setConfetti] = useState(false);
 
   const guide = GUIDE_CONTENT[moduleKey];
   const color = ACCENT[guide?.color ?? "emerald"] ?? ACCENT.emerald;
@@ -928,12 +774,10 @@ const InteractiveGuide: React.FC<InteractiveGuideProps> = ({
     if (isOpen) {
       setStep(0);
       setPhase("welcome");
-      setConfetti(false);
     }
   }, [isOpen]);
 
   // ── Compute tooltip position from live getBoundingClientRect ─────────────────
-  // Safe to call on scroll/resize — NEVER calls scrollIntoView.
   const computePos = useCallback(() => {
     if (!currentTarget) return;
     const el = document.querySelector(currentTarget.selector);
@@ -978,7 +822,6 @@ const InteractiveGuide: React.FC<InteractiveGuideProps> = ({
         break;
     }
 
-    // Hard-clamp: tooltip never goes off-screen regardless of scroll position
     top = clamp(top, 12, vh - TH - 12);
     left = clamp(left, 12, vw - TW - 12);
 
@@ -986,25 +829,21 @@ const InteractiveGuide: React.FC<InteractiveGuideProps> = ({
     setTooltipPos({ top, left });
   }, [currentTarget]);
 
-  // ── On step change: compute position IMMEDIATELY, then scroll + re-compute ────
+  // ── On step change ────────────────────────────────────────────────────────────
   useEffect(() => {
     if (phase !== "tour" || !currentTarget) return;
     const el = document.querySelector(currentTarget.selector);
 
-    // 1. Compute position right away so spotlight + tooltip jump instantly
     computePos();
 
     if (el) {
-      // 2. Scroll element into view (smooth)
       el.scrollIntoView({ behavior: "smooth", block: "center" });
-      // 3. Re-compute after scroll settles so rects are accurate post-scroll
       const t = setTimeout(() => computePos(), 380);
       return () => clearTimeout(t);
     }
-  }, [phase, step]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [phase, step]);  
 
-  // ── On scroll/resize: update spotlight + tooltip WITHOUT scrollIntoView ───────
-  // User is now free to scroll; spotlight and tooltip track the element live.
+  // ── On scroll/resize ──────────────────────────────────────────────────────────
   useEffect(() => {
     if (phase !== "tour") return;
     window.addEventListener("scroll", computePos, { passive: true });
@@ -1036,12 +875,8 @@ const InteractiveGuide: React.FC<InteractiveGuideProps> = ({
     if (step < totalSteps - 1) {
       setStep((s) => s + 1);
     } else {
-      setConfetti(true);
-      setPhase("done");
-      setTimeout(() => {
-        setConfetti(false);
-        onClose();
-      }, 2800);
+      // Last step — just close immediately, no done screen
+      handleClose();
     }
   };
   const handlePrev = () => {
@@ -1057,8 +892,6 @@ const InteractiveGuide: React.FC<InteractiveGuideProps> = ({
 
   return (
     <>
-      <Confetti active={confetti} color={color} />
-
       {phase === "welcome" && (
         <WelcomeScreen
           moduleKey={moduleKey}
@@ -1098,8 +931,6 @@ const InteractiveGuide: React.FC<InteractiveGuideProps> = ({
           />
         </>
       )}
-
-      {phase === "done" && <DoneScreen moduleKey={moduleKey} color={color} />}
     </>
   );
 };

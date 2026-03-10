@@ -7,7 +7,7 @@ import {
   CheckOutlined,
 } from "@ant-design/icons";
 import {
-  HelpCircle ,
+  HelpCircle,
   BookOpen,
   LayoutDashboard,
   FileText,
@@ -19,6 +19,7 @@ import { useNavigate } from "react-router-dom";
 import { baseUrl } from "../../../utils/baseUrl";
 import toast from "react-hot-toast";
 import { setActiveAccountId } from "../../../utils/auth";
+import FullscreenLoader from "../../ui/FullScreenLoader";
 type DocumentHeaderProps = {
   activeTab: string;
   onTabChange: (key: string) => void;
@@ -31,6 +32,7 @@ const DocumentHeader: React.FC<DocumentHeaderProps> = ({
   onOpenLauncher,
 }) => {
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [user, setUser] = useState(() => {
     const raw = localStorage.getItem("user") || sessionStorage.getItem("user");
@@ -65,6 +67,7 @@ const DocumentHeader: React.FC<DocumentHeaderProps> = ({
   }, []);
   const switchWorkspace = async (accountId: string) => {
     try {
+      setLoading(true);
       await fetch(baseUrl() + "/Home/SwitchAccount", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -75,11 +78,14 @@ const DocumentHeader: React.FC<DocumentHeaderProps> = ({
       setActiveAccountId(accountId); // 🔥 global update
     } catch {
       toast.error("Failed to switch account");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleLogout = async () => {
     try {
+      setLoading(true);
       await fetch(baseUrl() + "/Home/Logout", {
         method: "POST",
         credentials: "include", // IMPORTANT if cookies/session based
@@ -88,6 +94,7 @@ const DocumentHeader: React.FC<DocumentHeaderProps> = ({
       toast.error("Logout API failed, proceeding with client logout");
     } finally {
       // 🔥 clear auth FIRST
+      setLoading(false);
       localStorage.removeItem("user");
 
       sessionStorage.removeItem("user");
@@ -111,6 +118,7 @@ const DocumentHeader: React.FC<DocumentHeaderProps> = ({
   return (
     <header className="flex items-center justify-between mb-2 relative">
       {/* LEFT */}
+      {loading && <FullscreenLoader />}
       <div className="flex items-center gap-3">
         {/* Launcher */}
         <button onClick={onOpenLauncher} className="launcher-btn">
@@ -224,7 +232,9 @@ const DocumentHeader: React.FC<DocumentHeaderProps> = ({
 
         <Tooltip title="Help">
           <button
-            onClick={() => window.open("https://kozmo-saas.azurewebsites.net/Help", "_blank")}
+            onClick={() =>
+              window.open("https://kozmo-saas.azurewebsites.net/Help", "_blank")
+            }
             className="
       w-9 h-9 flex items-center justify-center rounded-lg
       text-emerald-600/70
@@ -234,7 +244,7 @@ const DocumentHeader: React.FC<DocumentHeaderProps> = ({
       transition-all duration-150
     "
           >
-            <HelpCircle  size={22} strokeWidth={2} />
+            <HelpCircle size={22} strokeWidth={2} />
           </button>
         </Tooltip>
         <Tooltip title="Guide">

@@ -21,6 +21,7 @@ import toast from "react-hot-toast";
 import InteractiveGuide from "../../common/InteractiveGuide";
 import { HOME_GUIDE_TARGETS } from "../../../constants/guideTargets";
 import { setActiveAccountId } from "../../../utils/auth";
+import FullscreenLoader from "../../ui/FullScreenLoader";
 type ContractHeaderProps = {
   activeTab: string;
   onTabChange: (key: string) => void;
@@ -34,6 +35,7 @@ const ContractHeader: React.FC<ContractHeaderProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
+  const [loading,setLoading] = useState(false);
   const navigate = useNavigate();
   const [user, setUser] = useState(() => {
     const raw = localStorage.getItem("user") || sessionStorage.getItem("user");
@@ -68,6 +70,7 @@ const ContractHeader: React.FC<ContractHeaderProps> = ({
   }, []);
   const switchWorkspace = async (accountId: string) => {
     try {
+      setLoading(true);
       await fetch(baseUrl() + "/Home/SwitchAccount", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -78,11 +81,14 @@ const ContractHeader: React.FC<ContractHeaderProps> = ({
       setActiveAccountId(accountId); // 🔥 global update
     } catch {
       toast.error("Failed to switch account");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleLogout = async () => {
     try {
+      setLoading(true);
       await fetch(baseUrl() + "/Home/Logout", {
         method: "POST",
         credentials: "include", // IMPORTANT if cookies/session based
@@ -91,6 +97,7 @@ const ContractHeader: React.FC<ContractHeaderProps> = ({
       toast.error("Logout API failed, proceeding with client logout");
     } finally {
       // 🔥 clear auth FIRST
+      setLoading(false);
       localStorage.removeItem("user");
 
       sessionStorage.removeItem("user");
@@ -117,6 +124,7 @@ const ContractHeader: React.FC<ContractHeaderProps> = ({
     <>
       <header className="flex items-center justify-between mb-2 relative">
         {/* LEFT */}
+        {loading && <FullscreenLoader />}
         <div className="flex items-center gap-3">
           {/* Launcher */}
           <button onClick={onOpenLauncher} className="launcher-btn">

@@ -20,6 +20,7 @@ import { useNavigate } from "react-router-dom";
 import { baseUrl } from "../../../utils/baseUrl";
 import toast from "react-hot-toast";
 import { setActiveAccountId } from "../../../utils/auth";
+import FullscreenLoader from "../../ui/FullScreenLoader";
 type IntakeHeaderProps = {
   activeTab: string;
   onTabChange: (key: string) => void;
@@ -33,6 +34,7 @@ const IntakeHeader: React.FC<IntakeHeaderProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const [loading,setLoading] = useState(false);
   const [user, setUser] = useState(() => {
     const raw = localStorage.getItem("user") || sessionStorage.getItem("user");
     return raw ? JSON.parse(raw) : null;
@@ -66,6 +68,7 @@ const IntakeHeader: React.FC<IntakeHeaderProps> = ({
   }, []);
   const switchWorkspace = async (accountId: string) => {
     try {
+      setLoading(true);
       await fetch(baseUrl() + "/Home/SwitchAccount", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -76,11 +79,14 @@ const IntakeHeader: React.FC<IntakeHeaderProps> = ({
       setActiveAccountId(accountId); // 🔥 global update
     } catch {
       toast.error("Failed to switch account");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleLogout = async () => {
     try {
+      setLoading(true);
       await fetch(baseUrl() + "/Home/Logout", {
         method: "POST",
         credentials: "include", // IMPORTANT if cookies/session based
@@ -89,6 +95,7 @@ const IntakeHeader: React.FC<IntakeHeaderProps> = ({
       toast.error("Logout API failed, proceeding with client logout");
     } finally {
       // 🔥 clear auth FIRST
+      setLoading(false);
       localStorage.removeItem("user");
 
       sessionStorage.removeItem("user");
@@ -115,6 +122,7 @@ const IntakeHeader: React.FC<IntakeHeaderProps> = ({
   return (
     <header className="flex items-center justify-between mb-2 relative">
       {/* LEFT */}
+      {loading && <FullscreenLoader />}
       <div className="flex items-center gap-3">
         {/* Launcher */}
         <button onClick={onOpenLauncher} className="launcher-btn">

@@ -17,11 +17,13 @@ import toast from "react-hot-toast";
 import { setActiveAccountId } from "../../../utils/auth";
 import InteractiveGuide from "../../common/InteractiveGuide";
 import { HOME_GUIDE_TARGETS } from "../../../constants/guideTargets";
+import FullscreenLoader from "../../ui/FullScreenLoader";
 const Header: React.FC<{ onOpenLauncher: () => void }> = ({
   onOpenLauncher,
 }) => {
   const [open, setOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
+  const [loading,setLoading] = useState(false);
   const navigate = useNavigate();
   // const {t} = useTranslation();
   const [user, setUser] = useState(() => {
@@ -57,6 +59,7 @@ const Header: React.FC<{ onOpenLauncher: () => void }> = ({
   }, []);
   const switchWorkspace = async (accountId: string) => {
     try {
+      setLoading(true);
       await fetch(baseUrl() + "/Home/SwitchAccount", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -67,11 +70,14 @@ const Header: React.FC<{ onOpenLauncher: () => void }> = ({
       setActiveAccountId(accountId); // 🔥 global update
     } catch {
       toast.error("Failed to switch account");
+    } finally{
+      setLoading(false);
     }
   };
 
   const handleLogout = async () => {
     try {
+      setLoading(true);
       await fetch(baseUrl() + "/Home/Logout", {
         method: "POST",
         credentials: "include", // IMPORTANT if cookies/session based
@@ -79,6 +85,7 @@ const Header: React.FC<{ onOpenLauncher: () => void }> = ({
     } catch {
       toast.error("Logout API failed, proceeding with client logout");
     } finally {
+      setLoading(false);
       // 🔥 clear auth FIRST
       localStorage.removeItem("user");
 
@@ -103,6 +110,7 @@ const Header: React.FC<{ onOpenLauncher: () => void }> = ({
   return (
     <>
       <header className="flex items-center justify-between mb-4 mt-2 relative">
+        {loading && <FullscreenLoader />}
         {/* LEFT */}
         <div className="flex items-center gap-3">
           {/* Launcher */}
