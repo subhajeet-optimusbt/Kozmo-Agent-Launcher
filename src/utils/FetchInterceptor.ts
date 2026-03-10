@@ -1,10 +1,14 @@
 import { forceLogout } from "./logout";
-
 // URLs that should never trigger auto-logout (auth endpoints themselves)
 const AUTH_URLS = ["/auth/", "/Home/Logout", "/login"];
 
 function isAuthUrl(input: RequestInfo | URL): boolean {
-  const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+  const url =
+    typeof input === "string"
+      ? input
+      : input instanceof URL
+        ? input.href
+        : input.url;
   return AUTH_URLS.some((auth) => url.includes(auth));
 }
 
@@ -14,7 +18,7 @@ export function setupFetchInterceptor(): void {
 
   window.fetch = async (
     input: RequestInfo | URL,
-    init?: RequestInit
+    init?: RequestInit,
   ): Promise<Response> => {
     // Never intercept auth/logout calls — avoids infinite loops
     if (isAuthUrl(input)) {
@@ -47,7 +51,10 @@ export function setupFetchInterceptor(): void {
 
         if (isLoginRedirect) {
           isRedirecting = true;
-          console.warn("[Auth] Redirected to login page → force logout", finalUrl);
+          console.warn(
+            "[Auth] Redirected to login page → force logout",
+            finalUrl,
+          );
           await forceLogout();
           return response;
         }
@@ -60,8 +67,8 @@ export function setupFetchInterceptor(): void {
         typeof input === "string"
           ? input
           : input instanceof URL
-          ? input.href
-          : input.url;
+            ? input.href
+            : input.url;
 
       if (url.includes("/api/")) {
         const contentType = response.headers.get("content-type") ?? "";
@@ -70,7 +77,9 @@ export function setupFetchInterceptor(): void {
         if (isHtml && response.ok) {
           // Server returned HTML with 200 — classic silent redirect to login
           isRedirecting = true;
-          console.warn("[Auth] API returned HTML (session expired redirect) → force logout");
+          console.warn(
+            "[Auth] API returned HTML (session expired redirect) → force logout",
+          );
           await forceLogout();
           return response;
         }

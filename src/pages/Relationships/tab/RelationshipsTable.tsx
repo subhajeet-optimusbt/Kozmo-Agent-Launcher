@@ -35,7 +35,10 @@ export default function RelationshipsTable() {
     useState<Relationships | null>(null);
 
   const [search, setSearch] = useState("");
-  const [sorter, setSorter] = useState<Sorter>({ field: "modified", order: "descend" });
+  const [sorter, setSorter] = useState<Sorter>({
+    field: "modified",
+    order: "descend",
+  });
   const [filters, setFilters] = useState<Filters>({
     status: ["All"],
     category: ["All"],
@@ -80,22 +83,23 @@ export default function RelationshipsTable() {
   /* ---------------- sorting ---------------- */
 
   const sortedRelationships = useMemo(() => {
-  if (!sorter.field || !sorter.order) return relationships;
+    if (!sorter.field || !sorter.order) return relationships;
 
-  return [...relationships].sort((a, b) => {
-    // Use raw ISO value for date fields
-    const sortField = sorter.field === "modified" || sorter.field === "created"
-      ? (`${sorter.field}Raw` as keyof Relationships)
-      : sorter.field!;
+    return [...relationships].sort((a, b) => {
+      // Use raw ISO value for date fields
+      const sortField =
+        sorter.field === "modified" || sorter.field === "created"
+          ? (`${sorter.field}Raw` as keyof Relationships)
+          : sorter.field!;
 
-    const aVal = a[sortField] ?? a[sorter.field!];
-    const bVal = b[sortField] ?? b[sorter.field!];
+      const aVal = a[sortField] ?? a[sorter.field!];
+      const bVal = b[sortField] ?? b[sorter.field!];
 
-    if (aVal < bVal) return sorter.order === "ascend" ? -1 : 1;
-    if (aVal > bVal) return sorter.order === "ascend" ? 1 : -1;
-    return 0;
-  });
-}, [relationships, sorter]);
+      if (aVal < bVal) return sorter.order === "ascend" ? -1 : 1;
+      if (aVal > bVal) return sorter.order === "ascend" ? 1 : -1;
+      return 0;
+    });
+  }, [relationships, sorter]);
 
   /* ---------------- search ---------------- */
   const searchedRelationships = useMemo(() => {
