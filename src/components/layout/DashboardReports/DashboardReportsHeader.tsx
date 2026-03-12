@@ -7,7 +7,7 @@ import {
   LogoutOutlined,
   CheckOutlined,
 } from "@ant-design/icons";
-import { HelpCircle , BookOpen } from "lucide-react";
+import { HelpCircle, BookOpen } from "lucide-react";
 import { Tooltip } from "antd";
 import { useNavigate } from "react-router-dom";
 import { baseUrl } from "../../../utils/baseUrl";
@@ -18,7 +18,7 @@ const DashboardReportsHeader: React.FC<{ onOpenLauncher: () => void }> = ({
   onOpenLauncher,
 }) => {
   const [open, setOpen] = useState(false);
-  const [loading,setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [user, setUser] = useState(() => {
     const raw = localStorage.getItem("user") || sessionStorage.getItem("user");
@@ -104,7 +104,7 @@ const DashboardReportsHeader: React.FC<{ onOpenLauncher: () => void }> = ({
   return (
     <header className="flex items-center justify-between mb-4 mt-2 relative">
       {/* LEFT */}
-      {loading && <FullscreenLoader/>}
+      {loading && <FullscreenLoader />}
       <div className="flex items-center gap-3">
         {/* Launcher */}
         <button onClick={onOpenLauncher} className="launcher-btn">
@@ -159,7 +159,7 @@ const DashboardReportsHeader: React.FC<{ onOpenLauncher: () => void }> = ({
       transition-all duration-150
     "
           >
-            <HelpCircle  size={22} strokeWidth={2} />
+            <HelpCircle size={22} strokeWidth={2} />
           </button>
         </Tooltip>
 
