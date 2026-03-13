@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
- 
- 
+
 import React, { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, X, BookOpen } from "lucide-react";
 import { GUIDE_CONTENT } from "../../constants/guides";
@@ -12,6 +11,7 @@ export interface GuideTarget {
   description: string;
   position?: "top" | "bottom" | "left" | "right";
   padding?: number;
+  tab?: string;
 }
 
 interface InteractiveGuideProps {
@@ -19,6 +19,7 @@ interface InteractiveGuideProps {
   onClose: () => void;
   moduleKey: string;
   targets: GuideTarget[];
+  onTabChange?: (tab: string) => void;
 }
 
 // ─── Per-module accent colours (light theme) ─────────────────────────────────
@@ -755,9 +756,11 @@ const InteractiveGuide: React.FC<InteractiveGuideProps> = ({
   onClose,
   moduleKey,
   targets,
+  onTabChange,
 }) => {
   const [phase, setPhase] = useState<"welcome" | "tour">("welcome");
   const [step, setStep] = useState(0);
+  const [switching, setSwitching] = useState(false);
   const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
   const [arrowDir, setArrowDir] = useState<"top" | "bottom" | "left" | "right">(
     "bottom",
@@ -830,18 +833,39 @@ const InteractiveGuide: React.FC<InteractiveGuideProps> = ({
   }, [currentTarget]);
 
   // ── On step change ────────────────────────────────────────────────────────────
+  // REPLACE the useEffect you changed earlier
   useEffect(() => {
     if (phase !== "tour" || !currentTarget) return;
-    const el = document.querySelector(currentTarget.selector);
 
-    computePos();
+    let cancelled = false;
 
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-      const t = setTimeout(() => computePos(), 380);
-      return () => clearTimeout(t);
-    }
-  }, [phase, step]);  
+    const activate = async () => {
+      const el = document.querySelector(currentTarget.selector);
+
+      // If tab switch needed
+      if (currentTarget.tab && onTabChange && !el) {
+        setSwitching(true); // hide tooltip instantly
+        onTabChange(currentTarget.tab);
+        await new Promise((r) => setTimeout(r, 900));
+        if (cancelled) return;
+        setSwitching(false); // show tooltip again
+      }
+
+      // Scroll + compute
+      const target = document.querySelector(currentTarget.selector);
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
+        await new Promise((r) => setTimeout(r, 380));
+      }
+      if (cancelled) return;
+      computePos();
+    };
+
+    activate();
+    return () => {
+      cancelled = true;
+    };
+  }, [phase, step]);
 
   // ── On scroll/resize ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -902,7 +926,7 @@ const InteractiveGuide: React.FC<InteractiveGuideProps> = ({
         />
       )}
 
-      {phase === "tour" && currentTarget && (
+      {phase === "tour" && currentTarget && !switching && (
         <>
           {/* Click-away overlay */}
           <div

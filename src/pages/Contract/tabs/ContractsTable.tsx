@@ -43,7 +43,10 @@ export default function ContractsPage() {
   const [loading, setLoading] = useState(false);
 
   const [search, setSearch] = useState("");
- const [sorter, setSorter] = useState<Sorter>({ field: "updated", order: "descend" });
+  const [sorter, setSorter] = useState<Sorter>({
+    field: "updated",
+    order: "descend",
+  });
   const [filters, setFilters] = useState<Filters>({
     status: [],
     type: [],
@@ -94,22 +97,23 @@ export default function ContractsPage() {
 
   /* ---------------- sorting ---------------- */
   const sortedContracts = useMemo(() => {
-  if (!sorter.field || !sorter.order) return contracts;
+    if (!sorter.field || !sorter.order) return contracts;
 
-  return [...contracts].sort((a, b) => {
-    // Use raw ISO value for date fields
-    const sortField = sorter.field === "updated" 
-      ? (`${sorter.field}Raw` as keyof Contract)
-      : sorter.field!;
+    return [...contracts].sort((a, b) => {
+      // Use raw ISO value for date fields
+      const sortField =
+        sorter.field === "updated"
+          ? (`${sorter.field}Raw` as keyof Contract)
+          : sorter.field!;
 
-    const aVal = a[sortField] ?? a[sorter.field!];
-    const bVal = b[sortField] ?? b[sorter.field!];
+      const aVal = a[sortField] ?? a[sorter.field!];
+      const bVal = b[sortField] ?? b[sorter.field!];
 
-    if (aVal < bVal) return sorter.order === "ascend" ? -1 : 1;
-    if (aVal > bVal) return sorter.order === "ascend" ? 1 : -1;
-    return 0;
-  });
-}, [contracts, sorter]);
+      if (aVal < bVal) return sorter.order === "ascend" ? -1 : 1;
+      if (aVal > bVal) return sorter.order === "ascend" ? 1 : -1;
+      return 0;
+    });
+  }, [contracts, sorter]);
 
   /* ---------------- search ---------------- */
   const searchedContracts = useMemo(() => {
@@ -179,7 +183,7 @@ export default function ContractsPage() {
         </div>
       ) : (
         <>
-          <div className="flex items-center justify-between gap-6">
+          <div className="contract-search-bar flex items-center justify-between gap-6">
             {/* Search + Filters */}
             <div className="flex items-center gap-3">
               <Input.Search
@@ -245,7 +249,7 @@ export default function ContractsPage() {
             </div>
 
             {/* View switch */}
-            <Button.Group className="shadow-sm rounded-xl overflow-hidden">
+            <Button.Group className="contract-view-toggle shadow-sm rounded-xl overflow-hidden">
               <Tooltip title="Table view">
                 <Button
                   type={view === "table" ? "primary" : "default"}
@@ -279,29 +283,30 @@ export default function ContractsPage() {
           <Divider className="my-2" />
 
           {/* ---------------- CONTENT ---------------- */}
-          {view === "table" && (
-            <ContractTableView
-              data={paginatedData}
-              sorter={sorter}
-              onSortChange={setSorter}
-              onSelect={setActiveContract}
-            />
-          )}
+          <div className="contract-table">
+            {view === "table" && (
+              <ContractTableView
+                data={paginatedData}
+                sorter={sorter}
+                onSortChange={setSorter}
+                onSelect={setActiveContract}
+              />
+            )}
 
-          {view === "list" && (
-            <ContractListView
-              data={paginatedData}
-              onSelect={setActiveContract}
-            />
-          )}
+            {view === "list" && (
+              <ContractListView
+                data={paginatedData}
+                onSelect={setActiveContract}
+              />
+            )}
 
-          {view === "card" && (
-            <ContractCardView
-              data={paginatedData}
-              onSelect={setActiveContract}
-            />
-          )}
-
+            {view === "card" && (
+              <ContractCardView
+                data={paginatedData}
+                onSelect={setActiveContract}
+              />
+            )}
+          </div>
           {/* ---------------- PAGINATION ---------------- */}
           {total > 0 && (
             <div className="pb-4 flex justify-center">

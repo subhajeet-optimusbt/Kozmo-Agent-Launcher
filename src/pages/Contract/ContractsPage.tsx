@@ -20,8 +20,7 @@ export default function ContractsPage() {
     useState<ContractDashboardResponse | null>(null);
   const [loading, setLoading] = useState(false);
 
-
-    const [range, setRange] = useState<RangeType>("today");
+  const [range, setRange] = useState<RangeType>("today");
   const [accountId, setAccountId] = useState(getActiveAccountId());
   useEffect(() => {
     const handler = () => {
@@ -37,7 +36,7 @@ export default function ContractsPage() {
     const loadDashboard = async () => {
       setLoading(true);
       try {
-        const data = await fetchContractsDashboard(accountId,range);
+        const data = await fetchContractsDashboard(accountId, range);
         setDashboardData(data);
       } catch (err) {
         console.error(err);
@@ -48,7 +47,7 @@ export default function ContractsPage() {
     };
 
     loadDashboard();
-  }, [accountId,range]);
+  }, [accountId, range]);
   return (
     <>
       {loading && <FullscreenLoader />}
@@ -57,7 +56,7 @@ export default function ContractsPage() {
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500" />
 
         {/* Header */}
-        <div className="mx-8 my-4 flex items-center">
+        <div className="contracts-hero mx-8 my-4 flex items-center">
           {/* Left side: title + subtitle */}
           <div>
             <h1 className="text-2xl font-black tracking-tight text-gray-900">
@@ -68,18 +67,22 @@ export default function ContractsPage() {
             </p>
           </div>
 
-        {activeTab !== "contracts" && (
-          <div className="ml-auto">
-            <RangeTabs value={range} onChange={setRange} />
-          </div>
-        )}
+          {activeTab !== "contracts" && (
+            <div className="ml-auto">
+              <RangeTabs value={range} onChange={setRange} />
+            </div>
+          )}
           {/* Right side: action button */}
         </div>
 
         {/* Tabs content */}
         {activeTab === "dashboard" && (
           <div className="px-8">
-            <ContractsDashboard loading={loading} data={dashboardData} range={range} />
+            <ContractsDashboard
+              loading={loading}
+              data={dashboardData}
+              range={range}
+            />
           </div>
         )}
 

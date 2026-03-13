@@ -62,7 +62,9 @@ export default function JobsPanel({ accountId, range }: Props) {
     <div className="space-y-4">
       {loading && <FullscreenLoader />}
       {/* <JobsHeader range={range} onChange={setRange} /> */}
-      <JobsKPIs jobs={filteredJobs} />
+      <div className="jobs-kpi">
+        <JobsKPIs jobs={filteredJobs} />
+      </div>
       <JobsControls
         view={view}
         onChange={setView}
@@ -72,7 +74,9 @@ export default function JobsPanel({ accountId, range }: Props) {
           setPageSize(size);
         }}
       />
-      <JobsTable view={view} jobs={paginatedData} />
+      <div className="jobs-table">
+        <JobsTable view={view} jobs={paginatedData} />
+      </div>
       <PaginationControl
         page={page}
         pageSize={pageSize}

@@ -19,7 +19,7 @@ import { useNavigate } from "react-router-dom";
 import { baseUrl } from "../../../utils/baseUrl";
 import toast from "react-hot-toast";
 import InteractiveGuide from "../../common/InteractiveGuide";
-import { HOME_GUIDE_TARGETS } from "../../../constants/guideTargets";
+import { CONTRACTS_GUIDE_TARGETS } from "../../../constants/guideTargets";
 import { setActiveAccountId } from "../../../utils/auth";
 import FullscreenLoader from "../../ui/FullScreenLoader";
 type ContractHeaderProps = {
@@ -35,7 +35,7 @@ const ContractHeader: React.FC<ContractHeaderProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
-  const [loading,setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [user, setUser] = useState(() => {
     const raw = localStorage.getItem("user") || sessionStorage.getItem("user");
@@ -150,7 +150,7 @@ const ContractHeader: React.FC<ContractHeaderProps> = ({
 
         {/* Pill Tabs */}
         <div
-          className="flex items-center gap-1.5
+          className="contracts-tab-nav flex items-center gap-1.5
   bg-white/60 backdrop-blur-md
   p-2 rounded-full
   border border-gray-200
@@ -217,6 +217,7 @@ const ContractHeader: React.FC<ContractHeaderProps> = ({
             <button
               onClick={onCreateContract}
               className="
+              new-contract-btn
       w-9 h-9
       flex items-center justify-center
       rounded-lg
@@ -351,8 +352,9 @@ const ContractHeader: React.FC<ContractHeaderProps> = ({
       <InteractiveGuide
         isOpen={guideOpen}
         onClose={() => setGuideOpen(false)}
-        moduleKey="home"
-        targets={HOME_GUIDE_TARGETS}
+        moduleKey="contracts"
+        targets={CONTRACTS_GUIDE_TARGETS}
+        onTabChange={onTabChange}
       />
     </>
   );

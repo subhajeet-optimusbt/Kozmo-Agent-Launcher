@@ -14,6 +14,7 @@ export interface GuideTarget {
   description: string;
   position?: "top" | "bottom" | "left" | "right";
   padding?: number;
+  tab?: string;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -89,56 +90,102 @@ export const HOME_GUIDE_TARGETS: GuideTarget[] = [
    CONTRACTS PAGE
 ══════════════════════════════════════════════════════════════ */
 export const CONTRACTS_GUIDE_TARGETS: GuideTarget[] = [
+  // ── Always visible (header) ──
   {
-    selector: ".contracts-hero",
-    title: "Contract Management Hub",
+    selector: ".contracts-tab-nav",
+    title: "Module Tabs",
     description:
-      "Full lifecycle management for every contract — from draft to expiry. Search, filter, and act on any contract from here.",
+      "Switch between Dashboard (KPIs & alerts), Contracts (full table & portfolio), and Jobs (AI job runs & health).",
     position: "bottom",
-    padding: 16,
-  },
-  {
-    selector: ".contract-metrics",
-    title: "Contract Dashboard",
-    description:
-      "Portfolio-level KPIs: total count, active vs expired, health distribution, and upcoming renewals in one row.",
-    position: "bottom",
-    padding: 16,
-  },
-  {
-    selector: ".contract-table",
-    title: "Contract Table",
-    description:
-      "Click any column header to sort. Use the filter bar to narrow by status, type, or counterparty. Click a row to open the full detail view.",
-    position: "top",
-    padding: 16,
-  },
-  {
-    selector: ".chi-indicator",
-    title: "Contract Health Index (CHI)",
-    description:
-      "CHI 75+ = Good (green), 60–74 = Fair (amber), below 60 = Poor (red). Use this score to prioritise which contracts need attention first.",
-    position: "right",
-    padding: 16,
-  },
-  {
-    selector: ".obligation-tracker",
-    title: "Obligation Tracking",
-    description:
-      "Auto-flagged upcoming milestones: renewal reminders, payment schedules, compliance checklists. Never miss a critical date.",
-    position: "top",
     padding: 16,
   },
   {
     selector: ".new-contract-btn",
     title: "Create New Contract",
     description:
-      "Click here to add a new contract. Define obligations, set key dates, upload documents, and configure renewal reminders.",
+      "Click + to start a new contract. Define parties, obligations, key dates, upload documents, and configure renewal reminders.",
     position: "left",
     padding: 14,
   },
-];
 
+  // ── Dashboard tab ──
+  {
+    selector: ".contract-kpi-grid",
+    tab: "dashboard",
+    title: "Contract KPIs",
+    description:
+      "Six live metrics: Total, Active, High-Risk, Needs Review, Expiring in 90 days, and Pending Signature.",
+    position: "bottom",
+    padding: 16,
+  },
+  {
+    selector: ".contract-alerts",
+    tab: "dashboard",
+    title: "Alerts & Exceptions",
+    description:
+      "AI-flagged exceptions: obligation overrides, price drift, missing signatures, usage violations, and clause conflicts.",
+    position: "top",
+    padding: 16,
+  },
+  {
+    selector: ".contract-worklists",
+    tab: "dashboard",
+    title: "Key Worklists",
+    description:
+      "Your most important queues — Legal review, Finance approval, Negotiation, Renewals, Obligations. Click any card to open that filtered view.",
+    position: "top",
+    padding: 16,
+  },
+
+  // ── Contracts tab ──
+  {
+    selector: ".contract-search-bar",
+    tab: "contracts",
+    title: "Search & Filter",
+    description:
+      "Full-text search across title, counterparty, type, and business area. Use Filters & Facets to narrow by status, type, or area.",
+    position: "bottom",
+    padding: 16,
+  },
+  {
+    selector: ".contract-view-toggle",
+    tab: "contracts",
+    title: "View Modes",
+    description:
+      "Switch between Table, Compact list, and Card view. Table is best for sorting; Card view gives a richer per-contract snapshot.",
+    position: "bottom",
+    padding: 14,
+  },
+  {
+    selector: ".contract-table",
+    tab: "contracts",
+    title: "Contract Table",
+    description:
+      "Click any column header to sort. Click a row to open the full contract detail drawer with obligations, history, and documents.",
+    position: "top",
+    padding: 16,
+  },
+
+  // ── Jobs tab ──
+  {
+    selector: ".jobs-kpi",
+    tab: "jobs",
+    title: "Jobs KPIs",
+    description:
+      "Live summary of all AI job runs: total jobs, success rate, failures, and average processing time for the selected range.",
+    position: "bottom",
+    padding: 16,
+  },
+  {
+    selector: ".jobs-table",
+    tab: "jobs",
+    title: "Jobs Table",
+    description:
+      "Every AI job run listed here. Toggle between Health view (status & SLA) and Runs view (execution logs) to diagnose issues fast.",
+    position: "top",
+    padding: 16,
+  },
+];
 /* ══════════════════════════════════════════════════════════════
    DOCUMENTS PAGE
 ══════════════════════════════════════════════════════════════ */

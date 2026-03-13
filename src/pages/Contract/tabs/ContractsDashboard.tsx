@@ -152,7 +152,7 @@ export default function ContractsDashboard({ data, loading }: Props) {
   return (
     <div className="space-y-6">
       {/* KPI CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5">
+      <div className="contract-kpi-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5">
         {kpiCards.map((kpi, idx) => {
           const Icon = kpi.icon;
 
@@ -227,7 +227,7 @@ export default function ContractsDashboard({ data, loading }: Props) {
       {/* ALERTS & WORKLISTS */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* ALERTS */}
-        <div className="bg-white rounded-2xl border border-gray-200">
+        <div className="contract-alerts bg-white rounded-2xl border border-gray-200">
           <div className="px-6 py-4 border-b border-gray-100">
             <h3 className="text-lg font-semibold text-gray-900">
               Alerts & Exceptions
@@ -258,7 +258,7 @@ export default function ContractsDashboard({ data, loading }: Props) {
         </div>
 
         {/* WORKLISTS — untouched */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
+        <div className="contract-worklists bg-white rounded-2xl border border-gray-200 shadow-sm">
           <div className="px-6 py-4 border-b border-gray-100">
             <h3 className="text-lg font-bold text-gray-900">Key Worklists</h3>
             <p className="text-sm text-gray-500 mt-1">
