@@ -14,7 +14,7 @@ import {
   ArrowLeft,
   Download,
   FileText,
-  Printer,
+  // Printer,
   Clock,
   LayoutDashboard,
 } from "lucide-react";
@@ -208,52 +208,52 @@ const DashboardDetails = () => {
 
     pdf.save(`${dashboard.dashboardName}.pdf`);
   };
-  const handlePrint = (): void => {
-    const printArea = document.getElementById("print-area");
+  // const handlePrint = (): void => {
+  //   const printArea = document.getElementById("print-area");
 
-    if (!printArea) {
-      console.error("Print area not found");
-      return;
-    }
+  //   if (!printArea) {
+  //     console.error("Print area not found");
+  //     return;
+  //   }
 
-    const printWindow = window.open("", "_blank", "width=1200,height=800");
+  //   const printWindow = window.open("", "_blank", "width=1200,height=800");
 
-    if (!printWindow) {
-      console.error("Unable to open print window");
-      return;
-    }
+  //   if (!printWindow) {
+  //     console.error("Unable to open print window");
+  //     return;
+  //   }
 
-    printWindow.document.write(`
-    <html>
-      <head>
-        <title>Print Dashboard</title>
-        <style>
-          body {
-            font-family: Inter, sans-serif;
-            padding: 20px;
-          }
-          @media print {
-            body {
-              zoom: 0.85;
-            }
-          }
-        </style>
-      </head>
-      <body>
-        ${printArea.innerHTML}
-      </body>
-    </html>
-  `);
+  //   printWindow.document.write(`
+  //   <html>
+  //     <head>
+  //       <title>Print Dashboard</title>
+  //       <style>
+  //         body {
+  //           font-family: Inter, sans-serif;
+  //           padding: 20px;
+  //         }
+  //         @media print {
+  //           body {
+  //             zoom: 0.85;
+  //           }
+  //         }
+  //       </style>
+  //     </head>
+  //     <body>
+  //       ${printArea.innerHTML}
+  //     </body>
+  //   </html>
+  // `);
 
-    printWindow.document.close();
-    printWindow.focus();
+  //   printWindow.document.close();
+  //   printWindow.focus();
 
-    // Give browser time to render content
-    setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 500);
-  };
+  //   // Give browser time to render content
+  //   setTimeout(() => {
+  //     printWindow.print();
+  //     printWindow.close();
+  //   }, 500);
+  // };
 
   /* ======= Inline button hover handler ======= */
   const makeBtnHover = (
@@ -404,11 +404,11 @@ const DashboardDetails = () => {
                 action: handleExcel,
               },
               { label: "PDF", icon: <FileText size={13} />, action: handlePdf },
-              {
-                label: "Print",
-                icon: <Printer size={13} />,
-                action: handlePrint,
-              },
+              // {
+              //   label: "Print",
+              //   icon: <Printer size={13} />,
+              //   action: handlePrint,
+              // },
             ].map(({ label, icon, action }) => (
               <button
                 key={label}

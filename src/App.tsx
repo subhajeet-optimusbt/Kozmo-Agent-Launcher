@@ -21,6 +21,7 @@ import NewRenewals from "./pages/Renewals/NewRenewals";
 import Renewals from "./pages/Renewals/RenewalsPage";
 import SignupPage from "./pages/auth/signuppage";
 import Login from "./pages/auth/loginpage";
+import Forgot from "./pages/auth/forgotpassword";
 import RelationshipsLayout from "./components/layout/Relationships/RelationshipsLayout";
 import Relationships from "./pages/Relationships/RelationshipsPage";
 import IntakeTableDetails from "./pages/Intake/IntakeTableDetails";
@@ -129,6 +130,7 @@ export default function App() {
 
         {/* ================= PUBLIC ================= */}
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<Forgot />} />
         <Route path="/signup" element={<SignupPage />} />
       </Routes>
     </BrowserRouter>
