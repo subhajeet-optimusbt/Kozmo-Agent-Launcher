@@ -16,14 +16,14 @@ import RangeTabs from "../../components/ui/RangeTabs";
 import { getActiveAccountId, ACCOUNT_CHANGED_EVENT } from "../../utils/auth";
 import type { Document } from "../../constants/apps";
 
-type IntakeContextType = {
+type DocumentContextType = {
   activeTab: string;
 };
 
 export type RangeType = "today" | "last7days" | "last30days";
 
 export default function DocumentPage() {
-  const { activeTab } = useOutletContext<IntakeContextType>();
+  const { activeTab } = useOutletContext<DocumentContextType>();
 
   const [document, setDocument] = useState<Document[]>([]);
   const [loading, setLoading] = useState(false);

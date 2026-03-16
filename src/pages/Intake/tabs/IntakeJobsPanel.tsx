@@ -40,15 +40,8 @@ export default function IntakeJobsPanel({ accountId, range }: Props) {
     loadJobs();
   }, [accountId, range]);
 
-const {
-  page,
-  pageSize,
-  total,
-  setPage,
-  setPageSize,
-  paginatedData,
-} = usePagination<any>(jobs);
-
+  const { page, pageSize, total, setPage, setPageSize, paginatedData } =
+    usePagination<any>(jobs);
 
   return (
     <div className="space-y-4">
@@ -56,8 +49,9 @@ const {
 
       {/* <JobsHeader
       /> */}
-
-      <JobsKPIs jobs={jobs} />
+      <div className="intake-jobs-kpi">
+        <JobsKPIs jobs={jobs} />
+      </div>
 
       <JobsControls
         view={view}
@@ -68,8 +62,9 @@ const {
           setPageSize(size);
         }}
       />
-
-      <JobsTable view={view} jobs={paginatedData} />
+      <div className="intake-jobs-table">
+        <JobsTable view={view} jobs={paginatedData} />
+      </div>
 
       <PaginationControl
         page={page}

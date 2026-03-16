@@ -152,7 +152,7 @@ const IntakeHeader: React.FC<IntakeHeaderProps> = ({
 
         {/* Pill Tabs */}
         <div
-          className="flex items-center gap-1.5
+          className="intake-tab-nav flex items-center gap-1.5
   bg-white/60 backdrop-blur-md
   p-2 rounded-full
   border border-gray-200
@@ -216,10 +216,10 @@ const IntakeHeader: React.FC<IntakeHeaderProps> = ({
 
         {/* RIGHT */}
         <div className="flex items-center gap-2 intake-hero">
-          <Tooltip title="Create new Intake" className="intake-hero">
+          <Tooltip title="Create new Intake">
             <button
               onClick={onCreateIntakeRequest}
-              className="
+              className="new-intake-btn
               w-9 h-9
               flex items-center justify-center
               rounded-lg
@@ -356,6 +356,7 @@ const IntakeHeader: React.FC<IntakeHeaderProps> = ({
         onClose={() => setGuideOpen(false)}
         moduleKey="intake"
         targets={INTAKE_GUIDE_TARGETS}
+        onTabChange={onTabChange}
       />
     </>
   );

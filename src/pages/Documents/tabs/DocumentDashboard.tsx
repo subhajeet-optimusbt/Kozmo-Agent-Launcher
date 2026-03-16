@@ -26,15 +26,10 @@ type Props = {
 
 /* ================= COMPONENT ================= */
 
-export default function DocumentDashboard({
-  data,
-  loading,
-}: Props) {
+export default function DocumentDashboard({ data, loading }: Props) {
   if (loading) {
     return (
-      <div className="py-10 text-sm text-gray-500">
-        Loading dashboard…
-      </div>
+      <div className="py-10 text-sm text-gray-500">Loading dashboard…</div>
     );
   }
 
@@ -150,7 +145,7 @@ export default function DocumentDashboard({
   return (
     <div className="space-y-8">
       {/* ================= KPI CARDS ================= */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5">
+      <div className="document-kpi-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5">
         {kpiCards.map((kpi, idx) => {
           const Icon = kpi.icon;
 
@@ -185,8 +180,8 @@ export default function DocumentDashboard({
                     kpi.trendType === "up"
                       ? "bg-emerald-50 text-emerald-600"
                       : kpi.trendType === "down"
-                      ? "bg-red-50 text-red-500"
-                      : "bg-gray-100 text-gray-500"
+                        ? "bg-red-50 text-red-500"
+                        : "bg-gray-100 text-gray-500"
                   }`}
                 >
                   {kpi.trend}
@@ -200,11 +195,9 @@ export default function DocumentDashboard({
       {/* ================= LOWER SECTION ================= */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* RECENT ACTIVITY */}
-        <div className="bg-white rounded-2xl border border-gray-200">
+        <div className="document-activity bg-white rounded-2xl border border-gray-200">
           <div className="px-6 py-4 border-b">
-            <h3 className="text-lg font-semibold">
-              Recent Activity & Signals
-            </h3>
+            <h3 className="text-lg font-semibold">Recent Activity & Signals</h3>
             <p className="text-sm text-gray-500">
               Live updates from ingestion, profiling, analysis.
             </p>
@@ -232,7 +225,7 @@ export default function DocumentDashboard({
         </div>
 
         {/* WORKLISTS */}
-        <div className="bg-white rounded-2xl border border-gray-200">
+        <div className="document-worklists bg-white rounded-2xl border border-gray-200">
           <div className="px-6 py-4 border-b">
             <h3 className="text-lg font-semibold">
               Documents Requiring Attention
@@ -259,9 +252,7 @@ export default function DocumentDashboard({
                   {list.count}
                 </div>
 
-                <p className="text-xs text-gray-500 mt-1">
-                  {list.action}
-                </p>
+                <p className="text-xs text-gray-500 mt-1">{list.action}</p>
               </div>
             ))}
           </div>

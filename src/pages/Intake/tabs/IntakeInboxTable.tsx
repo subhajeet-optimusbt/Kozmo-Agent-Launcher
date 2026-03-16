@@ -30,7 +30,10 @@ export default function IntakeTable({ intake }: { intake: Intake[] }) {
   const [activeIntake, setActiveIntake] = useState<Intake | null>(null);
 
   const [search, setSearch] = useState("");
-  const [sorter, setSorter] = useState<Sorter>({ field: "updated", order: "descend" });
+  const [sorter, setSorter] = useState<Sorter>({
+    field: "updated",
+    order: "descend",
+  });
   const [filters, setFilters] = useState<Filters>({
     Status: [],
     subject: [],
@@ -60,22 +63,23 @@ export default function IntakeTable({ intake }: { intake: Intake[] }) {
   // }, [intake, sorter]);
 
   const sortedIntake = useMemo(() => {
-  if (!sorter.field || !sorter.order) return intake;
+    if (!sorter.field || !sorter.order) return intake;
 
-  return [...intake].sort((a, b) => {
-    // Use raw ISO value for date fields
-    const sortField = sorter.field === "updated" || sorter.field === "created"
-      ? (`${sorter.field}Raw` as keyof Intake)
-      : sorter.field!;
+    return [...intake].sort((a, b) => {
+      // Use raw ISO value for date fields
+      const sortField =
+        sorter.field === "updated" || sorter.field === "created"
+          ? (`${sorter.field}Raw` as keyof Intake)
+          : sorter.field!;
 
-    const aVal = a[sortField] ?? a[sorter.field!];
-    const bVal = b[sortField] ?? b[sorter.field!];
+      const aVal = a[sortField] ?? a[sorter.field!];
+      const bVal = b[sortField] ?? b[sorter.field!];
 
-    if (aVal < bVal) return sorter.order === "ascend" ? -1 : 1;
-    if (aVal > bVal) return sorter.order === "ascend" ? 1 : -1;
-    return 0;
-  });
-}, [intake, sorter]);
+      if (aVal < bVal) return sorter.order === "ascend" ? -1 : 1;
+      if (aVal > bVal) return sorter.order === "ascend" ? 1 : -1;
+      return 0;
+    });
+  }, [intake, sorter]);
   /* ---------------- search ---------------- */
   const searchedIntake = useMemo(() => {
     if (!search) return sortedIntake;
@@ -99,10 +103,10 @@ export default function IntakeTable({ intake }: { intake: Intake[] }) {
         !filters.currentJobName.includes(c.currentJobName)
       )
         if (
-        filters.RequestId.length &&
-        !filters.RequestId.includes(c.RequestId)
-      )
-        return false;
+          filters.RequestId.length &&
+          !filters.RequestId.includes(c.RequestId)
+        )
+          return false;
       return true;
     });
   }, [searchedIntake, filters]);
@@ -120,7 +124,7 @@ export default function IntakeTable({ intake }: { intake: Intake[] }) {
     <div className="space-y-4">
       {/* ---------------- TOP TOOLBAR ---------------- */}
       <div className="flex items-center justify-between gap-6">
-        <div className="flex items-center gap-3">
+        <div className="intake-search-bar flex items-center gap-3">
           <Input.Search
             placeholder="Search intake, counterparties, clauses…"
             className="w-[340px]"
@@ -165,7 +169,7 @@ export default function IntakeTable({ intake }: { intake: Intake[] }) {
           />
         </div>
 
-        <Button.Group className="shadow-sm rounded-xl overflow-hidden">
+        <Button.Group className="intake-view-toggle shadow-sm rounded-xl overflow-hidden">
           <Tooltip title="Table view">
             <Button
               type={view === "table" ? "primary" : "default"}
@@ -195,22 +199,24 @@ export default function IntakeTable({ intake }: { intake: Intake[] }) {
 
       <Divider className="my-2" />
 
-      {view === "table" && (
-        <IntakeTableView
-          data={paginatedData}
-          sorter={sorter}
-          onSortChange={setSorter}
-          onSelect={setActiveIntake}
-        />
-      )}
+      <div className="intake-table">
+        {view === "table" && (
+          <IntakeTableView
+            data={paginatedData}
+            sorter={sorter}
+            onSortChange={setSorter}
+            onSelect={setActiveIntake}
+          />
+        )}
 
-      {view === "list" && (
-        <IntakeListView data={paginatedData} onSelect={setActiveIntake} />
-      )}
+        {view === "list" && (
+          <IntakeListView data={paginatedData} onSelect={setActiveIntake} />
+        )}
 
-      {view === "card" && (
-        <IntakeCardView data={paginatedData} onSelect={setActiveIntake} />
-      )}
+        {view === "card" && (
+          <IntakeCardView data={paginatedData} onSelect={setActiveIntake} />
+        )}
+      </div>
 
       {total > 0 && (
         <div className="pb-4 flex justify-center">
@@ -293,7 +299,12 @@ export default function IntakeTable({ intake }: { intake: Intake[] }) {
               icon={<RotateCcw size={16} />}
               className="flex-1"
               onClick={() =>
-                setFilters({ Status: [], subject: [], currentJobName: [], RequestId: [] })
+                setFilters({
+                  Status: [],
+                  subject: [],
+                  currentJobName: [],
+                  RequestId: [],
+                })
               }
             >
               Clear all

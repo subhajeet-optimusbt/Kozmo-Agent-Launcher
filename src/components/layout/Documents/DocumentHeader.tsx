@@ -20,6 +20,8 @@ import { baseUrl } from "../../../utils/baseUrl";
 import toast from "react-hot-toast";
 import { setActiveAccountId } from "../../../utils/auth";
 import FullscreenLoader from "../../ui/FullScreenLoader";
+import InteractiveGuide from "../../common/InteractiveGuide";
+import { DOCUMENTS_GUIDE_TARGETS } from "../../../constants/guideTargets";
 type DocumentHeaderProps = {
   activeTab: string;
   onTabChange: (key: string) => void;
@@ -34,6 +36,7 @@ const DocumentHeader: React.FC<DocumentHeaderProps> = ({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [guideOpen,setGuideOpen] = useState(false);
   const [user, setUser] = useState(() => {
     const raw = localStorage.getItem("user") || sessionStorage.getItem("user");
     return raw ? JSON.parse(raw) : null;
@@ -116,6 +119,7 @@ const DocumentHeader: React.FC<DocumentHeaderProps> = ({
 
   const onCreateNew = () => {};
   return (
+    <>
     <header className="flex items-center justify-between mb-2 relative">
       {/* LEFT */}
       {loading && <FullscreenLoader />}
@@ -144,7 +148,7 @@ const DocumentHeader: React.FC<DocumentHeaderProps> = ({
 
       {/* Pill Tabs */}
       <div
-        className="flex items-center gap-1.5
+        className="document-tab-nav flex items-center gap-1.5
   bg-white/60 backdrop-blur-md
   p-2 rounded-full
   border border-gray-200
@@ -212,7 +216,7 @@ const DocumentHeader: React.FC<DocumentHeaderProps> = ({
         <Tooltip title="Create new Document">
           <button
             onClick={onCreateNew}
-            className="
+            className="new-document-btn
       w-9 h-9
       flex items-center justify-center
       rounded-lg
@@ -247,8 +251,9 @@ const DocumentHeader: React.FC<DocumentHeaderProps> = ({
             <HelpCircle size={22} strokeWidth={2} />
           </button>
         </Tooltip>
-        <Tooltip title="Guide">
+        <Tooltip title="Take a Product Tour">
           <button
+          onClick={() => setGuideOpen(true)}
             className="
       w-9 h-9 flex items-center justify-center rounded-lg
       text-emerald-600/70
@@ -337,6 +342,14 @@ const DocumentHeader: React.FC<DocumentHeaderProps> = ({
         </div>
       </div>
     </header>
+     <InteractiveGuide
+      isOpen={guideOpen}
+      onClose={() => setGuideOpen(false)}
+      moduleKey="documents"
+      targets={DOCUMENTS_GUIDE_TARGETS}
+      onTabChange={onTabChange}
+    />
+    </>
   );
 };
 

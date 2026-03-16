@@ -96,7 +96,7 @@ export default function RelationshipsDashboard({
   return (
     <div className="space-y-8">
       {/* KPI CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="relationship-kpi-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {kpiCards.map((kpi, idx) => {
           const Icon = kpi.icon;
 
@@ -140,7 +140,7 @@ export default function RelationshipsDashboard({
       {/* LOWER SECTION */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* ACTIVITY */}
-        <div className="bg-white rounded-2xl border border-gray-200">
+        <div className="relationship-signals bg-white rounded-2xl border border-gray-200">
           <div className="px-6 py-4 border-b">
             <h3 className="text-lg font-semibold">
               Recent Relationship Signals
@@ -170,7 +170,7 @@ export default function RelationshipsDashboard({
         </div>
 
         {/* WORKLISTS */}
-        <div className="bg-white rounded-2xl border border-gray-200">
+        <div className="relationship-worklists bg-white rounded-2xl border border-gray-200">
           <div className="px-6 py-4 border-b">
             <h3 className="text-lg font-semibold">
               Relationships Requiring Attention

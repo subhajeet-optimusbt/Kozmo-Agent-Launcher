@@ -13,11 +13,10 @@ type Props = {
   range: string;
 };
 
-export default function JobsPanel({ accountId,range }: Props) {
+export default function JobsPanel({ accountId, range }: Props) {
   const [view, setView] = useState<"health" | "runs">("health");
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-
 
   useEffect(() => {
     if (!accountId) return;
@@ -60,9 +59,11 @@ export default function JobsPanel({ accountId,range }: Props) {
     useContractsPagination(filteredJobs);
   return (
     <div className="space-y-4">
-      {loading && <FullscreenLoader/>}
+      {loading && <FullscreenLoader />}
       {/* <JobsHeader range={range} onChange={setRange} /> */}
-      <JobsKPIs jobs={filteredJobs} />
+      <div className="renewal-jobs-kpi">
+        <JobsKPIs jobs={filteredJobs} />
+      </div>
       <JobsControls
         view={view}
         onChange={setView}
@@ -72,7 +73,9 @@ export default function JobsPanel({ accountId,range }: Props) {
           setPageSize(size);
         }}
       />
-      <JobsTable view={view} jobs={paginatedData} />
+      <div className="renewal-jobs-table">
+        <JobsTable view={view} jobs={paginatedData} />
+      </div>
       <PaginationControl
         page={page}
         pageSize={pageSize}

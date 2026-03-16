@@ -116,7 +116,7 @@ export const GUIDE_CONTENT: Record<string, GuideModule> = {
     title: "Contract Management",
     subtitle: "Manage obligations, billing, risk & compliance",
     icon: "📋",
-    color: "teal",
+    color: "emerald",
     steps: [
       {
         title: "Welcome to Contracts",
@@ -214,7 +214,7 @@ export const GUIDE_CONTENT: Record<string, GuideModule> = {
     title: "Document Intelligence",
     subtitle: "Redlines, briefs & document analysis",
     icon: "📄",
-    color: "blue",
+    color: "emerald",
     steps: [
       {
         title: "Welcome to Documents",
@@ -312,7 +312,7 @@ export const GUIDE_CONTENT: Record<string, GuideModule> = {
     title: "Intake Management",
     subtitle: "Redlines, briefs & document intelligence",
     icon: "📨",
-    color: "violet",
+    color: "emerald",
     steps: [
       {
         title: "Welcome to Intake",
@@ -411,7 +411,7 @@ export const GUIDE_CONTENT: Record<string, GuideModule> = {
     title: "Renewal Management",
     subtitle: "Renewals, risk signals & value retention",
     icon: "🔄",
-    color: "amber",
+    color: "emerald",
     steps: [
       {
         title: "Welcome to Renewals",
@@ -511,7 +511,7 @@ export const GUIDE_CONTENT: Record<string, GuideModule> = {
     title: "Relationship Management",
     subtitle: "Counterparty insights and relationship health",
     icon: "🤝",
-    color: "rose",
+    color: "emerald",
     steps: [
       {
         title: "Welcome to Relationships",

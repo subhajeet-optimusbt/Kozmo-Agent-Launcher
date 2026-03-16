@@ -143,7 +143,7 @@ export default function DocumentTable({ document }: { document: Document[] }) {
     <div className="space-y-4">
       {/* ---------------- TOP TOOLBAR ---------------- */}
       <div className="flex items-center justify-between gap-6">
-        <div className="flex items-center gap-3">
+        <div className="document-search-bar flex items-center gap-3">
           <Input.Search
             placeholder="Search documents…"
             className="w-[340px]"
@@ -188,7 +188,7 @@ export default function DocumentTable({ document }: { document: Document[] }) {
           />
         </div>
 
-        <Button.Group className="shadow-sm rounded-xl overflow-hidden">
+        <Button.Group className="document-view-toggle shadow-sm rounded-xl overflow-hidden">
           <Tooltip title="Table view">
             <Button
               type={view === "table" ? "primary" : "default"}
@@ -218,22 +218,24 @@ export default function DocumentTable({ document }: { document: Document[] }) {
 
       <Divider className="my-2" />
 
-      {view === "table" && (
-        <DocumentTableView
-          data={paginatedData}
-          sorter={sorter}
-          onSortChange={setSorter}
-          onSelect={setActiveDocument}
-        />
-      )}
+      <div className="document-table">
+        {view === "table" && (
+          <DocumentTableView
+            data={paginatedData}
+            sorter={sorter}
+            onSortChange={setSorter}
+            onSelect={setActiveDocument}
+          />
+        )}
 
-      {view === "list" && (
-        <DocumentListView data={paginatedData} onSelect={setActiveDocument} />
-      )}
+        {view === "list" && (
+          <DocumentListView data={paginatedData} onSelect={setActiveDocument} />
+        )}
 
-      {view === "card" && (
-        <DocumentCardView data={paginatedData} onSelect={setActiveDocument} />
-      )}
+        {view === "card" && (
+          <DocumentCardView data={paginatedData} onSelect={setActiveDocument} />
+        )}
+      </div>
 
       {total > 0 && (
         <div className="pb-4 flex justify-center">

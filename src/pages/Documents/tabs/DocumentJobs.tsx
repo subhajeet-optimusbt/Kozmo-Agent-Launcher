@@ -47,8 +47,9 @@ export default function DocumentJobsPanel({ accountId, range }: Props) {
       {loading && <FullscreenLoader />}
 
       {/* <JobsHeader /> */}
-
-      <JobsKPIs jobs={jobs} />
+      <div className="document-jobs-kpi">
+        <JobsKPIs jobs={jobs} />
+      </div>
 
       <JobsControls
         view={view}
@@ -60,7 +61,9 @@ export default function DocumentJobsPanel({ accountId, range }: Props) {
         }}
       />
 
-      <JobsTable view={view} jobs={paginatedData} />
+      <div className="document-jobs-table">
+        <JobsTable view={view} jobs={paginatedData} />
+      </div>
 
       <PaginationControl
         page={page}

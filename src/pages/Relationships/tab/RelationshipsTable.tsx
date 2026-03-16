@@ -160,7 +160,7 @@ export default function RelationshipsTable() {
       {/* ---------------- TOP TOOLBAR ---------------- */}
       <div className="flex items-center justify-between gap-6">
         {loading && <FullscreenLoader />}
-        <div className="flex items-center gap-3">
+        <div className="relationship-search-bar flex items-center gap-3">
           <Input.Search
             placeholder="Search relationships...."
             className="w-[340px]"
@@ -205,7 +205,7 @@ export default function RelationshipsTable() {
           />
         </div>
 
-        <Button.Group className="shadow-sm rounded-xl overflow-hidden">
+        <Button.Group className="relationship-view-toggle shadow-sm rounded-xl overflow-hidden">
           <Tooltip title="Table view">
             <Button
               type={view === "table" ? "primary" : "default"}
@@ -235,29 +235,30 @@ export default function RelationshipsTable() {
 
       <Divider className="my-2" />
 
-      {view === "table" && (
-        <RelationshipsTableView
-          data={paginatedData}
-          sorter={sorter}
-          onSortChange={setSorter}
-          onSelect={setActiveRelationships}
-        />
-      )}
+      <div className="relationship-table">
+        {view === "table" && (
+          <RelationshipsTableView
+            data={paginatedData}
+            sorter={sorter}
+            onSortChange={setSorter}
+            onSelect={setActiveRelationships}
+          />
+        )}
 
-      {view === "list" && (
-        <RelastionshipsListView
-          data={paginatedData}
-          onSelect={setActiveRelationships}
-        />
-      )}
+        {view === "list" && (
+          <RelastionshipsListView
+            data={paginatedData}
+            onSelect={setActiveRelationships}
+          />
+        )}
 
-      {view === "card" && (
-        <RelationshipsCardView
-          data={paginatedData}
-          onSelect={setActiveRelationships}
-        />
-      )}
-
+        {view === "card" && (
+          <RelationshipsCardView
+            data={paginatedData}
+            onSelect={setActiveRelationships}
+          />
+        )}
+      </div>
       {total > 0 && (
         <div className="pb-4 flex justify-center">
           <PaginationControl

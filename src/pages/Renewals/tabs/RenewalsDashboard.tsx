@@ -130,7 +130,7 @@ export default function RenewalsDashboard({loading}: Props) {
   return (
     <div className="space-y-6">
       {/* ================= KPI CARDS ================= */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5">
+      <div className="renewal-kpi-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5">
         {kpiCards.map((kpi, idx) => {
           const Icon = kpi.icon;
 
@@ -178,7 +178,7 @@ export default function RenewalsDashboard({loading}: Props) {
       {/* ================= ALERTS + WORKLISTS ================= */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* ===== RECENT ACTIVITY ===== */}
-        <div className="bg-white rounded-2xl border border-gray-200">
+        <div className="renewal-activity bg-white rounded-2xl border border-gray-200">
           <div className="px-6 py-4 border-b border-gray-100">
             <h3 className="text-lg font-semibold text-gray-900">
               Recent Activity & Signals
@@ -210,7 +210,7 @@ export default function RenewalsDashboard({loading}: Props) {
         </div>
 
         {/* ===== DOCUMENTS REQUIRING ATTENTION ===== */}
-        <div className="bg-white rounded-2xl border border-gray-200">
+        <div className="renewal-worklists bg-white rounded-2xl border border-gray-200">
           <div className="px-6 py-4 border-b border-gray-100">
             <h3 className="text-lg font-bold text-gray-900">
               Documents Requiring Attention

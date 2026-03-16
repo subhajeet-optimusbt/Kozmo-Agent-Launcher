@@ -190,44 +190,99 @@ export const CONTRACTS_GUIDE_TARGETS: GuideTarget[] = [
    DOCUMENTS PAGE
 ══════════════════════════════════════════════════════════════ */
 export const DOCUMENTS_GUIDE_TARGETS: GuideTarget[] = [
+  // ── Always visible (header) ──
   {
-    selector: ".documents-hero",
-    title: "Document Intelligence",
+    selector: ".document-tab-nav",
+    title: "Module Tabs",
     description:
-      "AI-powered document analysis. Upload contracts and get automatic redlines, briefs, clause extraction, and risk flags.",
+      "Switch between Dashboard (KPIs & signals), Documents (full table), and Jobs (AI job runs & health).",
     position: "bottom",
     padding: 16,
   },
   {
-    selector: ".document-metrics",
-    title: "Document Dashboard",
+    selector: ".new-document-btn",
+    title: "Upload New Document",
     description:
-      "Processing status at a glance: total documents, completion rates, documents in progress, and any items needing attention.",
+      "Click + to upload a new document. The AI will automatically parse, classify, and begin analysis.",
+    position: "left",
+    padding: 14,
+  },
+
+  // ── Dashboard tab ──
+  {
+    selector: ".document-kpi-grid",
+    tab: "dashboard",
+    title: "Document KPIs",
+    description:
+      "Six live metrics: Created, Updated, Classification, Completed, Escalated, and Extracted — all updated in real time.",
     position: "bottom",
     padding: 16,
   },
   {
-    selector: ".upload-area",
-    title: "Upload Documents",
+    selector: ".document-activity",
+    tab: "dashboard",
+    title: "Recent Activity & Signals",
     description:
-      "Drag & drop or click to upload PDF, DOCX, or TXT files. The AI will automatically parse and begin analysis.",
+      "Live updates from ingestion, profiling, and analysis — pricing deviations, liability changes, and draft completions.",
     position: "top",
     padding: 16,
   },
   {
-    selector: ".document-queue",
-    title: "Processing Queue",
+    selector: ".document-worklists",
+    tab: "dashboard",
+    title: "Documents Requiring Attention",
     description:
-      "Live view of documents being worked on. Download generated briefs or redlines once the AI finishes processing.",
+      "Auto-detected blockers: High-Risk Redlines, Missing Fields, Processing Errors, and Critical Signals — click any card to action that queue.",
     position: "top",
     padding: 16,
   },
+
+  // ── Documents tab ──
   {
-    selector: ".document-search",
+    selector: ".document-search-bar",
+    tab: "documents",
     title: "Search & Filter",
     description:
-      "Full-text search across all documents. Filter by status, type, or date to find any document in seconds.",
+      "Full-text search across subject and job name. Use Filters & Facets to narrow by status or current job.",
     position: "bottom",
+    padding: 16,
+  },
+  {
+    selector: ".document-view-toggle",
+    tab: "documents",
+    title: "View Modes",
+    description:
+      "Switch between Table, Compact list, and Card view. Table is best for sorting; Card view gives a richer per-document snapshot.",
+    position: "bottom",
+    padding: 14,
+  },
+  {
+    selector: ".document-table",
+    tab: "documents",
+    title: "Documents Table",
+    description:
+      "Every document listed here. Click any column header to sort. Click a row to open the full detail drawer with analysis results.",
+    position: "top",
+    padding: 16,
+  },
+
+  // ── Jobs tab ──
+  {
+    selector: ".document-jobs-kpi",
+    tab: "jobs",
+    title: "Jobs KPIs",
+    description:
+      "Live summary of all document AI job runs: total jobs, success rate, failures, and average processing time.",
+    position: "bottom",
+    padding: 16,
+  },
+  {
+    selector: ".document-jobs-table",
+    tab: "jobs",
+    title: "Jobs Table",
+    description:
+      "Every AI job run for documents listed here. Toggle between Health view (status & SLA) and Runs view (execution logs).",
+    position: "top",
     padding: 16,
   },
 ];
@@ -236,99 +291,200 @@ export const DOCUMENTS_GUIDE_TARGETS: GuideTarget[] = [
    INTAKE PAGE
 ══════════════════════════════════════════════════════════════ */
 export const INTAKE_GUIDE_TARGETS: GuideTarget[] = [
+  // ── Always visible (header) ──
   {
-    selector: ".intake-hero",
-    title: "Intake Management",
+    selector: ".intake-tab-nav",
+    title: "Module Tabs",
     description:
-      "Centralised request intake. Process incoming documents, track status from received → in-progress → completed.",
+      "Switch between Dashboard (KPIs & triage), Inbox (full intake table), and Jobs (AI job runs & health).",
     position: "bottom",
     padding: 16,
   },
   {
-    selector: ".intake-metrics",
-    title: "Intake Dashboard",
+    selector: ".new-intake-btn",
+    title: "Create New Intake Request",
     description:
-      "Total requests, status breakdown, average processing time, and completion rates — all in one overview row.",
-    position: "bottom",
-    padding: 16,
-  },
-  {
-    selector: ".new-request-btn",
-    title: "Create New Request",
-    description:
-      "Start a new intake request. Select type, upload documents, add context, and submit for AI-powered analysis.",
+      "Click + to start a new intake request. Select type, upload documents, add context, and submit for AI-powered analysis.",
     position: "left",
     padding: 14,
   },
+
+  // ── Dashboard tab ──
   {
-    selector: ".request-queue",
-    title: "Your Queue",
+    selector: ".intake-kpi-grid",
+    tab: "dashboard",
+    title: "Intake KPIs",
     description:
-      "All requests you've submitted. Track processing progress, download completed results, or re-prioritise items.",
+      "Six live metrics: New Requests, With Documents, Running, Completed, Failed, and Escalated — all updated in real time.",
+    position: "bottom",
+    padding: 16,
+  },
+  {
+    selector: ".intake-source-feed",
+    tab: "dashboard",
+    title: "Source Feed",
+    description:
+      "Where requests originate — Email, Upload, Salesforce, Teams and more. Every incoming channel tracked in one place.",
     position: "top",
     padding: 16,
   },
   {
-    selector: ".bulk-upload",
-    title: "Bulk Operations",
+    selector: ".intake-triage",
+    tab: "dashboard",
+    title: "Requests Requiring Attention",
     description:
-      "Process multiple documents in one go. Apply the same settings across a batch for faster turnaround.",
+      "Triage buckets: Missing Info, Clarification Needed, Ambiguous Routing, and High Priority — click any card to action that queue.",
+    position: "top",
+    padding: 16,
+  },
+
+  // ── Inbox tab ──
+  {
+    selector: ".intake-search-bar",
+    tab: "inbox",
+    title: "Search & Filter",
+    description:
+      "Full-text search across subject, job name, request ID, and documents. Use Filters & Facets to narrow by status or type.",
+    position: "bottom",
+    padding: 16,
+  },
+  {
+    selector: ".intake-view-toggle",
+    tab: "inbox",
+    title: "View Modes",
+    description:
+      "Switch between Table, Compact list, and Card view. Table is best for sorting; Card view gives a richer per-request snapshot.",
+    position: "bottom",
+    padding: 14,
+  },
+  {
+    selector: ".intake-table",
+    tab: "inbox",
+    title: "Intake Table",
+    description:
+      "Every intake request listed here. Click any column header to sort. Click a row to open the full detail drawer.",
+    position: "top",
+    padding: 16,
+  },
+
+  // ── Jobs tab ──
+  {
+    selector: ".intake-jobs-kpi",
+    tab: "jobs",
+    title: "Jobs KPIs",
+    description:
+      "Live summary of all intake AI job runs: total jobs, success rate, failures, and average processing time.",
+    position: "bottom",
+    padding: 16,
+  },
+  {
+    selector: ".intake-jobs-table",
+    tab: "jobs",
+    title: "Jobs Table",
+    description:
+      "Every AI job run for intake listed here. Toggle between Health view (status & SLA) and Runs view (execution logs).",
     position: "top",
     padding: 16,
   },
 ];
-
 /* ══════════════════════════════════════════════════════════════
    RENEWALS PAGE
 ══════════════════════════════════════════════════════════════ */
 export const RENEWALS_GUIDE_TARGETS: GuideTarget[] = [
+  // ── Always visible (header) ──
   {
-    selector: ".renewals-hero",
-    title: "Renewal Management",
+    selector: ".renewal-tab-nav",
+    title: "Module Tabs",
     description:
-      "Strategic renewal planning and risk management. Identify at-risk renewals early and build your negotiation playbook.",
+      "Switch between Dashboard (KPIs & signals), Renewals (full table), and Jobs (AI job runs & health).",
     position: "bottom",
-    padding: 16,
-  },
-  {
-    selector: ".renewal-metrics",
-    title: "Renewal Dashboard",
-    description:
-      "Upcoming renewals, at-risk items, total renewal value at stake, and historical success rates — all in one view.",
-    position: "bottom",
-    padding: 16,
-  },
-  {
-    selector: ".renewal-calendar",
-    title: "Renewal Calendar",
-    description:
-      "All renewals plotted chronologically. Colour-coded by risk: red = critical, amber = needs attention, green = on track.",
-    position: "top",
-    padding: 16,
-  },
-  {
-    selector: ".risk-signals",
-    title: "Risk Signals",
-    description:
-      "AI-flagged risks: payment delays, disputed terms, low CHI score, counterparty changes, and market shifts.",
-    position: "top",
-    padding: 16,
-  },
-  {
-    selector: ".negotiation-tracker",
-    title: "Negotiation Tracker",
-    description:
-      "Monitor live renewal negotiations: offers, counter-offers, open points, and escalation triggers.",
-    position: "top",
     padding: 16,
   },
   {
     selector: ".new-renewal-btn",
-    title: "Create Renewal Plan",
+    title: "Create New Renewal",
     description:
-      "Start planning a renewal. Set goals, define key negotiation points, and assign a responsible owner.",
+      "Click + to start a new renewal plan. Set goals, define key negotiation points, and assign a responsible owner.",
     position: "left",
     padding: 14,
+  },
+
+  // ── Dashboard tab ──
+  {
+    selector: ".renewal-kpi-grid",
+    tab: "dashboard",
+    title: "Renewal KPIs",
+    description:
+      "Six live metrics: Documents Created, Updated, Classification, Completed, Escalated, and Extracted — updated in real time.",
+    position: "bottom",
+    padding: 16,
+  },
+  {
+    selector: ".renewal-activity",
+    tab: "dashboard",
+    title: "Recent Activity & Signals",
+    description:
+      "Live updates from ingestion, profiling, and analysis — pricing deviations, liability changes, and draft completions.",
+    position: "top",
+    padding: 16,
+  },
+  {
+    selector: ".renewal-worklists",
+    tab: "dashboard",
+    title: "Renewals Requiring Attention",
+    description:
+      "Auto-detected blockers: High-Risk Redlines, Missing Fields, Processing Errors, and Critical Signals — click any card to action that queue.",
+    position: "top",
+    padding: 16,
+  },
+
+  // ── Renewals tab ──
+  {
+    selector: ".renewal-search-bar",
+    tab: "renewals",
+    title: "Search & Filter",
+    description:
+      "Full-text search across title, counterparty, business area, and owner. Use Filters & Facets to narrow by status or type.",
+    position: "bottom",
+    padding: 16,
+  },
+  {
+    selector: ".renewal-view-toggle",
+    tab: "renewals",
+    title: "View Modes",
+    description:
+      "Switch between Table, Compact list, and Card view. Table is best for sorting; Card view gives a richer per-renewal snapshot.",
+    position: "bottom",
+    padding: 14,
+  },
+  {
+    selector: ".renewal-table",
+    tab: "renewals",
+    title: "Renewals Table",
+    description:
+      "Every renewal listed here. Click any column header to sort. Click a row to open the full detail drawer with negotiation history.",
+    position: "top",
+    padding: 16,
+  },
+
+  // ── Jobs tab ──
+  {
+    selector: ".renewal-jobs-kpi",
+    tab: "jobs",
+    title: "Jobs KPIs",
+    description:
+      "Live summary of all renewal AI job runs: total jobs, success rate, failures, and average processing time.",
+    position: "bottom",
+    padding: 16,
+  },
+  {
+    selector: ".renewal-jobs-table",
+    tab: "jobs",
+    title: "Jobs Table",
+    description:
+      "Every AI job run for renewals listed here. Toggle between Health view (status & SLA) and Runs view (execution logs).",
+    position: "top",
+    padding: 16,
   },
 ];
 
@@ -336,51 +492,78 @@ export const RENEWALS_GUIDE_TARGETS: GuideTarget[] = [
    RELATIONSHIPS PAGE
 ══════════════════════════════════════════════════════════════ */
 export const RELATIONSHIPS_GUIDE_TARGETS: GuideTarget[] = [
+  // ── Always visible (header) ──
   {
-    selector: ".relationships-hero",
-    title: "Relationship Management",
+    selector: ".relationship-tab-nav",
+    title: "Module Tabs",
     description:
-      "Manage and optimise counterparty relationships. Track history, health metrics, and full contract portfolios.",
+      "Switch between Dashboard (KPIs & signals) and Relationships (full counterparty table with search & filters).",
     position: "bottom",
     padding: 16,
   },
   {
-    selector: ".relationships-metrics",
-    title: "Relationship Dashboard",
+    selector: ".new-relationship-btn",
+    title: "Add New Relationship",
     description:
-      "Total counterparties, overall relationship health score, total exposure, and recent activity in one overview.",
+      "Click + to create a new counterparty. Fill in legal name, display name, role, status, and category.",
+    position: "left",
+    padding: 14,
+  },
+
+  // ── Dashboard tab ──
+  {
+    selector: ".relationship-kpi-grid",
+    tab: "dashboard",
+    title: "Relationship KPIs",
+    description:
+      "Three live metrics: Active Counterparties, New Counterparties added, and High Risk Counterparties needing immediate attention.",
     position: "bottom",
     padding: 16,
   },
   {
-    selector: ".counterparty-profiles",
-    title: "Counterparty Profiles",
+    selector: ".relationship-signals",
+    tab: "dashboard",
+    title: "Recent Relationship Signals",
     description:
-      "Complete intelligence card: company info, key contacts, contract history, payment reliability score, and preferences.",
+      "Risk, onboarding and monitoring updates — risk score changes, new relationships pending due diligence, and compliance flags.",
     position: "top",
     padding: 16,
   },
   {
-    selector: ".health-score",
-    title: "Relationship Health Score",
+    selector: ".relationship-worklists",
+    tab: "dashboard",
+    title: "Relationships Requiring Attention",
     description:
-      "Composite quality indicator. Factors in payment reliability, dispute rate, satisfaction, and trend direction.",
-    position: "right",
-    padding: 16,
-  },
-  {
-    selector: ".contract-portfolio",
-    title: "Contract Portfolio View",
-    description:
-      "Every contract with this counterparty across all business units. Spot consolidation and cross-sell opportunities.",
+      "Compliance and risk blockers: High Risk Counterparties needing immediate review and Pending Onboarding with incomplete KYC.",
     position: "top",
     padding: 16,
   },
+
+  // ── Relationships tab ──
   {
-    selector: ".interaction-timeline",
-    title: "Interaction Timeline",
+    selector: ".relationship-search-bar",
+    tab: "relationships",
+    title: "Search & Filter",
     description:
-      "Full history of touchpoints: signings, amendments, payments, disputes, and negotiation milestones.",
+      "Full-text search across display name and legal name. Use Filters & Facets to narrow by status or category.",
+    position: "bottom",
+    padding: 16,
+  },
+  {
+    selector: ".relationship-view-toggle",
+    tab: "relationships",
+    title: "View Modes",
+    description:
+      "Switch between Table, Compact list, and Card view. Table is best for sorting; Card view gives a richer per-counterparty snapshot.",
+    position: "bottom",
+    padding: 14,
+  },
+  {
+    selector: ".relationship-table",
+    tab: "relationships",
+    title: "Relationships Table",
+    description:
+      "Every counterparty listed here. Click any column header to sort. Click a row to open the full detail drawer with contract history and health score.",
     position: "top",
     padding: 16,
   },

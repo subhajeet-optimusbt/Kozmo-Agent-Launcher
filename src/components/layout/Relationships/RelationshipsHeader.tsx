@@ -20,6 +20,8 @@ import toast from "react-hot-toast";
 import { setActiveAccountId } from "../../../utils/auth";
 import RelationshipsForm from "../../../pages/Relationships/RelationshipsForm";
 import FullscreenLoader from "../../ui/FullScreenLoader";
+import InteractiveGuide from "../../common/InteractiveGuide";
+import { RELATIONSHIPS_GUIDE_TARGETS } from "../../../constants/guideTargets";
 type RelationshipsHeaderProps = {
   activeTab: string;
   onTabChange: (key: string) => void;
@@ -33,8 +35,9 @@ const RelationshipsHeader: React.FC<RelationshipsHeaderProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+  const [guideOpen, setGuideOpen] = useState(false);
   const navigate = useNavigate();
-  const [loading,setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(() => {
     const raw = localStorage.getItem("user") || sessionStorage.getItem("user");
     return raw ? JSON.parse(raw) : null;
@@ -79,7 +82,7 @@ const RelationshipsHeader: React.FC<RelationshipsHeaderProps> = ({
       setActiveAccountId(accountId); // 🔥 global update
     } catch {
       toast.error("Failed to switch account");
-    } finally{
+    } finally {
       setLoading(false);
     }
   };
@@ -148,7 +151,7 @@ const RelationshipsHeader: React.FC<RelationshipsHeaderProps> = ({
 
         {/* Pill Tabs */}
         <div
-          className="flex items-center gap-1.5
+          className="relationship-tab-nav flex items-center gap-1.5
   bg-white/60 backdrop-blur-md
   p-2 rounded-full
   border border-gray-200
@@ -215,6 +218,7 @@ const RelationshipsHeader: React.FC<RelationshipsHeaderProps> = ({
             <button
               onClick={onCreateNew}
               className="
+              new-relationship-btn
       w-9 h-9
       flex items-center justify-center
       rounded-lg
@@ -254,6 +258,7 @@ const RelationshipsHeader: React.FC<RelationshipsHeaderProps> = ({
           </Tooltip>
           <Tooltip title="Take a Product Tour">
             <button
+              onClick={() => setGuideOpen(true)}
               className="
       w-9 h-9 flex items-center justify-center rounded-lg
       text-emerald-600/70
@@ -399,6 +404,13 @@ const RelationshipsHeader: React.FC<RelationshipsHeaderProps> = ({
             toast.error(err.message || "Something went wrong");
           }
         }}
+      />
+      <InteractiveGuide
+        isOpen={guideOpen}
+        onClose={() => setGuideOpen(false)}
+        moduleKey="relationships"
+        targets={RELATIONSHIPS_GUIDE_TARGETS}
+        onTabChange={onTabChange}
       />
     </>
   );

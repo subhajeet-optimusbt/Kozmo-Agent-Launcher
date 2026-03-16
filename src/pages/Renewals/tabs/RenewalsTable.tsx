@@ -24,11 +24,7 @@ type Filters = {
   area: string[];
 };
 
-export default function RenewalsTable({
-  renewals,
-}: {
-  renewals: Renewal[];
-}) {
+export default function RenewalsTable({ renewals }: { renewals: Renewal[] }) {
   const [view, setView] = useState<View>("table");
   const [activeRenewal, setActiveRenewal] = useState<Renewal | null>(null);
 
@@ -78,10 +74,8 @@ export default function RenewalsTable({
     return searchedRenewals.filter((c) => {
       if (filters.status.length && !filters.status.includes(c.renewalStatus))
         return false;
-      if (filters.type.length && !filters.type.includes(c.type))
-        return false;
-      if (filters.area.length && !filters.area.includes(c.area))
-        return false;
+      if (filters.type.length && !filters.type.includes(c.type)) return false;
+      if (filters.area.length && !filters.area.includes(c.area)) return false;
       return true;
     });
   }, [searchedRenewals, filters]);
@@ -97,7 +91,7 @@ export default function RenewalsTable({
     <div className="space-y-4">
       {/* ---------------- TOP TOOLBAR ---------------- */}
       <div className="flex items-center justify-between gap-6">
-        <div className="flex items-center gap-3">
+        <div className="renewal-search-bar flex items-center gap-3">
           <Input.Search
             placeholder="Search renewals, counterparties, clauses…"
             className="w-[340px]"
@@ -142,7 +136,7 @@ export default function RenewalsTable({
           />
         </div>
 
-        <Button.Group className="shadow-sm rounded-xl overflow-hidden">
+        <Button.Group className="renewal-view-toggle shadow-sm rounded-xl overflow-hidden">
           <Tooltip title="Table view">
             <Button
               type={view === "table" ? "primary" : "default"}
@@ -172,28 +166,24 @@ export default function RenewalsTable({
 
       <Divider className="my-2" />
 
-      {view === "table" && (
-        <RenewalsTableView
-          data={paginatedData}
-          sorter={sorter}
-          onSortChange={setSorter}
-          onSelect={setActiveRenewal}
-        />
-      )}
+      <div className="renewal-table">
+        {view === "table" && (
+          <RenewalsTableView
+            data={paginatedData}
+            sorter={sorter}
+            onSortChange={setSorter}
+            onSelect={setActiveRenewal}
+          />
+        )}
 
-      {view === "list" && (
-        <RenewalsListView
-          data={paginatedData}
-          onSelect={setActiveRenewal}
-        />
-      )}
+        {view === "list" && (
+          <RenewalsListView data={paginatedData} onSelect={setActiveRenewal} />
+        )}
 
-      {view === "card" && (
-        <RenewalsCardView
-          data={paginatedData}
-          onSelect={setActiveRenewal}
-        />
-      )}
+        {view === "card" && (
+          <RenewalsCardView data={paginatedData} onSelect={setActiveRenewal} />
+        )}
+      </div>
 
       {total > 0 && (
         <div className="pb-4 flex justify-center">
