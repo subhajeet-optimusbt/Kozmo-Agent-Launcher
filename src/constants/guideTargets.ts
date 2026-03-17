@@ -568,3 +568,70 @@ export const RELATIONSHIPS_GUIDE_TARGETS: GuideTarget[] = [
     padding: 16,
   },
 ];
+
+export const DASHBOARD_REPORTS_GUIDE_TARGETS: GuideTarget[] = [
+  {
+    selector: ".dr-dashboards-section",
+    title: "Dashboards",
+    description:
+      "Analytical dashboards: Portfolio Posture, Commercial Value, Health & Intelligence, Renewal Risk, Operational Stress, and Counterparty Risk. Click any card to open the full interactive dashboard.",
+    position: "bottom",
+    padding: 16,
+  },
+  {
+    selector: ".dr-dashboard-grid",
+    title: "Dashboard Cards",
+    description:
+      "Each card shows live KPIs for that domain. The colour accent matches the risk level — emerald is healthy, amber is caution, rose is critical.",
+    position: "bottom",
+    padding: 16,
+  },
+  {
+    selector: ".dr-reports-section",
+    title: "Reports",
+    description:
+      "Five report categories: Contract Status, Renewal & Expiration, Relationship, Workflow & Obligations, and Other Reports. Click any group to expand it.",
+    position: "top",
+    padding: 16,
+  },
+  {
+    selector: ".dr-reports-contracts",
+    title: "Contract Status Reports",
+    description:
+      "Visibility into contract lifecycle stages and portfolio posture. Click any report row to drill into the full data view.",
+    position: "top",
+    padding: 16,
+  },
+  {
+    selector: ".dr-reports-renewals",
+    title: "Renewal & Expiration Reports",
+    description:
+      "Track upcoming, missed, and high-risk renewals. Rows with amber or red dots need immediate attention.",
+    position: "top",
+    padding: 16,
+  },
+  {
+    selector: ".dr-reports-relationships",
+    title: "Relationship Reports",
+    description:
+      "Risk exposure and dependency tracking across all counterparties and partners.",
+    position: "top",
+    padding: 16,
+  },
+  {
+    selector: ".dr-reports-obligations",
+    title: "Workflow & Obligations",
+    description:
+      "Operational tracking of tasks, milestones, and compliance deadlines across all contracts.",
+    position: "top",
+    padding: 16,
+  },
+  {
+    selector: ".dr-reports-others",
+    title: "Other Reports",
+    description:
+      "Issues and key contractual provisions that don't fit other categories — useful for legal and compliance reviews.",
+    position: "top",
+    padding: 16,
+  },
+];

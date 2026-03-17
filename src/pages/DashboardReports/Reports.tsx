@@ -107,46 +107,56 @@ const ReportsSection: React.FC<Props> = ({ PremiumReportGroup }) => {
 
   return (
     <div className="space-y-3">
-      <PremiumReportGroup
-        colorIdx={0}
-        title="Contract Status Reports"
-        description="Visibility into contract lifecycle stages and portfolio posture."
-        defaultOpen
-        reports={contracts}
-        categoryId="contracts"
-      />
+      <div className="dr-reports-contracts">
+        <PremiumReportGroup
+          colorIdx={0}
+          title="Contract Status Reports"
+          description="Visibility into contract lifecycle stages and portfolio posture."
+          defaultOpen
+          reports={contracts}
+          categoryId="contracts"
+        />
+      </div>
 
-      <PremiumReportGroup
-        colorIdx={1}
-        title="Renewal & Expiration Reports"
-        description="Track upcoming, missed, and high-risk renewals."
-        reports={renewals}
-        categoryId="renewals"
-      />
+      <div className="dr-reports-renewals">
+        <PremiumReportGroup
+          colorIdx={1}
+          title="Renewal & Expiration Reports"
+          description="Track upcoming, missed, and high-risk renewals."
+          reports={renewals}
+          categoryId="renewals"
+        />
+      </div>
 
-      <PremiumReportGroup
-        colorIdx={2}
-        title="Relationship Reports"
-        description="Risk exposure and dependency tracking across partners."
-        reports={counterparties}
-        categoryId="counterparties"
-      />
+      <div className="dr-reports-relationships">
+        <PremiumReportGroup
+          colorIdx={2}
+          title="Relationship Reports"
+          description="Risk exposure and dependency tracking across partners."
+          reports={counterparties}
+          categoryId="counterparties"
+        />
+      </div>
 
-      <PremiumReportGroup
-        colorIdx={3}
-        title="Workflow & Obligations"
-        description="Operational tracking of tasks, milestones & compliance."
-        reports={milestones}
-        categoryId="milestones"
-      />
+      <div className="dr-reports-obligations">
+        <PremiumReportGroup
+          colorIdx={3}
+          title="Workflow & Obligations"
+          description="Operational tracking of tasks, milestones & compliance."
+          reports={milestones}
+          categoryId="milestones"
+        />
+      </div>
 
-      <PremiumReportGroup
-        colorIdx={4}
-        title="Other Reports"
-        description="Issues and contractual provisions."
-        reports={[...issues, ...keyProvisions]}
-        categoryId="others"
-      />
+      <div className="dr-reports-others">
+        <PremiumReportGroup
+          colorIdx={4}
+          title="Other Reports"
+          description="Issues and contractual provisions."
+          reports={[...issues, ...keyProvisions]}
+          categoryId="others"
+        />
+      </div>
     </div>
   );
 };

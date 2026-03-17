@@ -357,13 +357,17 @@ const DashboardReportsPage: React.FC = () => {
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500" />
 
       <div className="mx-auto px-6 py-8 space-y-6 bg-gray-50/40">
+      <div className="dr-dashboards-section">
         <SectionShell title="Dashboards" icon={BarChart3}>
           <DashboardSection Zone={Zone} />
         </SectionShell>
+        </div>
 
+        <div className="dr-reports-section">
         <SectionShell title="Reports" icon={BarChart3}>
           <ReportsSection PremiumReportGroup={PremiumReportGroup} />
         </SectionShell>
+        </div>
       </div>
     </div>
   );

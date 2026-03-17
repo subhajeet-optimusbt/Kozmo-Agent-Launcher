@@ -88,7 +88,7 @@ const DashboardSection: React.FC<Props> = ({ Zone }) => {
     <div className="space-y-4">
       {loading && <FullscreenLoader />}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="dr-dashboard-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {[...dashboards]
           .filter((d) => d.isActive === true && d.isLandingPage === false)
           .sort((a, b) => {
