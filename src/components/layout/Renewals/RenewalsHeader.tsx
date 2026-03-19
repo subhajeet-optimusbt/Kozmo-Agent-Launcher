@@ -127,13 +127,15 @@ const RenewalHeader: React.FC<RenewalHeaderProps> = ({
         {loading && <FullscreenLoader />}
         <div className="flex items-center gap-3">
           {/* Launcher */}
-          <button onClick={onOpenLauncher} className="launcher-btn">
-            <div className="launcher-dots">
-              {Array.from({ length: 9 }).map((_, i) => (
-                <span key={i} className="dot" />
-              ))}
-            </div>
-          </button>
+          <Tooltip title="Launcher">
+            <button onClick={onOpenLauncher} className="launcher-btn">
+              <div className="launcher-dots">
+                {Array.from({ length: 9 }).map((_, i) => (
+                  <span key={i} className="dot" />
+                ))}
+              </div>
+            </button>
+          </Tooltip>
 
           {/* Kozmo Logo */}
           <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-blue-500 flex items-center justify-center text-white font-bold text-base shadow-lg">
@@ -258,7 +260,7 @@ const RenewalHeader: React.FC<RenewalHeaderProps> = ({
 
           <Tooltip title="Take a Product Tour">
             <button
-            onClick={() => setGuideOpen(true)}
+              onClick={() => setGuideOpen(true)}
               className="
       w-9 h-9 flex items-center justify-center rounded-lg
       text-emerald-600/70

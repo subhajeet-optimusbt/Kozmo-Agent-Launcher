@@ -7,7 +7,7 @@ import {
   LogoutOutlined,
   CheckOutlined,
 } from "@ant-design/icons";
-import { HelpCircle , BookOpen } from "lucide-react";
+import { HelpCircle, BookOpen } from "lucide-react";
 import { Tooltip } from "antd";
 import { useNavigate } from "react-router-dom";
 import { baseUrl } from "../../../utils/baseUrl";
@@ -23,7 +23,7 @@ const Header: React.FC<{ onOpenLauncher: () => void }> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
-  const [loading,setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   // const {t} = useTranslation();
   const [user, setUser] = useState(() => {
@@ -70,7 +70,7 @@ const Header: React.FC<{ onOpenLauncher: () => void }> = ({
       setActiveAccountId(accountId); // 🔥 global update
     } catch {
       toast.error("Failed to switch account");
-    } finally{
+    } finally {
       setLoading(false);
     }
   };
@@ -114,13 +114,15 @@ const Header: React.FC<{ onOpenLauncher: () => void }> = ({
         {/* LEFT */}
         <div className="flex items-center gap-3">
           {/* Launcher */}
-          <button onClick={onOpenLauncher} className="launcher-btn">
-            <div className="launcher-dots">
-              {Array.from({ length: 9 }).map((_, i) => (
-                <span key={i} className="dot" />
-              ))}
-            </div>
-          </button>
+          <Tooltip title="Launcher">
+            <button onClick={onOpenLauncher} className="launcher-btn">
+              <div className="launcher-dots">
+                {Array.from({ length: 9 }).map((_, i) => (
+                  <span key={i} className="dot" />
+                ))}
+              </div>
+            </button>
+          </Tooltip>
 
           {/* Kozmo Logo */}
           <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-blue-500 flex items-center justify-center text-white font-bold text-base shadow-lg">
@@ -171,7 +173,7 @@ const Header: React.FC<{ onOpenLauncher: () => void }> = ({
       transition-all duration-150
     "
             >
-              <HelpCircle  size={22} strokeWidth={2} />
+              <HelpCircle size={22} strokeWidth={2} />
             </button>
           </Tooltip>
 

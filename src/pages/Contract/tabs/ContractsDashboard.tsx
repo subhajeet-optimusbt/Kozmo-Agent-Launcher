@@ -273,7 +273,7 @@ export default function ContractsDashboard({ data, loading }: Props) {
                 className="group relative overflow-hidden bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-200 p-4 hover:shadow-lg transition-all duration-300 cursor-pointer"
               >
                 <div
-                  className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${list.color}`}
+                  className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${list.color}`}
                 />
                 <div className="space-y-3">
                   <h4 className="text-sm font-semibold text-gray-900">
