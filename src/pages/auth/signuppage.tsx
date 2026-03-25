@@ -11,9 +11,13 @@ import Step3Plan from "../../components/signup/Step3Plan";
 import Step4Review from "../../components/signup/Step4Review";
 import LivePreview from "../../components/signup/LivePreview";
 
+import { baseUrl } from "../../utils/baseUrl";
+
 export default function SignupPage() {
   const [step, setStep] = useState(1);
   const [isExpanded, setIsExpanded] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     tenantName: "",
@@ -37,6 +41,57 @@ export default function SignupPage() {
 
   const next = () => setStep((s) => Math.min(4, s + 1));
   const back = () => setStep((s) => Math.max(1, s - 1));
+
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    const payload = {
+      AccountName: form.tenantName,
+      Subdomain: form.tenantName.toLowerCase().replace(/\s+/g, "-"),
+      UserName: form.ownerName,
+      UserEmail: form.ownerEmail,
+      Password: form.password,
+      Region: form.region,
+      // Step 2
+      CompanySize: form.companySize,
+      Industry: form.industry,
+      Role: form.role,
+      PrimaryUseCase: form.useCase ? [form.useCase] : [],
+      // Step 3
+      Plan: form.plan,
+      BusinessAreaName: form.businessAreaName,
+      BusinessAreaType: form.businessAreaType,
+      Agents: form.agents,
+    };
+
+    try {
+      const response = await fetch(`${baseUrl()}/Home/Register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(
+          errorData?.message || `Request failed with status ${response.status}`,
+        );
+      }
+
+      await response.json();
+      alert("Workspace created!");
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Something went wrong.";
+      setError(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // ✅ Live preview only for steps 1–3
   const showLivePreview = isExpanded && step < 4;
@@ -68,29 +123,23 @@ export default function SignupPage() {
         >
           <StepHeader />
 
-          <div className="bg-white/90 backdrop-blur rounded-3xl shadow-2xl
-                          p-6 lg:p-8 border border-white/60">
+          <div
+            className="bg-white/90 backdrop-blur rounded-3xl shadow-2xl
+                          p-6 lg:p-8 border border-white/60"
+          >
             <Stepper step={step} />
 
             {/* MAIN CONTENT */}
             <div
               className={`grid gap-8 mt-6 transition-all duration-500 ${
-                showLivePreview
-                  ? "grid-cols-1 lg:grid-cols-2"
-                  : "grid-cols-1"
+                showLivePreview ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"
               }`}
             >
               {/* LEFT: STEP CONTENT */}
               <div>
-                {step === 1 && (
-                  <Step1Account form={form} update={update} />
-                )}
-                {step === 2 && (
-                  <Step2Company form={form} update={update} />
-                )}
-                {step === 3 && (
-                  <Step3Plan form={form} update={update} />
-                )}
+                {step === 1 && <Step1Account form={form} update={update} />}
+                {step === 2 && <Step2Company form={form} update={update} />}
+                {step === 3 && <Step3Plan form={form} update={update} />}
                 {step === 4 && <Step4Review form={form} />}
               </div>
 
@@ -102,11 +151,16 @@ export default function SignupPage() {
               )}
             </div>
 
+            {/* Error message */}
+            {error && (
+              <p className="mt-4 text-sm text-red-600 font-medium">{error}</p>
+            )}
+
             {/* FOOTER NAVIGATION (FULL WIDTH) */}
             <div className="mt-8 flex justify-between">
               <button
                 onClick={back}
-                disabled={step === 1}
+                disabled={step === 1 || isLoading}
                 className="h-10 px-4 rounded-lg border border-gray-200 text-sm
                            disabled:opacity-40 hover:bg-gray-50 transition
                            font-medium text-gray-700"
@@ -115,17 +169,19 @@ export default function SignupPage() {
               </button>
 
               <button
-                onClick={
-                  step === 4
-                    ? () => alert("Workspace created!")
-                    : next
-                }
+                onClick={step === 4 ? handleSubmit : next}
+                disabled={isLoading}
                 className="h-10 px-6 rounded-lg bg-gradient-to-r
                            from-emerald-500 to-emerald-600
                            text-white font-semibold hover:shadow-lg
-                           hover:shadow-emerald-500/30 transition-all"
+                           hover:shadow-emerald-500/30 transition-all
+                           disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {step === 4 ? "Create workspace" : "Next"}
+                {step === 4
+                  ? isLoading
+                    ? "Creating..."
+                    : "Create workspace"
+                  : "Next"}
               </button>
             </div>
           </div>
